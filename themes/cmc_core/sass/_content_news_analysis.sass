@@ -1,0 +1,210 @@
+// CMC Markets Theme	
+// name = CMC Markets V4
+// description = CMC Markets Base Theme - as of 17/02
+// News & Analysis section SASS
+
+.page-market-analysis
+	.gradient
+		z-index: 3
+	#main-content
+		//background: url("/#{$themepath}/loadera64.gif") no-repeat scroll 50% 20% transparent
+	.tabbed
+		border: 0
+		margin-top: 3em
+	.tabbed > ul > li .detail
+		padding: 20px 0 0 0
+	.tabbed > ul
+		border: 1px solid #E3E3E3
+	.view-cmc-blog
+		//content: 'hi'
+		.view-content
+			margin-bottom: 2em
+		//-----------------------------------------------------------------------------------------------
+		// count the view divs and then remove margin on landing page
+		//-----------------------------------------------------------------------------------------------
+		$x: 34
+		@while $x > 0
+			.views-row-#{$x}
+				margin-right: 0
+			$x: $x - 5
+		//-----------------------------------------------------------------------------------------------
+		// Individual landing page blocks
+		//-----------------------------------------------------------------------------------------------
+		.views-row
+			height: 210px
+			background-image: url(/#{$themepath}/i_blog_sprite.gif)
+			background-color: white
+			background-repeat: no-repeat
+			background-position: -300% -300% 
+			p.image
+				display: none
+				@extend .views-row
+				background-color: #f7f7f7
+				position: absolute
+				left: 375px
+				top: 0
+				width: 605px
+				overflow: hidden
+				img
+					width: 100%
+			.border
+				background: $menu-hilite
+				height: 5px
+				width: 100%
+				position: absolute
+				bottom: 0
+				left: 0
+			h3
+				padding-right: 10px
+				font-size: 1.9em
+				padding-top: 0
+				margin-top: 0px
+				line-height: 0.85em
+				a
+					+transition(all 0.4s ease 0s)
+					color: $darkesttext
+					font-size: 0.8em
+					&:after
+						+arrow
+						padding-left: 5px
+						-webkit-transform: scale(0.5, 1)
+						-moz-transform: scale(0.5, 1)
+			h3:after
+				bottom: -5px
+				content: ""
+				left: auto
+				position: absolute
+				display: block
+				z-index: 1
+				right: 0px
+				top: 0
+				width: 5px
+				background: $blue
+				+background(linear-gradient(top, #10cde3, $menu-hilite))
+				+transition(background 0.5s ease 0s)
+			.meta
+				font-size: 0.8em
+				color: $darkesttext
+				position: absolute
+				bottom: 20px
+				left: 0
+				margin: 0
+			.author
+				@extend .meta
+				color: $blue
+				bottom: 35px
+				margin: 0
+			.teaser
+				position: absolute
+				bottom: -15px
+				left: auto
+				margin: 0
+				background: black
+				padding: 5px 10px 10px
+				color: white
+				z-index: 2
+				height: 0
+				overflow: hidden
+				width: 100%
+				+box-sizing(border-box)
+				+transition(all 0.5s ease 0s)
+		.views-row-1
+			margin-right: 0
+		.taxonomy-102
+			background-position: 100% -630px 
+			h3:after
+				background: $tint-currency
+				+background(linear-gradient(top, #a9d72e, $tint-currency))
+			.border
+				background: $tint-currency
+			p.image
+				background-position: 100% -1470px 
+		.taxonomy-89
+			background-position: 100% -420px 
+			h3:after
+				background: $tint-economy
+				+background(linear-gradient(top, #fc9627, $tint-economy))
+			.border
+				background: $tint-economy
+			p.image
+				background-position: 100% -1260px 
+		.taxonomy-91
+			background-position: 100% -210px 
+			h3:after
+				background: $tint-markets
+				+background(linear-gradient(top, #a83698, $tint-markets))
+			.border
+				background: $tint-markets
+			p.image
+				background-position: 100% -1050px 
+		.taxonomy-104
+			background-position: 100% 0px 
+			h3:after
+				background: $menu-hilite
+				+background(linear-gradient(top, #10cde3, $menu-hilite))
+			.border
+				background: $menu-hilite
+			p.image
+				background-position: 100% -840px 
+		//-----------------------------------------------------------------------------------------------
+		// landing page blocks hover state
+		//-----------------------------------------------------------------------------------------------
+		.views-row:hover
+			h3
+				a
+					color: $blue
+					+transition(all 0.4s ease 0s)
+			h3:after
+				+background(linear-gradient(top, black, black))
+				+transition(background 0.5s ease 0s)
+				+ieCssFix
+			.teaser
+				height: 110px
+			.border
+				background: black
+
+		.views-row-first
+			width: 980px
+			background-position: 325px 160px
+			h3
+				margin-top: 0px
+				width: 370px
+				line-height: 1.3em
+				a
+					font-size: 1.2em
+			.border
+				width: 375px
+			.teaser
+				width: 355px
+			p.image
+				display: block
+				
+		.views-row-first h3:after
+			right: auto
+			left: 375px
+		.views-row-2,
+		.views-row-3
+			width: 380px
+			h3
+				margin-top: 0px
+				line-height: 1.2em
+				a
+					font-size: 1em
+		.views-row-first.taxonomy-102
+			background-position: 325px -630px 
+		.views-row-first.taxonomy-89
+			background-position: 325px -420px 
+		.views-row-first.taxonomy-91
+			background-position: 325px -210px 
+		.views-row-first.taxonomy-104
+			background-position: 325px 0px 
+
+//-----------------------------------------------------------------------------------------------
+// Actual blog page styling
+//-----------------------------------------------------------------------------------------------
+
+.node-type-cmc-blog
+	.submitted
+		font-size: 0.8em
+		color: $darkesttext
+		margin-bottom: 2.9em

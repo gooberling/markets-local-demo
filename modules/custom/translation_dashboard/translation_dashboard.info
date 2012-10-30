@@ -1,0 +1,8 @@
+name = Translation Dashboard 
+description = Provides a dashboard overview for translation of all interface and content types 
+package = CMC
+version = 0.1
+core = 7.x
+
+files[] = translation_dashboard.module 
+files[] = translation_dashboard.admin.inc

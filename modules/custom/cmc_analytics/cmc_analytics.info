@@ -1,0 +1,9 @@
+name = Google analytics integation for CMC Markets
+description = Provides custom google analytics integration for CMC Markets
+package = CMC
+version = 0.1
+core = 7.x
+
+files[] = cmc_analytics.module
+
+configure = admin/config/cmc-prototype/cmc_analytics

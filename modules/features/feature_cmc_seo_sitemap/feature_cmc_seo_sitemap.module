@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the Feature seo sitemap feature.
+ */
+
+include_once('feature_cmc_seo_sitemap.features.inc');

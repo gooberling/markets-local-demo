@@ -1,0 +1,99 @@
+// CMC Markets Theme	
+// name = CMC Markets V4
+// description = CMC Markets Base Theme - as of 17/02
+// Grid SASS
+// calculate grid widths and define grid system for each device
+
+//-----------------------------------------------------------------------------------------------
+// desktop grid declarations
+//-----------------------------------------------------------------------------------------------
+$grid-width: 80px
+$desk-gutter-width: 20px
+
+// set widths of columns
+@function grid-width($n)
+	@return $n * $grid-width + ($n - 1) * $desk-gutter-width
+
+// define .grid class
+$j: 10
+
+@while $j > 0
+	.grid-#{$j}
+		width: grid-width($j)
+		display: inline
+		float: left
+		position: relative
+		margin-right: $desk-gutter-width
+		min-height: 1px
+	$j: $j - 1
+
+// define .push class
+$i: 10
+
+@while $i > 0
+	.push-#{$i}
+		left: grid-width($i) + $desk-gutter-width
+		position: relative
+	$i: $i - 1
+
+//-----------------------------------------------------------------------------------------------
+// tablet declarations
+//-----------------------------------------------------------------------------------------------
+@media screen and (min-width : 700px) and (max-width : 1010px)
+	// set grid width
+	.grid-2
+		width: 18.36%
+		margin-right: 2.04%
+	.col-left.grid-2,
+	.col-right.grid-2
+		width: 22%
+	.grid-10
+		padding: 0 1%
+		width: 98%
+	.grid-4
+		width: 41.86%
+		margin-right: 2.04%
+	.grid-5
+		width: 47.96%
+		margin-right: 2.04%
+	.grid-6
+		width: 59.16%
+		margin-right: 2.04%
+	#main-content.grid-6,
+	#main-content.grid-8
+		width: 74.8%
+		
+	.grid-8
+		width: 79.56%
+		margin-right: 2.04%
+	.push-2
+		//left: 20.4%;
+		left: 1%
+
+//-----------------------------------------------------------------------------------------------
+// smartphone declarations
+//-----------------------------------------------------------------------------------------------
+@media screen and (min-width : 250px) and (max-width : 699px)
+	// set grid width
+	$j: 10
+	@while $j > 0
+		.grid-#{$j}
+			display: block
+			float: none
+			margin-right: 0px
+			position: relative
+			width: 100%
+		$j: $j - 1
+	$i: 10
+	@while $i > 0
+		.push-#{$i}
+			left: 0
+		$i: $i - 1
+
+.last-col, .grid-10
+	margin-right: 0
+
+.grid-10
+	display: block
+	float: none
+	clear: both

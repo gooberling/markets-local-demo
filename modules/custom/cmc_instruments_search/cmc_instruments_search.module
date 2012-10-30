@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the CMC Instruments search feature.
+ */
+
+include_once('cmc_instruments_search.features.inc');

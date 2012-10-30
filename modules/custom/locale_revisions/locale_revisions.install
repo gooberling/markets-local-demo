@@ -1,0 +1,137 @@
+<?php
+
+/**
+ * Implements hook_schema
+ * @return array 
+ */
+function locale_revisions_schema() {
+  $schema['locales_revisions_index'] = array(
+    'description' => 'Holds index & metadata of all revisions',
+    'fields' => array(
+      'rid'  => array(
+        'type' => 'serial',
+        'not null' => TRUE,
+        'description' => 'Primary Key: Unique revision Id.',
+      ),
+      'lid' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'size' => 'big',
+        'description' => 'lid of the string.',
+      ),
+      'updated' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'size' => 'big',
+        'description' => 'holds the timestmap',
+      ),
+      'uid' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'size' => 'big',
+        'description' => 'User that made the last change',
+      ),
+      'status' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'size' => 'tiny',
+        'description' => 'Status of the translation',
+      ),
+      'current' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'size' => 'tiny',
+        'description' => 'marks if the this translation is the one that is in use',
+      )
+    ),
+    'primary key' => array('rid'),
+  );
+
+  $schema['locales_revisions'] = array(
+    'description' => 'Holds revisions of all translations',
+    'fields' => array(
+      'rid' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'size' => 'big',
+        'description' => "Revision id",
+      ),
+        
+      'lid' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'size' => 'big',
+        'description' => 'Lid of the string from locales_source table',
+      ),
+      'translation' => array(
+        'mysql_type' => 'blob',
+        'not null' => FALSE,
+        'description' => 'Actual translated text',
+      ),
+             
+     'language' => array(
+        'type' => 'varchar',
+        'length' => 12,
+        'not null' => TRUE,
+        'description' => 'Language id',
+      ),
+      'plid' => array(
+        'type' => 'int',
+        'size' => 'big',
+        'not null' => FALSE,
+        'description' => 'Pl id',
+      ),
+      'plural' => array(
+        'type' => 'int',
+        'size' => 'big',
+        'not null' => FALSE,
+        'description' => 'Plural',
+      ),
+    ),
+  );
+
+  return $schema;
+}
+
+
+
+/**
+ * Implements hook_install
+ * 
+ * When translations revisions is installed the first time, look through already translated 
+ * strings and assign them a revision id.
+ */
+function locale_revisions_install() {
+  global $user;
+  $query = db_select('locales_target', 'lt');
+  $result = $query->distinct()
+        ->fields('lt', array('lid'))
+        ->execute();
+  while($item = $result->fetchAssoc()) {
+    // Get translations for each record.
+    $translations = db_select('locales_target', 'l')
+                   ->fields('l')
+                   ->condition('lid', $item['lid'], '=')
+                   ->execute();
+          //Create index for the string
+     $rid = db_insert('locales_revisions_index') // Table name no longer needs {}
+            ->fields(array(
+                'lid' => $item['lid'],
+                'updated' => REQUEST_TIME,
+                'status' => LOCALE_REVISIONS_PUBLISHED,
+                'current' => LOCAL_REVISIONS_CURRENT_TRUE,
+                'uid' => $user->uid,
+              ))
+            ->execute();
+     while($translation = $translations->fetchAssoc()){
+       db_insert('locales_revisions')
+        ->fields(array(
+          'rid' => $rid,
+          'lid' => $item['lid'],
+          'translation' => $translation['translation'],
+          'language' => $translation['language'],
+        ))
+        ->execute();
+     }
+  }
+}

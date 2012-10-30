@@ -1,0 +1,45 @@
+<?php
+// cmc_document_guide.install
+
+/**
+ *
+ */
+function cmc_document_guide_install() {
+  switch ($GLOBALS['db_type']) {
+    case 'mysql':
+    case 'mysqli':
+      cmc_document_guide_install_create_table();
+      break;
+  }
+}
+
+
+/**
+ *
+ */
+function cmc_document_guide_install_create_table() {
+  db_query("CREATE TABLE IF NOT EXISTS `cmc_document_guide_webform_log` (
+          `nid` int(11) NOT NULL,
+          `sid` int(11) NOT NULL,
+          `document_guide_nid` int(11) NOT NULL,
+          `document_guide_title` varchar(255) NOT NULL,          
+          `created` int(11) NOT NULL
+        ) ENGINE=InnoDB DEFAULT CHARSET=latin1;");
+        
+  drupal_set_message('Created Table cmc_document_guide_webform_log');
+}
+
+
+/**
+ *
+ */
+function cmc_document_guide_update_7001() {
+
+  if (!db_table_exists('cmc_document_guide_webform_log')) {
+    cmc_document_guide_install_create_table();
+  }
+  else {
+    drupal_set_message('Table cmc_document_guide_webform_log Exists');
+  }
+}
+

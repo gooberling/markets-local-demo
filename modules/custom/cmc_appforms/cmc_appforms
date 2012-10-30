@@ -1,0 +1,15 @@
+name = CMC Trading Account Registration for NextGen regions
+description = Provides functionality for users to register for trading accounts
+package = CMC
+version = 0.2
+core = 7.x
+
+dependencies[]= browserclass
+
+configure = admin/config/cmc/registration
+
+files[] = cmc_registration.module
+files[] = includes/cmc_registration.pages.inc
+files[] = includes/cmc_registration_nextgen.class.inc
+files[] = cmc_registration.demo.inc
+files[] = cmc_registration.live.inc

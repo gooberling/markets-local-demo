@@ -1,0 +1,10 @@
+core = "7.x"
+dependencies[] = "cmc_products_config"
+description = "Basic search functionality"
+features[search_api_index][] = "sitewide"
+name = "CMC Search"
+package = "Features"
+project = "cmc_search"
+version = "7.x-0.1"
+
+configure = admin/config/cmc/search

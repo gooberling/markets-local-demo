@@ -1,0 +1,64 @@
+// CMC Markets Theme	
+// name = CMC Markets V4
+// description = CMC Markets Base Theme - as of 17/02
+// FAQs
+
+
+.page-faqs
+	h1
+		width: 390px
+	.accordion
+		margin-bottom: 1.5em
+		border: 0
+		padding: 0
+		background: none
+		span
+			display: none
+		strong.open
+			color: $darkesttext
+	.accordion > strong
+		color: $blue
+		&:hover
+			+cursor
+	.region-filter-block
+		display: block
+		height: auto
+		border: 0
+		background: transparent
+		position: absolute
+		right: 0
+		top: 0
+		+box-shadow(none)
+		label
+			display: none
+		.form-text
+			position: relative
+			border: 0
+			width: 135px
+			padding: 8px 30px 7px 15px
+			overflow: hidden
+			background: #fff
+			+border-radius(15px)
+			color: $textcolor
+			+box-shadow(0px 0px 3px 0px #cccccc inset)
+			+ieCssFix
+		div.form-item
+			margin-bottom: 0
+			margin-top: 0px
+		.form-submit
+			background: url(/#{$themepath}/v4_bg_magnify.png) no-repeat 0 0 transparent !important
+			border: none
+			top: 6px
+			right: 10px
+			position: absolute
+			text-indent: -5000px
+			font-size: 0px
+			line-height: 999px
+			overflow: hidden
+			width: 17px
+			height: 19px
+			opacity: 0.6
+			+transition(opacity 0.5s ease 0s)
+		.views-exposed-form .views-exposed-widget
+			float: none
+			padding: 0

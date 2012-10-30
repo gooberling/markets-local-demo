@@ -1,0 +1,58 @@
+<?php
+
+
+abstract class NextgenAddressIntegrationTestCase extends NextgenIntegrationTestCase {
+
+  function testAddressSearch() {
+    $search = 'N8 8SR';
+    $country = 'GBR';
+
+    try {
+      $result = nextgen_address_search($search, $country);
+      $this->assertEqual(200, $result['code'], 'Got HTTP 200 response for address search');
+      $this->assertEqual(is_object($result['data']), 'Got object containing address search data');
+      $this->assertEqual(TRUE, property_exists($result['data'], 'matches'), 'Got a set of matching addresses');
+      $this->assertEqual(TRUE, count($result['data']->matches) > 0, 'Got more than zero matching addresses');
+
+    } catch (NextgenException $e) {
+      $this->exceptionHandler($e);
+    }
+  }
+
+}
+
+class NextgenAddressIntegrationLocalTestCase extends NextgenAddressIntegrationTestCase {
+  protected $bridge_url = NEXTGEN_TEST_LOCAL_URL;
+
+  public static function getInfo() {
+    return array(
+      'name' => 'Address lookup tests',
+      'description' => 'Tests search and retrieval of address data',
+      'group' => 'CMC Integration (local)'
+    );
+  }
+}
+
+class NextgenAddressIntegrationHdev3TestCase extends NextgenAddressIntegrationTestCase {
+  protected $bridge_url = NEXTGEN_TEST_HDEV3_URL;
+
+  public static function getInfo() {
+    return array(
+      'name' => 'Address lookup tests',
+      'description' => 'Tests search and retrieval of address data',
+      'group' => 'CMC Integration (HDEV3)'
+    );
+  }
+}
+
+class NextgenAddressIntegrationUatTestCase extends NextgenAddressIntegrationTestCase {
+  protected $bridge_url = NEXTGEN_TEST_UAT_URL;
+
+  public static function getInfo() {
+    return array(
+      'name' => 'Address lookup tests',
+      'description' => 'Tests search and retrieval of address data',
+      'group' => 'CMC Integration (UAT)'
+    );
+  }
+}

@@ -1,0 +1,125 @@
+<?php
+/**
+ * @File 
+ * 
+ * @author Ravi Julapalli (r.julapalli@cmcmarkets.com) 
+ */
+
+/**
+ * Implements hook_menu
+ */
+function cmc_analytics_menu() {
+  $items = array();
+  
+  $items['admin/config/cmc-prototype/cmc_analytics'] = array(
+    'title' => t('Settings for CMC Analytics'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('cmc_analytics_settings'),
+    'access arguments' => array('Administer site configuration'),
+    'file' => 'cmc_analytics.admin.inc',
+  );  
+ $items['cmc_analytics/form_js'] = array(
+    'page callback' => 'cmc_analytics_form_js',
+    'access arguments' => array('Administer site configuration'),
+    'type' => MENU_CALLBACK,
+  );
+  return $items;
+}
+
+
+function cmc_analytics_permissions() {
+  return array(
+    'administer cmc analytics code on forms' => array(
+      'title' => t('administer CMC analytics code on forms'),
+      'description' => t('Providing this permission allows users to manage analytics
+                          code on the form directly'),
+    ),
+  );
+}
+
+/**
+ * Implements hook_form_alter
+ */
+function cmc_analytics_form_alter(&$form, &$form_state, $form_id) {
+  if (_cmc_analytics_show_form()) {
+     _cmc_analytics_get_form_elements($form, $form_state, $form_id);
+  }
+}
+
+function _cmc_analytics_show_form() {
+  if(variable_get('cmc_analytics_show_form_options', FALSE) && user_access('administer cmc analytics code on forms'))
+    return TRUE;
+
+  return FALSE;
+}
+
+function _cmc_analytics_get_form_elements(&$form, &$form_state, $form_id) {
+    
+  $form['form_code'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('CMC Analytics for this form'),
+  );
+  
+  $form['form_code']['form_code_options'] = array(
+    '#type' => 'radios',
+    '#title' => t('How would you  like to manage analytics code for this form ?'),
+    '#weight' => '-1',
+    '#options' => array(0 => t('Use default'), 1 => 'Use custom code'),
+  );
+  
+  $form['form_code']["{cmc_analytics_adform"] = array(
+    '#type' => 'textfield',
+    '#default_value' => '',
+    '#title' => t('Code for Ad form'),
+    '#weight' => '0',
+    '#states' => array(
+      'visible' => array(
+        'input[name="form_code_options"]' => array('value' => 1)
+      )
+    )
+  );
+    
+  $form['form_code']["cmc_analytics_ga"] = array(
+    '#type' => 'textfield',
+    '#title' => t('Code for Google analytics'),
+    '#default_value' => "cmc_analytics_adform",
+    '#weight' => '1',
+    '#states' => array(
+      'visible' => array(
+        'input[name="form_code_options"]' => array('value' => 1)
+      )
+    )
+  );
+  
+  $form['form_code']['cmc_analytics_request_path'] = array('#type' => 'value', '#value' => request_path());
+  
+  // If this is a multistep from, we want to maintain which step this value needs to be set 
+  // against
+  if (isset($form_state['step'])) {
+    $form['form_code']['cmc_analytics_request_path_form_step'] = array('#type' => 'value', '#value' => $form_state['step']);
+  }
+   
+  $form['form_code']["cmc_analytics_save"] = array(
+    '#type' => 'submit',
+    '#value' => t('Save analytics'),
+    '#ajax' => array(
+      'callback' => 'cmc_analytics_form_ajax',
+      'wrapper' => 'box',
+      'name' => 'submit1',
+      ),
+    '#weight' => '3',
+  );
+}
+
+
+function cmc_analytics_form_ajax($form, $form_state) {
+  $values = isset($form_state['values'])?$form_state['values']:FALSE;
+  if ($values) {
+    variable_set();
+    
+    
+  }
+ 
+  return $element;
+}
+

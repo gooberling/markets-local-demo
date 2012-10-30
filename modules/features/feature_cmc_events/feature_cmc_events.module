@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the Feature CMC Events feature.
+ */
+
+include_once('feature_cmc_events.features.inc');

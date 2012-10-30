@@ -1,0 +1,7 @@
+name = CMC Identity service
+description = Provides functionality for users to register for trading accounts
+package = CMC
+version = 0.1
+core = 7.x
+dependencies[]= nextgen 
+;configure = admin/config/cmc/registration

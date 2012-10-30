@@ -1,0 +1,11 @@
+name = JS Validation API
+description = Provides API for JS validation
+package = CMC
+version = 0.1
+core = 7.x
+
+files[] = cmc_js_validation.module
+
+scripts[] = js/moment.min.js
+
+;configure = admin/config/cmc/nextgen

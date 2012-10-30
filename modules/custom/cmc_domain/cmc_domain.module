@@ -1,0 +1,280 @@
+<?php
+/**
+ * Implements hook_menu
+ */
+function cmc_domain_menu() {
+  $items = array();
+  
+  $items['admin/config/cmc_domain'] = array(
+    'title' => t('Settings for CMC Domain'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('cmc_domain_settings'),
+    'access arguments' => array('Administer site configuration'),
+  );
+  
+  $items['admin/config/cmc_domain/create_menus'] = array(
+    'title' => t('Create menus for domain'),
+    'page callback' => 'cmc_domain_create_menus',
+    'page arguments' => array('cmc_settings'),
+    'access arguments' => array('Administer site configuration'),
+    'file' => 'cmc_domain.admin.inc',
+  );
+  
+  return $items;
+}
+
+
+function cmc_domain_permissions() {
+  return array();
+}
+
+
+/**
+ * Domains settings form
+ */
+function cmc_domain_settings() {
+  $form = array();
+  $form['cmc_domain_setting'] = array(
+    '#type' => 'textfield',
+    '#prefix' => l('Create Domain menus', 'admin/config/cmc_domain/create_menus'),
+    '#title' => t('CMC Domain setting'),
+    '#default_value' =>  variable_get('cmc_domain_main_menu', ''),
+  );
+  
+  return system_settings_form($form);
+}
+
+
+/**
+ * Add our custom settings to the domain form so we can select our menus
+ * might be a better way of doing this
+ * @param unknown_type $form
+ * @param unknown_type $form_state
+ * @param unknown_type $form_id
+ */
+function cmc_domain_form_domain_conf_form_alter(&$form, &$form_state, $form_id) {
+
+  $domain_id = $form['domain_id']['#value'];
+  // we want extra menus to be set per domain
+  $menu_options = $form['Menu settings']['menu_main_links_source']['#options'];
+ 
+  $form['Menu settings']['menu_seo_links_source'] = array(
+    '#title' => t('Source for the SEO footer links'),
+    '#type' => 'select',
+    '#options' => $menu_options,
+    '#description' => t('Select what should be displayed as the seo menu links.'),
+    //'#default_value' => variable_get('menu_seo_links_source', ''),
+    '#default_value' => domain_conf_variable_get($domain_id, 'menu_seo_links_source'),
+  );
+ 
+  $form['Menu settings']['menu_header_links_source'] = array(
+    '#title' => t('Source for the header links'),
+    '#type' => 'select',
+    '#options' => $menu_options,
+    '#description' => t('Select what should be displayed as the header menu links.'),
+    //'#default_value' => variable_get('menu_header_links_source', ''),
+    '#default_value' => domain_conf_variable_get($domain_id, 'menu_header_links_source'),
+  );
+}
+
+
+
+
+
+/**
+ * hook_block_info
+ */
+function cmc_domain_block_info() {
+  $blocks['cmc_domain_main_menu'] = array(
+    'info' => t('cmc_domain main menu'),
+    'visibility' => BLOCK_VISIBILITY_NOTLISTED,
+  );
+  
+  $blocks['cmc_domain_sidebar_menu'] = array(
+    'info' => t('cmc_domain sidebar menu'),
+    'visibility' => BLOCK_VISIBILITY_NOTLISTED,
+  );
+  
+  $blocks['cmc_domain_seo_menu'] = array(
+    'info' => t('cmc_domain seo menu'),
+    'visibility' => BLOCK_VISIBILITY_NOTLISTED,
+  );
+
+  $blocks['cmc_domain_footer_menu'] = array(
+    'info' => t('cmc_domain footer menu'),
+    'visibility' => BLOCK_VISIBILITY_NOTLISTED,
+  );
+  
+  $blocks['cmc_domain_responsive_menu'] = array(
+    'info' => t('cmc_domain responsive menu'),
+    'visibility' => BLOCK_VISIBILITY_NOTLISTED,
+  );
+  
+  return $blocks;
+}
+
+
+/**
+ * hook_block_view
+ * @param unknown_type $delta
+ */
+function cmc_domain_block_view($delta = '') {
+  
+  module_load_include('module', 'menu_block', 'menu_block');
+  $block = array();
+  $current_domain = domain_get_domain();
+  $domain_id = $current_domain['domain_id'];
+  
+  if ($delta == 'cmc_domain_main_menu' || $delta == 'cmc_domain_responsive_menu') {
+    //$menu_source = variable_get('menu_main_links_source','');
+    $menu_source = domain_conf_variable_get($domain_id, 'menu_main_links_source');
+    // this stuff should really go into config if possible
+    $block['content'] = cmc_domain_block_menu($menu_source, 0, 1);
+  }
+  else if ($delta == 'cmc_domain_sidebar_menu') {
+    //$menu_source = variable_get('menu_main_links_source','');
+    $menu_source = domain_conf_variable_get($domain_id, 'menu_main_links_source');
+    $block['content'] = cmc_domain_block_menu($menu_source, 0, 2);
+  }
+  else if ($delta == 'cmc_domain_header_menu') {
+    //$menu_source = variable_get('menu_header_links_source','');
+    $menu_source = domain_conf_variable_get($domain_id, 'menu_header_links_source');
+    $block['content'] = $delta;
+  }
+  else if ($delta == 'cmc_domain_seo_menu') {
+    //$menu_source = variable_get('menu_seo_links_source','');
+    $menu_source = domain_conf_variable_get($domain_id, 'menu_seo_links_source');
+    $block['content'] = cmc_domain_block_menu($menu_source);
+  }
+  else if ($delta == 'cmc_domain_footer_menu') {
+    //$menu_source = variable_get('menu_secondary_links_source','');
+    $menu_source = domain_conf_variable_get($domain_id, 'menu_secondary_links_source');
+    $block['content'] = cmc_domain_block_menu($menu_source);
+  }
+
+  return $block;
+}
+
+
+/**
+ * Mostly copied and modified from menu_block_block_view
+ * @param unknown_type $source
+ * @param unknown_type $depth
+ * @param unknown_type $level
+ */
+function cmc_domain_block_menu($source, $depth=1, $level=1) {
+  
+  if (!$source) {
+    return;
+  }
+  
+  // Copied and modified from menu_block_block_view
+  // we modify the config array to get it to output what we want
+  $config = menu_block_get_config();
+  $config['menu_name'] = $source;
+
+  $config['depth'] = $depth;
+  
+  $data = menu_tree_build($config);
+  // Add contextual links for this block.
+  if (!empty($data['content'])) {
+    if (in_array($config['menu_name'], array_keys(menu_get_menus()))) {
+      $data['content']['#contextual_links']['menu_block'] = array('admin/structure/menu/manage', array($config['menu_name']));
+    }
+    elseif (strpos($config['menu_name'], 'book-toc-') === 0) {
+      $node = str_replace('book-toc-', '', $config['menu_name']);
+      $data['content']['#contextual_links']['menu_block'] = array('admin/content/book', array($node));
+    }
+
+    // hack to get it display at the correct level
+    if ($level > 1) {
+      
+      $active = false;
+      //echo __METHOD__;
+      //print_r($data['content']['#content']);
+      foreach ($data['content']['#content'] as $mlid => $m) {
+        if (isset($m['#attributes']['class']) && is_array($m['#attributes']['class']) && in_array('active-trail', $m['#attributes']['class']) && count($m['#below'])) {
+          $active = true;
+          // modify the #content array so it renders correctly
+          $data['content']['#content'] = array(
+            $mlid => $data['content']['#content'][$mlid]['#below'],
+            '#sorted' => $data['content']['#content']['#sorted'],
+            //'#theme_wrappers' => $data['content']['#content']['#theme_wrappers']
+          );
+        }
+      }
+
+      if (!$active) {
+        return;
+      }
+    }
+    return $data['content'];
+  }
+}
+
+
+/**
+ * hook_form_alter
+ * Enter description here ...
+ * @param unknown_type $form
+ * @param unknown_type $form_state
+ * @param unknown_type $form_id
+ */
+function cmc_domain_form_node_form_alter(&$form, &$form_state, $form_id) {
+   // return;
+  // some js to help with creating/updating a node with domain access
+  $path = drupal_get_path('module', 'cmc_domain');
+  drupal_add_js($path . '/js/cmc_domain.admin.js');
+  
+  $form['#after_build'][] = 'cmc_domain_node_form_after_build';
+  //unset($form['path']);
+}
+
+
+/**
+ *
+ * @param unknown_type $form
+ * @param unknown_type $form_state
+ */
+function cmc_domain_node_form_after_build($form, &$form_state) {
+  //return $form;
+  // force user to choose generate url alias
+  $form['path']['pathauto']['#default_value'] = 0;
+  $form['path']['pathauto']['#checked'] = 0;
+  $form['path']['alias']['#value'] = ''; // always empty
+  
+  return $form;
+}
+
+
+/**
+ * hook_node_presave
+ * Enter description here ...
+ * @param unknown_type $node
+ */
+function cmc_domain_node_presave(&$node){
+  
+  // generate pathauto checked
+  // url alias must be empty
+  // blog path should be there
+  if (module_exists('pathauto') && isset($node->path['pathauto'])) {
+    
+    module_load_include('inc', 'pathauto');
+    $uri = entity_uri('node', $node);
+    $path = pathauto_create_alias('node', 'return', $uri['path'], array('node' => $node), $node->type);
+    
+    if ($path && is_array($node->domains)) {
+      $domains = array_values($node->domains);
+      $domains = array_unique($domains);
+      foreach ($domains as $domain_id) {
+        if ($domain_id && !$node->domain_path[$domain_id]) {
+          $node->domain_path[$domain_id] = $path;
+        }
+      }
+    }
+  }
+  
+}
+
+
+

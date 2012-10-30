@@ -1,0 +1,102 @@
+<?php
+
+function cmc_js_validation_init() {
+  drupal_add_js(drupal_get_path('module', 'cmc_js_validation') . '/js/v2.js',
+    array(
+      'type' => 'file',
+      'group' => JS_LIBRARY,
+      'every_page' => TRUE
+    )
+  );
+}
+
+function cmc_js_validation_form_alter(&$form, &$form_state, $form_id) {
+  if (isset($form['#js_validation']) && ($form['#js_validation']['enabled'] === TRUE)) {
+    $form['#pre_render'][] = 'cmc_js_validation_add_validators';
+  }
+}
+
+function cmc_js_validation_add_validators($element) {
+  $handlers = isset($element['#js_validation']['handlers']) ?
+    $element['#js_validation']['handlers'] : array();
+
+  $validators = array(
+    'elements' => cmc_js_validation_process_element($element),
+  );
+
+  $validators = array_merge($validators, $handlers);
+
+  $form_info = array(
+    '#' . $element['#id'] =>  $validators
+  );
+
+  cmc_js_validation_add($form_info);
+
+  return $element;
+}
+
+function cmc_js_validation_process_element(&$element) {
+
+  $validators = array();
+  $langcode = cmc_js_validation_get_language();
+
+  $id = '#' . $element['#id'];
+
+  if (isset($element['#type']) && ($element['#type'] == 'captcha')) {
+    $id .= '-response';
+  }
+
+  if (isset($element['#js_validator'])) {
+    
+    $default_validator = (!empty($element['#js_validator']['default']))? $element['#js_validator']['default'] : $element['#js_validator'];
+    $validators[$id] = (!empty($element['#js_validator'][$langcode])) ? $element['#js_validator'][$langcode] : $default_validator;
+
+    if ($element['#type'] == 'select') {
+      $element['#theme'] = 'cmc_js_validation_select';
+    }
+  }
+
+  $children = element_children($element);
+
+  foreach ($children as $key) {
+    $validators = array_merge($validators,
+                  cmc_js_validation_process_element($element[$key]));
+  }
+
+  return $validators;
+}
+
+
+function cmc_js_validation_add($settings) {
+  drupal_add_js(array('cmcForm' => $settings),
+    array(
+      'type' => 'setting',
+      'every_page' => FALSE
+    )
+  );
+}
+
+
+function cmc_js_validation_theme($existing, $type, $theme, $path) {
+  return array(
+    'cmc_js_validation_select' => array(
+      'render element' => 'element'
+    )
+  );
+}
+
+function theme_cmc_js_validation_select($variables) {
+  $element = $variables['element'];
+  element_set_attributes($element, array('id', 'name', 'size'));
+  _form_set_class($element, array('form-select'));
+
+  return '<div class="select-wrapper"><select' . drupal_attributes($element['#attributes']) . '>' . form_select_options($element) . '</select></div>';
+}
+
+
+function cmc_js_validation_get_language() {
+  global $language;
+  $lang = explode('-', $language->language);
+  
+  return $lang[0];
+}

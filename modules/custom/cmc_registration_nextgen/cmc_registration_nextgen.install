@@ -1,0 +1,12 @@
+<?php
+
+/**
+ * Implements hook_enable
+ */
+function cmc_registration_nextgen_enable() {
+  $message = t('CMC registration forms depend on Tenant Template Code being set correctly.
+             Use !configuration_settings to set appropriate Tenant Template Code',
+             array('!configuration_settings' => l('configuration settings', 'admin/config/cmc/registration')));
+
+  drupal_set_message($message);
+}

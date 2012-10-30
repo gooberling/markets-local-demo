@@ -1,0 +1,35 @@
+<?php
+
+/**
+ * Implements hook_schema().
+ */
+function cmc_insights_schema() {
+  $schema = array();
+
+  $schema['cmc_insights'] = array(
+    'description' => 'Table for storing additional properties for insight nodes.',
+    'fields' => array(
+      'nid' => array(
+        'description' => 'The node identifier of a blog post/insight.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'content_services_id' => array(
+        'description' => 'The ID assigned to this node by content services',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+      'version' => array(
+        'description' => 'The version number of the content',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => FALSE,
+      ),
+    ),
+    'primary key' => array('nid'),
+  );
+
+  return $schema;
+}

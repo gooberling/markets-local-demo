@@ -1,0 +1,15 @@
+<?php
+/**
+ * @file
+ * Code for the cmc_triptych feature.
+ */
+
+include_once 'cmc_triptych.features.inc';
+
+function cmc_triptych_node_view($node, $view_mode, $langcode) {
+  if ($node->type ==  'cmc_triptych' && $view_mode == 'full') {
+    $path = drupal_get_path('module', 'cmc_triptych');
+    drupal_add_js($path . '/js/cmc_triptych.js');
+    //drupal_add_css($path . '/css/cmc_triptych.css');
+  }
+}

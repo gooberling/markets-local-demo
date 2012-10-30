@@ -1,0 +1,45 @@
+Enable the module 
+
+Put markitup directory into sites/all/libraries - should be in the libaries dir
+already in git
+
+Added more images to 
+markitup/markitup/sets/default/images/
+
+Add a new filter - featurable?
+
+* Limit allowed HTML tags 
+* Convert line breaks into HTML (i.e. <br> and <p>) 
+* Convert URLs into links 
+* Convert Media tags to markup 
+* Correct faulty and chopped off HTML
+
+
+FILE TYPES
+Add relevant fields to filetypes in the media configuration
+  taxonomy terms
+
+
+MEDIA UPDATE
+* Replace existing file when uploading a file with the same name.
+* Replace (remove) existing file when uploading a file with a different name. 
+
+
+ADD MEDIA FILES
+Add new file to media library
+  Should appear in the media library
+Delete file in media library - 
+  should bring up warning? 
+  should delete file
+Update a file in media library - 
+  should delete old file 
+  should replace old file with new file
+  all references to the old media object should be updated
+  
+  
+EMBEDDING FILES
+  Add an image
+  Link to internal url - what happens if we change the path alias?
+  Link to external url
+  Link to a media file - pdf/doc, should download to a users computer and be a link
+  Link to a video?!?

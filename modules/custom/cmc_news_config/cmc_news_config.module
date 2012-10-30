@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the CMC News Config feature.
+ */
+
+include_once('cmc_news_config.features.inc');

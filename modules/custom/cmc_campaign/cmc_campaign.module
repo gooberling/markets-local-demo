@@ -1,0 +1,138 @@
+<?php
+
+/**
+ * Implementation of hook_menu() to create Campaign page and Campaign settings page.
+ */
+function cmc_campaign_menu() {
+	$items = array();
+
+	$items['campaign'] = array(
+		'title'            => variable_get('cmc_campaign_page_title', 'CMC Campaign'),
+	    'page callback'    => 'cmc_campaign_page',
+	    'access arguments' => array('access content'),
+	);
+
+	$items['admin/config/cmc/campaign'] = array(
+		'title' => 'CMC Campaign',
+		'description' => 'CMC Campaign Configuration',
+		'page callback' => 'drupal_get_form',
+		'page arguments' => array('cmc_campaign_settings'),
+		'access arguments' => array('Configure Campaign pages'),
+		'type' => MENU_NORMAL_ITEM,
+	);
+
+	return $items;
+}
+
+/**
+ * Implementation of hook_permission() to create 'Configure Campaign pages' permission
+ */
+function cmc_campaign_permission() {
+	return array(
+		'Configure Campaign pages' => array(
+			'title' => t('Configure Campaign pages'),
+		),
+	);
+}
+
+/**
+ * Implementation of hook_theme() to pass variables to the template
+ */	
+function cmc_campaign_theme($existing, $type, $theme, $path) {
+	return array(
+		'campaign_display' => array(
+			'arguments' => array('title' => NULL, 'nid' => NULL, 'body' => NULL, 'desktop_img' => NULL, 'mobile_img' => NULL, 'item_number' => NULL, 'anchor_link' => NULL, 'tracking_code' => NULL, 'fom_link' => NULL, 'fom_tracking_code' => NULL, 'fom_link_text' => NULL),
+			'template' => 'cmc_campaign',
+    	),
+	);
+}
+
+/**
+ * Page callback used in hook_menu() to do the Campaign page stuff
+ */		
+function cmc_campaign_page() {
+	
+  $information = _retrieve_campaign_pages();
+  
+  $content = array();
+  foreach ($information as $item) {
+	$content[] = array(
+      '#type' => 'markup',
+      '#markup' => theme('campaign_display', $item),
+    );
+  }
+  
+  return $content;	
+}
+
+
+/**
+ * Configurable settings for the Campaign page which can be set within the Drupal admin
+ */
+function cmc_campaign_settings() {
+
+	$form['page_settings'] = array(
+		'#type' => 'fieldset',
+		'#title' => 'Page Settings',
+		'#collapsible' => TRUE,
+		'#collapsed' => FALSE,
+	);
+	$form['page_settings']['cmc_campaign_page_title'] = array(
+       '#type'           => 'textfield',
+       '#title'          => t('Page Title'),
+       '#default_value'  => variable_get('cmc_campaign_page_title', 'CMC Campaign'),
+       '#size'           => 20,
+       '#description'    => t('The page title that is used on the Campaign page'),
+  );
+  
+  return system_settings_form($form);
+}
+
+
+/**
+ * Function called in cmc_campaign_page() to rerieve the individual campaign pages
+ */		
+function _retrieve_campaign_pages() {
+	
+	$information[] = array();
+
+	$query = new EntityFieldQuery();
+	$entities = $query->entityCondition('entity_type', 'node')
+                    ->propertyCondition('status', 1)
+					->propertyCondition('type', array('cmc_campaign_page'))
+                    ->propertyOrderBy('created', 'DESC')
+                    ->execute();
+
+	$nodes = node_load_multiple(array_keys($entities['node']));
+	
+	$i = 0;
+	
+	foreach($nodes as $campaign):
+				
+		$information[$i]['item_number'] = $i+1;
+		$information[$i]['nid'] = $campaign->nid;
+		$information[$i]['title'] = $campaign->title;
+		$information[$i]['body'] = $campaign->body['und'][0]['safe_value'];
+		$information[$i]['anchor_link'] = $campaign->field_campaign_anchor_link['und'][0]['safe_value'];
+		$information[$i]['tracking_code'] = $campaign->field_campaign_account_tracking['und'][0]['safe_value'];
+		$information[$i]['fom_link'] = $campaign->field_campaign_fom_link['und'][0]['safe_value'];
+		$information[$i]['fom_link_text'] = $campaign->field_campaign_fom_link_text['und'][0]['safe_value'];
+		$information[$i]['fom_tracking_code'] = $campaign->field_campaign_fom_tracking['und'][0]['safe_value'];
+		$information[$i]['mobile_img'] = $campaign->field_campaign_mobile_bg['und'][0]['filename'];
+		$information[$i]['desktop_img'] = $campaign->field_campaign_desktop_bg['und'][0]['filename'];
+		
+		if ((isset($_GET['promo'])) && ($_GET['promo'] == $campaign->field_campaign_anchor_link['und'][0]['safe_value'])):
+			$promo_item = $i;
+		endif;
+		
+		$i++;
+	endforeach;
+	
+	if (isset($promo_item)):
+		$promo[] = $information[$promo_item];
+		unset($information[$promo_item]);
+		$information = array_merge($promo, $information);
+	endif;
+	
+	return $information;
+}

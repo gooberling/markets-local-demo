@@ -1,0 +1,6 @@
+name = "CMC Custom Tokens"
+description = "Creates custom tokens for use on the site"
+package = "CMC"
+core = 7.x
+dependencies[] = token
+files[] = cmc_custom_tokens.module

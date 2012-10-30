@@ -1,0 +1,124 @@
+// CMC Markets Theme	
+// name = CMC Markets V4
+// description = CMC Markets Base Theme - as of 17/02
+// Right Col SASS
+
+//-----------------------------------------------------------------------------------------------
+// promo blocks
+//-----------------------------------------------------------------------------------------------
+
+.col-right .view-related-content,
+.col-left .education
+	overflow: hidden
+	padding-bottom: 55px
+	position: relative
+	+greybox
+	background-repeat: no-repeat
+	background-image: url("/#{$themepath}/i_related_promo.gif")
+	h3
+		background-image: url("/#{$themepath}/bg_promo_h.png")
+		background-repeat: no-repeat
+		font-size: 1.22em
+		line-height: 1.2em
+		margin: 0 0 0.8em
+		padding: 20px 18px 0
+	p
+		padding-left: 18px
+		padding-right: 18px
+	p.meta
+		font-size: 0.9em
+
+//-----------------------------------------------------------------------------------------------
+// Blog promo
+//-----------------------------------------------------------------------------------------------
+.block-cmc-blog
+	background-position: 0 100%
+	h3
+		background-position: 0 -240px
+
+//-----------------------------------------------------------------------------------------------
+// Related events promo
+//-----------------------------------------------------------------------------------------------
+.block-cmc-event
+	background-position: -178px 100%
+	h3
+		background-position: 0 -160px
+
+//-----------------------------------------------------------------------------------------------
+// Related pricing promo
+//-----------------------------------------------------------------------------------------------
+#block-cmc-pricing-cmc-pricing-product-node
+	h3
+		background-position: left top
+		background-repeat: no-repeat
+		font-size: 1.22em
+		line-height: 1.2em
+		margin: 0 0 0.8em
+		padding: 20px 18px 0
+		background-position: 0 -120px
+		a, a:visited
+			color: $darkesttext
+	ul.details
+		padding: 10px 18px 5px
+
+//-----------------------------------------------------------------------------------------------
+// Sign up promo
+//-----------------------------------------------------------------------------------------------
+.signpost-links
+	margin-bottom: 20px
+	overflow: hidden
+	.disclaim
+		border: 1px solid #E3E3E3
+		border-top: 0
+		background: white
+		+box-shadow(0px 5px 3px -3px #bbbbbb inset)
+		+ieCssFix
+		p
+			padding: 11px 18px 15px
+			font-size: 0.975em
+			line-height: 1.3em
+			margin: 0
+
+.signpost1
+	top: 0px
+	position: relative
+	z-index: 9
+	height: 33px
+	overflow: hidden
+
+.signpost2
+	top: 0px
+	position: relative
+	z-index: 10
+	background: #0DBBDB
+
+.signpost1 a, .signpost1 a:visited
+	position: relative
+	background: #FFF000
+	color: #000
+	display: block
+	padding: 10px 5px 0
+	height: 23px
+	text-align: center
+
+.signpost1 a:nth-child(2), .signpost1 a:nth-child(2):visited
+	background: #000
+	color: white
+
+.signpost2 a, .signpost2 a:visited
+	position: relative
+	+background(linear-gradient(top, #02b3c5 0, #00cceb 10%, #00c5e8 54%, #00bbe6 100%))
+	color: white
+	padding: 10px 5px 0
+	height: 23px
+	display: block
+	text-align: center
+	opacity: 1
+	+transition(opacity 0.2s ease 0s)
+	-pie-background: linear-gradient(#00cceb, #00cceb)
+	+ieCssFix
+
+.signpost2 a:hover
+	opacity: 0.8
+	+transition(opacity 0.2s ease 0s)
+	+ieCssFix

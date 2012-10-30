@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the Feature SEO feature.
+ */
+
+include_once('feature_cmc_seo.features.inc');

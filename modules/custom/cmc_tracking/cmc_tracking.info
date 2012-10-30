@@ -1,0 +1,11 @@
+name = Analytics/tracking integation for CMC Markets
+description = Provides custom analytics/tracking integration for CMC Markets
+package = CMC
+version = 0.1
+core = 7.x
+
+configure = admin/config/cmc/cmc_tracking
+files[] = cmc_tracking.module
+dependencies[] = googleanalytics
+dependencies[] = cmc_adform
+scripts[] = js/cmc_tracking_control.js

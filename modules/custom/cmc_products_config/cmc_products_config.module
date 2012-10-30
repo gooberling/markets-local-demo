@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the CMC Products Config feature.
+ */
+
+include_once('cmc_products_config.features.inc');

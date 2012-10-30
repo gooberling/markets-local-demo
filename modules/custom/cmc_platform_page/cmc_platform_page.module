@@ -1,0 +1,122 @@
+<?php
+/**
+ * @file
+ * Code for the CMC Platform Page feature.
+ */
+
+include_once('cmc_platform_page.features.inc');
+
+function cmc_platform_page_menu() {
+  $items = array();
+  
+  $items['admin/config/cmc/cmc_platform_page'] = array(
+    'title' => t('CMC Platform Settings'),
+  	'page callback'     => 'drupal_get_form',
+    'page arguments' => array('cmc_platform_page_settings'),
+    'access arguments' => array('cmc_platform_page configure'),
+  );
+  
+  return $items;
+}
+
+
+/**
+ * Implementation of hook_perm().
+ */
+function cmc_platform_page_permission() {
+  return array(
+    'cmc_platform_page configure' => array(
+      'title' => t('cmc_platform_page configure'),
+      'restrict access' => TRUE,
+     ),
+  );
+}
+
+function cmc_platform_page_settings() {
+  
+  $form = array();
+  $form['cmc_platform_page_landing_node'] = array(
+    '#type' => 'textfield',
+    '#title' => t('CMC Platform Landing Page Node Nid'),
+    '#default_value' =>  variable_get('cmc_platform_page_landing_node', 3681),
+    '#required' => TRUE,
+  );
+  
+  $form['cmc_platform_page_platform_default'] = array(
+    '#type' => 'select',
+    '#options' => array(
+      'desktop' => 'desktop',
+      'ipad' => 'ipad',
+      'iphone' => 'iphone',
+      'android' => 'android',
+    ),
+    '#title' => t('CMC Platform default platform'),
+    '#default_value' =>  variable_get('cmc_platform_page_platform_default', 'desktop'),
+    '#required' => TRUE,
+  );
+  
+  return system_settings_form($form);
+}
+
+
+/**
+ * hook_block_info
+ */
+function cmc_platform_page_block_info() {
+  $blocks['cmc_platform_page_header'] = array(
+    'info' => t('CMC Platforms Header'),
+    //'visibility' => BLOCK_VISIBILITY_NOTLISTED,
+  );
+    
+  return $blocks;
+}
+
+
+/**
+ * hook_block_view
+ * @param unknown_type $delta
+ */
+function cmc_platform_page_block_view($delta = '') {
+  
+  if ($delta == 'cmc_platform_page_header') {
+    $block['content'] = cmc_platform_page_block_header();
+  }
+
+  return $block;
+}
+
+
+/**
+ */
+function cmc_platform_page_theme($existing, $type, $theme, $path) {
+  return array(
+    'cmc_platform_page_header' => array(
+      'template'	=> 'theme/cmc_platform_page_header',
+      'variables' => array(
+        'data' => NULL
+      ),
+    ),
+  );
+}
+
+
+/**
+ * Use a bunch of views to get the platform header output
+ */
+function cmc_platform_page_block_header() {
+
+  $node = menu_get_object();
+  
+  $data = array(
+    'node' => $node,
+  );
+  
+  $header = theme('cmc_platform_page_header', $data);
+  
+  $view = views_get_view('cmc_platform');
+  $navigation = $view->preview('navigation');
+  
+  $output[] = $header;
+  $output[] = $navigation;
+  return implode("\n", $output);
+}

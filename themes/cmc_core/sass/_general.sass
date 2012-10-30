@@ -1,0 +1,443 @@
+// CMC Markets Theme	
+// General SASS
+// CMC Markets Theme	
+// name = CMC Markets V4
+// description = CMC Markets Base Theme - as of 17/02
+// General Declaration SASS
+
+body
+	background: #fff
+	padding: 0
+	margin: 0 auto
+	font-size: 0.8em
+	line-height: 1em
+	overflow: hidden
+
+.element-invisible
+	clip: rect(1px, 1px, 1px, 1px)
+	position: absolute !important
+
+.clearfix:after
+	clear: both
+	content: "."
+	display: block
+	height: 0
+	visibility: hidden
+	
+label
+	display: block
+
+//-----------------------------------------------------------------------------------------------
+// divs
+//-----------------------------------------------------------------------------------------------
+
+#page, .node-product
+	// loading anim for tab pages
+	background: url(/#{$themepath}/loadera64.gif) no-repeat -3000em -3000em
+
+.inner
+	margin: 0 auto
+	overflow: hidden
+	position: relative
+	padding: 0 10px
+
+#main-wrapper
+	background: white
+	padding-top: 2.8em
+	position: relative
+	//z-index:2;
+
+.is-front #main-wrapper
+	padding-top: 5.6em
+	z-index: 0
+
+#main-content
+	// Shrunk to 300px, not sure why it was set to 600px
+	min-height: 300px
+	
+#main-wrapper .inner:first-child
+	overflow: visible
+
+.col-right
+	float: right
+	overflow: hidden
+
+.col-left, .col-right, #main-content
+	margin-bottom: 5em
+
+.mobile-navigation
+	display: none
+
+//-----------------------------------------------------------------------------------------------
+// headings and heading situations
+//-----------------------------------------------------------------------------------------------
+
+h1.site-name, 
+h2.site-name
+	margin-top: 35px
+
+h1, h2, h3
+	color: #333333
+	font-family: $titlefont
+	font-weight: 300
+
+h1
+	font-size: 2.3em
+	// 30px
+	margin: 0 0 0.25em
+	line-height: 1.05em
+
+h2
+	clear: both
+	font-size: 1.93em
+	line-height: 1.145em
+	margin: 0 0 0.4em
+	padding-top: 1.135em
+
+h2:first-child
+	color: $textcolor
+	margin-top: 0
+	padding-top: 0
+
+p + h2
+	//margin-top: 23px;
+
+hr.intro + h2
+	border-width: 0
+	padding-top: 0
+
+h3
+	font-size: 1.5em
+	line-height: 1.2em
+	margin: 0 0 0.4em
+	padding-top: 0.6em
+
+hr + h3, hr + h2
+	padding-top: 0
+
+h2 + h3
+	padding-top: 0
+
+//-----------------------------------------------------------------------------------------------
+// text elements
+//-----------------------------------------------------------------------------------------------
+
+a, a:link, a:visited
+	text-decoration: none
+	color: $blue
+	&:active
+		color: black
+	&:hover
+		color: $pink
+
+p
+	line-height: 1.55em
+	margin-bottom: 0.8em
+
+hr
+	display: block
+	border-width: 0
+	clear: both
+	height: 8px
+	margin: 1.7em 0
+	width: 100%
+	background: url(/#{$themepath}/v4_bg_divider.png) top center no-repeat
+
+.views-exposed-widgets
+	margin-bottom: 0
+
+ul li.leaf, ul li.expanded, ul li.collapsed
+	list-style-image: none
+
+//-----------------------------------------------------------------------------------------------
+// tables
+//-----------------------------------------------------------------------------------------------
+table
+	width: 100%
+	border-collapse: collpase
+	margin: 25px 0
+	border: 1px solid #eee
+	.center
+		text-align: center
+
+table.left
+	margin: 15px 20px 15px 0
+	float: left
+
+table.right
+	margin: 15px 0 15px 20px
+	float: right
+
+tbody
+	border-top: 0
+
+tr
+	//background-color:#fff;
+	border: 0
+
+tr:nth-of-type(even), tr.even
+	background-color: #f9f9f9 !important
+	border-bottom: 0 !important
+
+td,th
+	padding: 10px
+	border-bottom: 0
+	text-align: left
+
+//-----------------------------------------------------------------------------------------------
+// lists
+//-----------------------------------------------------------------------------------------------
+dd
+	margin: 0.5em 0 1em
+
+.node-type-list dt
+	font-size: 1.2em
+
+.node-type-list dd
+	border-bottom: 1px dotted #ccc
+	padding-bottom: 1em
+	padding-left: 13px
+
+.node-type-list dt:before
+	content: '>'
+	color: $pink
+	padding-right: 5px
+
+.menu-reveal
+	display: none
+
+ul.iconlist
+	margin: 2em 0 2em 0
+	padding: 0
+	li
+		list-style: none
+		overflow: hidden
+		padding: 0px 0 0 80px
+		margin: 0 0 1em 0
+		position: relative
+	img,
+	.image
+		position: absolute
+		left: 0
+		top: 2px
+		margin: 0
+	h3
+		padding-top: 0
+
+ul.iconlist.col-2
+	margin-top: 2em
+	overflow: hidden
+	margin-right: -15px
+	li
+		float: left
+		width: 37%
+		margin-right: 2%
+
+//h1 ~ ul.iconlist.col-2 {
+//	margin-top:2em;
+//}
+
+//-----------------------------------------------------------------------------------------------
+// Media elements
+//-----------------------------------------------------------------------------------------------
+.media-image
+	border: 0!important
+
+.media_original
+	margin: 10px 0px 20px
+	img
+		max-width: 580px
+
+.media_original.icon
+	margin: 0px
+
+.media_original.right
+	float: right
+	margin: 10px 0px 7px 20px
+
+.media_original.left
+	float: left
+	margin: 10px 20px 7px 0px
+
+.media_original.border
+	+box-shadow(0 0 3px #cccccc)
+	border: 4px solid white
+	+ieCssFix
+
+.media-youtube-outer-wrapper
+	margin-bottom: 2.9em
+	margin-top: 2em
+
+.media-youtube-outer-wrapper h2
+	padding-top: 0
+
+.map
+	margin-bottom: 1em
+	margin-top: 1em
+
+.manual_placeholder
+	color: #aaa !important
+
+//-----------------------------------------------------------------------------------------------
+// generic landing page list style- for blog, education
+//-----------------------------------------------------------------------------------------------
+.landing-list
+	ul
+		overflow: hidden
+		margin: 0
+		padding: 0
+	li
+		+box-sizing(border-box)
+		height: 210px
+		margin-bottom: 20px
+		overflow: hidden
+		background-color: white
+		&:hover > div, &:hover > a.img-block
+			opacity: 0.8
+			//-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=8%)";
+			+transition(all 0.5s ease 0s)
+	li > div
+		opacity: 1
+		//-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=100%)";
+		+transition(all 0.5s ease 0s)
+
+//-----------------------------------------------------------------------------------------------
+// tabbed content
+//-----------------------------------------------------------------------------------------------
+.tabbed
+	display: none
+	background: white
+
+.tabbed > ul
+	margin: 0
+	padding: 0
+	position: relative
+	top: -50px
+	height: 49px
+	+box-shadow(0 5px 3px -3px #eeeeee)
+
+.tabbed > ul >li
+	list-style: none
+	float: left
+	.detail
+		position: absolute
+		top: 50px
+		left: 0
+		padding: 20px
+		min-height: 200px
+		display: none
+	h2
+		margin-bottom: 0
+	h2 a,
+	h2 a:visited,
+	h2 a:active
+		color: $textcolor
+		background: transparent
+		display: block
+		font-size: 0.8em
+		line-height: 2.5em
+		text-align: center
+		+transition(color 1s ease 0s)
+	h2 a:hover
+		//	background:$textcolor;
+		color: black
+
+.tabbed > ul > li.active
+	.detail
+		display: block
+	h2 a,
+	h2 a:visited
+		color: white
+		+transition(color 1s ease 0s)
+
+.tabbed
+	position: relative
+	margin-bottom: 2.4em
+	border: 1px solid $border-color
+	.slider
+		background: $blue
+		height: 49px
+		position: relative
+
+//-----------------------------------------------------------------------------------------------
+// Accordion
+//-----------------------------------------------------------------------------------------------
+
+.accordion
+	margin-bottom: 0.7em
+	border: 1px solid #EEEEEE
+	padding: 15px
+	background: url(/#{$themepath}/v4_bg_divider.png) top center no-repeat
+	span
+		float: right
+		background-image: url(/#{$themepath}/i_filter_aro_d.gif)
+		width: 9px
+		height: 9px
+		background-position: 0 2px
+		background-repeat: no-repeat
+	.open span
+		background-image: url(/#{$themepath}/i_filter_aro.gif)
+
+.accordion > h2
+	padding-top: 1.135em
+	&:hover
+		+cursor
+
+//-----------------------------------------------------------------------------------------------
+// Pagination
+//-----------------------------------------------------------------------------------------------
+
+.item-list .pager
+	clear: both
+	text-align: center
+	padding: 0
+	li
+		background-image: none
+		display: inline
+		list-style-type: none
+		padding: 5px 0.2em 0
+		margin: 0 0 0.2em 0
+		color: black
+		a, a:visited
+			color: $blue
+			&:hover
+				color: $pink
+		.progress-disabled
+			display: none
+	.pager-last, .pager-first
+		display: none
+	.pager-previous,
+	.pager-next
+		padding: 0
+		overflow: hidden
+		a, a:visited
+			text-indent: -300em
+			white-space: nowrap
+			//	overflow: hidden;
+			display: inline-block
+			//	font-size:0;
+			width: 23px
+			height: 21px
+			opacity: 1
+			-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=100%)"
+			+transition(all 0.5s ease 0s)
+			&:hover
+				opacity: 0.5
+				-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=50%)"
+				+transition(all 0.5s ease 0s)
+	.pager-previous
+		margin-right: 20px
+		a
+			background: url(/#{$themepath}/i_pagi_prev.png) no-repeat 0 0 transparent
+	.pager-next
+		margin-left: 20px
+		a
+			background: url(/#{$themepath}/i_pagi_next.png) no-repeat 0 0 transparent
+
+//-----------------------------------------------------------------------------------------------
+// ajax override
+//-----------------------------------------------------------------------------------------------
+html.js input.form-autocomplete
+	background-image: none
+	background-position: 0 0
+	background-repeat: no-repeat

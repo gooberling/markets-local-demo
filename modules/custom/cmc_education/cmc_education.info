@@ -1,0 +1,9 @@
+name = "CMC Education"
+description = "Creates a education landing page"
+package = "CMC"
+core = 7.x
+
+dependencies[] = views
+dependencies[] = search_api
+
+files[] = cmc_education.module

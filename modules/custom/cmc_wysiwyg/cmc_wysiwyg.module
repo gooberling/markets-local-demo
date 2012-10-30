@@ -1,0 +1,879 @@
+<?php
+/**
+ * @file
+ * Code for the CMC wysiwyg feature.
+ */
+
+include_once('cmc_wysiwyg.features.inc');
+
+/**
+ * hook_menu
+ */
+function cmc_wysiwyg_menu() {  $items = array();
+  
+  $items['admin/config/cmc/cmc_wysiwyg'] = array(
+    'title' => 'CMC Wysiwg Settings',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('cmc_wysiwyg_settings'),
+    'access arguments' => array('Administer text formats and filters'),
+  );
+
+  $items['wysiwyg_preview'] = array(
+    'title' => 'Wysiwg Preview',
+    'page callback' => 'cmc_wysiwyg_preview',
+    'access arguments' => array('access content'),
+  );
+  
+  $items['cmc_wysiwyg/preview'] = array(
+    'title' => 'Wysiwg Preview',
+    'page callback' => 'cmc_wysiwyg_preview',
+    'access arguments' => array('access content'),
+  );
+  
+  $items['cmc_wysiwyg/list_internal_nodes'] = array(
+    'title' => 'Wysiwg List internal nodes',
+    'page callback' => 'cmc_wysiwyg_list_internal_nodes',
+    'access arguments' => array('access content'),
+  );
+  
+  $items['cmc_wysiwyg/get_internal_url'] = array(
+    'title' => 'Wysiwg get internal nodes',
+    'page callback' => 'cmc_wysiwyg_get_internal_url',
+    'access arguments' => array('access content'),
+  );
+  
+  return $items;
+}
+
+
+/**
+ * System settings
+ */
+function cmc_wysiwyg_settings() {
+  $form = array();
+  
+  //$form[];
+  $formats = filter_formats();
+  
+  $format_options = array();
+  foreach ($formats as $k => $format) {
+    $format_options[$format->format] = $format->name;
+  }
+  
+  $form['cmc_wysiwyg_format'] = array(
+    '#title' => t('CMC Wysiwyg format'),
+    '#type' => 'select',
+    '#options' => $format_options,
+    '#description' => t('Select format for cmc wysiwyg'),
+    '#default_value' => variable_get('cmc_wysiwyg_format', 'cmc_editor'),
+  );
+  
+  
+  return system_settings_form($form);
+}
+
+
+
+/**
+ *
+ * Enter description here ...
+ */
+function cmc_wysiwyg_get_internal_url() {
+  $params = drupal_get_query_parameters();
+  $url = trim($params['url'], '/');
+  
+  $path = drupal_get_normal_path($url);
+  echo $path;
+  exit;
+}
+
+
+// ajax call to get internal nodes
+function cmc_wysiwyg_list_internal_nodes() {
+  
+  // load up the block with filters
+  // load up menus, limited by domain
+  $params = drupal_get_query_parameters();
+  //print_r($params);
+  
+  if (isset($params['title'])) {
+    //echo 'wibble';
+    // list nodes containing that title
+    $output  = '';
+  }
+  else {
+    // want to grab all the menus available for this domain
+    $main_menu_source = variable_get('menu_main_links_source');
+    
+    $menus = array(
+      variable_get('menu_main_links_source'),
+      variable_get('menu_secondary_links_source'),
+    );
+    
+    if (module_exists('cmc_domain')) {
+      $current_domain = domain_get_domain();
+      $domain_id = $current_domain['domain_id'];
+      $menus[] = domain_conf_variable_get($domain_id, 'menu_header_links_source');
+      $menus[] = domain_conf_variable_get($domain_id, 'menu_seo_links_source');
+    }
+    $menus = array_unique($menus);
+    
+    $output = '';
+    foreach ($menus as $menu) {
+      $m = menu_load($menu);
+//      print_r($m);
+      if (!empty($m['title'])) {
+        $tree = menu_build_tree($menu);
+        $output .= '<h3>' . $m['title'] . '</h3>' . drupal_render(menu_tree_output($tree));
+      }
+    }
+  }
+  
+  // with this internal link chooser we use the ckeditor_link
+  // if the node has changed the url, we will still get 404s
+  // Internal links won't be changed until the actual node hass been resaved or cache busted
+  // looking up nodes where body contains node/nid and removing entries from cache_field
+  // is one way of keeping content up to date but it's a bit shit really
+  echo '<div id="internal-link-chooser">
+  <a id="internal-link-chooser-close" href="#">Close Window [X]</a>
+  <h1>Internal link chooser</h1>' . $output  .
+  '</div>';
+  
+  exit;
+}
+
+/**
+ * This runs the posted data through the filter that is used for the markitup editor
+ * Enter description here ...
+ */
+function cmc_wysiwyg_preview() {
+
+  $data = $_POST['data'];
+  // run it through a filter
+  $return = check_markup($data, variable_get('cmc_wysiwyg_format', 'cmc_editor'));
+  $css_file = base_path() . drupal_get_path('module', 'cmc_wysiwyg') . '/css/cmc_wysiwyg.css';
+  
+  $str = <<<EOF
+  <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>markItUp! preview template</title>
+<link rel="stylesheet" type="text/css" href="$css_file" />
+</head>
+<body>
+$return
+</body>
+</html>
+EOF;
+  
+  echo $str;
+  exit;
+}
+
+
+/**
+ * hook_preprocess_page
+ */
+function cmc_wysiwyg_preprocess_page(&$vars) {
+  $path = drupal_get_path('module', 'media_youtube');
+  drupal_add_js($path . '/js/media_youtube.js');
+  drupal_add_js($path . '/js/flash_detect_min.js');
+}
+
+
+/**
+ * Implementation of hook_wysiwyg_editor_settings_alter()
+ */
+function cmc_wysiwyg_wysiwyg_editor_settings_alter(&$settings, $context) {
+  
+  if ($context['profile']->editor == 'markitup') {
+    
+    $buttons = cmc_wysiwyg_markitup_buttons();
+    $path = drupal_get_path('module', 'cmc_wysiwyg');
+
+    // 3rd party js for interface
+    drupal_add_js($path . '/js/cmc_markitup.js');
+    drupal_add_js($path . '/js/jquery.simplemodal.1.4.2.js');
+
+    // styling for editor interface
+    drupal_add_css($path . '/css/cmc_wysiwyg.css');
+    //drupal_add_js($path . '/js/cmc_wysiwyg.js');
+    
+    // add our buttons depending on what are options chosen are
+    foreach ($context['profile']->settings['buttons']['default'] as $k => $v) {
+      if ($v) {
+        $settings['markupSet'][$k] = $buttons[$k];
+        if ($k == 'media' && module_exists('media')) {
+          module_load_include('inc', 'media', 'wysiwyg_plugins/media');
+          //media_include_browser_js();
+          drupal_add_js($path . '/js/cmc_wysiwyg-media.js');
+        }
+      }
+    }
+  }
+}
+
+
+/**
+ * hook_wysiwyg_plugin
+ * Determines what buttons/plugins to add on the wysiwyg settings page
+ * /admin/config/content/wysiwyg/profile/cmc_editing_format_2/edit
+ *
+ * To add a button to the toolabr, add button here
+ * and also add an entry to cmc_wysiwyg_markitup_buttons();
+ *
+ * @param unknown_type $editor
+ * @param unknown_type $version
+ */
+function cmc_wysiwyg_wysiwyg_plugin($editor, $version) {
+  switch ($editor) {
+    case 'markitup':
+      return array(
+        'default' => array(
+          'buttons' => array(
+            'h1' => t('H1'),
+            'h2' => t('H2'),
+            'h3' => t('H3'),
+            'h4' => t('H4'),
+            'h5' => t('H5'),
+            'h6' => t('H6'),
+            'bold' => t('Bold'), // default set
+            'italic' => t('Italic'), // default set
+            'stroke' => t('Strike-through'), // default set
+            'link' => t('Link'), // default set
+            'image' => t('Image'), // default set
+            // 'cleanup' => t('Clean-up'),
+            'list_bullet' => t('Bullet List'),
+            'list_numeric' => t('Numeric List'),
+            'list_tabbed' => t('Tabbed List'),
+            'table' => t('Table'),
+            'divider' => t('Divider'),
+            'accordion' => t('Accordion'),
+            'media' => t('Media'),
+            'preview' => t('Preview'), // default set
+            'ajaxpreview' => t('Ajax Preview'),
+            'modal' => t('Modal'),
+          	'item_headline' => t('Chart Education Headline'),
+            'item_text' => t('Chart Education Text'),
+            'item_caption' => t('Chart Education Caption'),
+            'item_image' => t('Chart Education Image'),
+            'item_dotted_line' => t('Chart Education Dotted Line'),
+            'item_bold' => t('Chart Education Bold'),
+            'item_italics' => t('Chart Education Italics'),
+            'item_underline' => t('Chart Education Underline'),
+            'item_frequency' => t('Chart Education Frequency'),
+            'item_source' => t('Chart Education Source'),
+            'item_measure' => t('Chart Education Measure'),
+            'item_care' => t('Chart Education Care'),
+          ),
+          'internal' => TRUE,
+        ),
+      );
+      break;
+  }
+}
+
+/**
+ * To add a button to the toolabr, add defintiion here
+ * and also add an entry to cmc_wysiwyg_wysiwyg_plugin();
+ */
+function cmc_wysiwyg_markitup_buttons() {
+  // Add configured buttons or all available.
+  $default_buttons = array(
+    'h1' => array(
+      'name' => t('H1'),
+      'className' => 'markitup-h1',
+      'openWith' => '<h1>',
+      'closeWith' => '</h1>',
+    ),
+    'h2' => array(
+      'name' => t('H2'),
+      'className' => 'markitup-h2',
+      'openWith' => '<h2>',
+      'closeWith' => '</h2>',
+    ),
+    'h3' => array(
+      'name' => t('H3'),
+      'className' => 'markitup-h3',
+      'openWith' => '<h3>',
+      'closeWith' => '</h3>',
+    ),
+    'h4' => array(
+      'name' => t('h4'),
+      'className' => 'markitup-h4',
+      'openWith' => '<h4>',
+      'closeWith' => '</h4>',
+    ),
+    'h5' => array(
+      'name' => t('h5'),
+      'className' => 'markitup-h5',
+      'openWith' => '<h5>',
+      'closeWith' => '</h5>',
+    ),
+    'h6' => array(
+      'name' => t('h6'),
+      'className' => 'markitup-h6',
+      'openWith' => '<h6>',
+      'closeWith' => '</h6>',
+    ),
+  	'bold' => array(
+      'name' => t('Bold'),
+      'className' => 'markitup-bold',
+      'openWith' => '(!(<strong>|!|<b>)!)',
+      'closeWith' => '(!(</strong>|!|</b>)!)',
+    ),
+    'italic' => array(
+      'name' => t('Italic'),
+      'className' => 'markitup-italic',
+      'openWith' => '(!(<em>|!|<i>)!)',
+      'closeWith' => '(!(</em>|!|</i>)!)',
+    ),
+    'stroke' => array(
+      'name' => t('Strike-through'),
+      'className' => 'markitup-stroke',
+      'openWith' => '<del>',
+      'closeWith' => '</del>',
+    ),
+    'image' => array(
+      'name' => t('Image'),
+      'className' => 'markitup-image',
+      'replaceWith' => '<img src="[![Source:!:http://]!]" alt="[![Alternative text]!]" />',
+    ),
+    'link' => array(
+      'name' => t('Link'),
+      'className' => 'markitup-link',
+    ),
+    'list_bullet' => array(
+      'name' => t('Bullet List'),
+      'className' => 'markitup-ul-list',
+    ),
+    'list_numeric' => array(
+      'name' => t('Numeric List'),
+      'className' => 'markitup-ol-list',
+    ),
+    'list_tabbed' => array(
+      'name' => t('Tabbed List'),
+      'className' => 'markitup-tabbed-list',
+    ),
+    'table' => array(
+      'name' => t('Table'),
+      'className' => 'markitup-table',
+      'placeholder' => "Your text here...",
+    ),
+    'divider' => array(
+      'name' => t('Divider'),
+      'className' => 'markitup-divider',
+      'openWith' => '<hr />',
+    ),
+    'accordion' => array(
+      'name' => t('Accordion'),
+      'className' => 'accordion',
+    ),
+    // @todo
+    // 'cleanup' => array('name' => t('Clean-up'), 'className' => 'markitup-cleanup', 'replaceWith' => 'function(markitup) { return markitup.selection.replace(/<(.*?)>/g, "") }'),
+    'preview' => array(
+      'name' => t('Preview'),
+      'className' => 'markitup-preview',
+      'call' => 'preview',
+    ),
+    'ajaxpreview' => array(
+      'name' => t('Ajax Preview'),
+      'className' => 'markitup-ajaxpreview',
+      'call' => 'ajaxpreview',
+    ),
+    'media' => array(
+      'name' => t('Add Media'),
+      'className' => 'markitup-media',
+      'call' => 'mediaPopup',
+    ),
+    'modal' => array(
+      'name' => t('Modal'),
+      'className' => 'markitup-modal',
+      'call' => 'modalPopup',
+    ),
+    'item_headline' => array(
+    	'name' => t('Headline'),
+      'className' => 'markitup-item-headline',
+      'openWith' => '<item type="headline">',
+      'closeWith' => '</item>',
+    ),
+    'item_text' => array(
+    	'name' => t('Text'),
+      'className' => 'markitup-item-text',
+      'openWith' => '<item type="text">',
+      'closeWith' => '</item>',
+    ),
+    'item_caption' => array(
+    	'name' => t('Caption'),
+      'className' => 'markitup-item-caption',
+      'openWith' => '<item type="caption">',
+      'closeWith' => '</item>',
+    ),
+    'item_image' => array(
+    	'name' => t('Image'),
+      'className' => 'markitup-item-image',
+      'openWith' => '<item type="image">',
+      'closeWith' => '</item>',
+    ),
+    'item_dotted_line' => array(
+    	'name' => t('Dotted Line'),
+      'className' => 'markitup-item-dotted-line',
+      'openWith' => '<item type="dotted-line">',
+      'closeWith' => '</item>',
+    ),
+    'item_frequency' => array(
+    	'name' => t('Frequency'),
+      'className' => 'markitup-item-frequency',
+      'openWith' => '<item type="frequency">',
+      'closeWith' => '</item>',
+    ),
+    'item_source' => array(
+    	'name' => t('Source'),
+      'className' => 'markitup-item-source',
+      'openWith' => '<item type="source">',
+      'closeWith' => '</item>',
+    ),
+    'item_measure' => array(
+    	'name' => t('Measure'),
+      'className' => 'markitup-item-measure',
+      'openWith' => '<item type="measure">',
+      'closeWith' => '</item>',
+    ),
+    'item_care' => array(
+    	'name' => t('Care'),
+      'className' => 'markitup-item-care',
+      'openWith' => '<item type="care">',
+      'closeWith' => '</item>',
+    ),
+    
+    'item_bold' => array(
+    	'name' => t('Bold'),
+      'className' => 'markitup-item-bold',
+      'openWith' => '<b>',
+      'closeWith' => '</b>',
+    ),
+    'item_italics' => array(
+    	'name' => t('Italics'),
+      'className' => 'markitup-item-italics',
+      'openWith' => '<i>',
+      'closeWith' => '</i>',
+    ),
+    'item_underline' => array(
+    	'name' => t('Unerline'),
+      'className' => 'markitup-item-underline',
+      'openWith' => '<u>',
+      'closeWith' => '</u>',
+    ),
+  );
+  
+  return $default_buttons;
+}
+
+
+/**
+ * hook_preprocess_node
+ * @param unknown_type $variables
+ */
+function cmc_wysiwyg_preprocess_node(&$variables) {
+  //echo __METHOD__;
+}
+
+ 
+/**
+ * Implements hook_entity_info_alter().
+ *
+ * Add view modes to the file entity type, appropriate for displaying media.
+ */
+function cmc_wysiwyg_entity_info_alter(&$entity_info) {
+
+  // add our own extra view modes
+  // media_small doesn't seem to work...
+  $entity_info['file']['view modes']['media_icon'] = array('label' => t('Icon'), 'custom settings' => TRUE);
+  $entity_info['file']['view modes']['media_small_left'] = array('label' => t('Small left'), 'custom settings' => TRUE);
+  $entity_info['file']['view modes']['media_small_border'] = array('label' => t('Small with border'), 'custom settings' => TRUE);
+  $entity_info['file']['view modes']['media_small_right'] = array('label' => t('Small right'), 'custom settings' => TRUE);
+  $entity_info['file']['view modes']['media_small_right_border'] = array('label' => t('Small right with border'), 'custom settings' => TRUE);
+  
+  $entity_info['file']['view modes']['media_medium'] = array('label' => t('Medium'), 'custom settings' => TRUE);
+  $entity_info['file']['view modes']['media_medium_border'] = array('label' => t('Medium with border'), 'custom settings' => TRUE);
+  $entity_info['file']['view modes']['media_medium_right'] = array('label' => t('Medium right'), 'custom settings' => TRUE);
+  $entity_info['file']['view modes']['media_medium_right_border'] = array('label' => t('Medium right with border'), 'custom settings' => TRUE);
+  
+  $entity_info['file']['view modes']['media_large'] = array('label' => t('Large'), 'custom settings' => TRUE);
+  
+  $entity_info['file']['view modes']['media_original'] = array('label' => t('Original'), 'custom settings' => TRUE);
+  
+  /*
+  $entity_info['file']['view modes']['media_link'] = array('label' => t('Link'), 'custom settings' => TRUE);
+  $entity_info['file']['view modes']['media_preview'] = array('label' => t('Preview'), 'custom settings' => TRUE);
+  $entity_info['file']['view modes']['media_small'] = array('label' => t('Small'), 'custom settings' => TRUE);
+  $entity_info['file']['view modes']['media_large'] = array('label' => t('Large'), 'custom settings' => TRUE);
+  $entity_info['file']['view modes']['media_original'] = array('label' => t('Original'), 'custom settings' => TRUE);
+  */
+  //print_r($entity_info);
+}
+
+
+function cmc_wysiwyg_field_formatter_info_alter(&$info) {
+  
+  $new_modes = array(
+    array('media_icon', 'Icon'),
+    array('media_small_left', 'Small left'),
+    array('media_small_border', 'Small with border'),
+    array('media_small_right', 'Small right'),
+    array('media_small_right_border', 'Small right with border'),
+    
+    array('media_medium', 'Medium'),
+    array('media_medium_border', 'Medium with border'),
+    array('media_medium_right', 'Medium right'),
+    array('media_medium_right_border', 'Medium right with border'),
+    
+  );
+  
+  foreach ($new_modes as $mode) {
+    $info[$mode[0]] = array(
+      'label' => t($mode[1]),
+      'settings' => array(),
+      'field types' => array('media'),
+      'module' => 'media',
+    );
+  }
+}
+
+
+/**
+ * Remove view modes from the media embed form to make it less confusing.
+ * Some view modes aren't applicable for some file types
+ *
+ * Enter description here ...
+ * @param unknown_type $view_modes
+ * @param unknown_type $file
+ */
+function cmc_wysiwyg_media_wysiwyg_allowed_view_modes_alter(&$view_modes, $file) {
+  //print_r($file);
+  // should make this configurable?!
+  if ($file->type == 'image') {
+    unset($view_modes['media_link']);
+    unset($view_modes['token']);
+    unset($view_modes['media_preview']);
+  }
+  else if ($file->type == 'default') {
+    unset($view_modes['media_preview']);
+    
+    unset($view_modes['media_icon']);
+    unset($view_modes['media_large']);
+    unset($view_modes['media_original']);
+    unset($view_modes['token']);
+    
+    unset($view_modes['media_small']);
+    unset($view_modes['media_small_left']);
+    unset($view_modes['media_small_border']);
+    unset($view_modes['media_small_right']);
+    unset($view_modes['media_small_right_border']);
+    
+    unset($view_modes['media_medium']);
+    unset($view_modes['media_medium_border']);
+    unset($view_modes['media_medium_right']);
+    unset($view_modes['media_medium_right_border']);
+    
+  }
+  else if ($file->type == 'video') {
+    // do nothing
+  }
+  //echo __METHOD__;
+  //print_r($view_modes);
+}
+
+
+
+/**
+ * hook_form_alter
+ */
+function cmc_wysiwyg_form_alter(&$form, &$form_state, $form_id) {
+  //echo __METHOD__, ' ', $form_id, '<br />';
+  
+}
+
+/**
+ * hook_form_alter
+ * We want to add the file_entity fields to this form if we can...
+ */
+function cmc_wysiwyg_form_media_add_upload_alter(&$form, &$form_state, $form_id) {
+  $form['#submit'][] = 'cmc_wysiwyg_file_added_submit';
+
+}
+
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function cmc_wysiwyg_form_media_internet_add_alter(&$form, &$form_state) {
+  $form['#submit'][] = 'cmc_wysiwyg_file_added_submit';
+}
+
+/**
+ * Form submit callback added to Media browser forms that add new files.
+ *
+ * This function changes the redirect of such forms to the file editing form,
+ * so that the file's fields can be edited.
+ */
+function cmc_wysiwyg_file_added_submit($form, &$form_state) {
+  // @todo media_internet_add_submit() and media_internet_add_submit() should
+  //   set $form_state['file'], so we don't have to find the file id in this
+  //   indirect and fragile way.
+  $fid = $form_state['redirect'][1]['query']['fid'];
+  if (cmc_wysiwyg_is_media_popup($form)) {
+    $form_state['redirect'] = array('media/' . $fid . '/edit', array('query' => array('render' => 'media-popup')));
+  }
+  else {
+    $form_state['redirect'] = array('media/' . $fid . '/edit');
+  }
+  
+}
+
+
+/**
+ * Checks to see if media form is in a popup
+ * @param unknown_type $form
+ */
+function cmc_wysiwyg_is_media_popup(&$form) {
+  if (strpos($form['#action'], 'render=media-popup')) {
+    return true;
+  }
+  return false;
+}
+
+
+/**
+ * Form submit callback after fields have been edited for a newly added file in the Media browser.
+ *
+ * Redirect back to the page that informs the Media browser that a file is ready
+ * for insertion into WYSIWYG or a field.
+ */
+function cmc_wysiwyg_form_media_edit_alter(&$form, &$form_state) {
+  $form['#submit'][] = 'cmc_wysiwyg_form_media_edit_submit';
+  $form['actions']['submit']['#submit'][] = 'cmc_wysiwyg_form_media_edit_submit';
+  /*
+  //print_r($form);
+  // automtically assign depending on type of file it is
+  $filemime = $form['preview']['#file']->filemime;
+  $types = array(
+    'image/jpeg' => 'image',
+    'mimetype/fsa' => 'sometype',
+  );
+  //print_r($form);
+  //echo $types[$filemime];
+  //print_r($form['field_filetype']);
+  $form['field_filetype']['und']['#default_value'] = array($types[$filemime]);
+  
+  
+  $form['type']['#value'] = $types[$filemime];
+  */
+  //print_r($form['field_filetype']);
+  
+  if (cmc_wysiwyg_is_media_popup($form)) {
+    $path = drupal_get_path('module', 'cmc_wysiwyg');
+    drupal_add_css($path . '/css/cmc_wysiwyg.css');
+
+    // haveto use jQuery as seems to be a conflict if we use $
+    // can get the node type at this point!
+    drupal_add_js("jQuery(document).ready(function(e){var h = jQuery('body').height(); jQuery(parent.window.document).find('#mediaBrowser').height(h);});", 'inline');
+    $form['#prefix'] = '<style type="text/css">body {margin:30px;}</style>';
+    
+    if ($form['type']['#value'] == 'video') {
+      // HACK FOR YOUTUBE/VIDEO So it inserts it properly into the field
+      // the $form['redirect'] doesn't seem to work for youtube videos
+      $_GET['destination'] = 'media/browser?render=media-popup&fid=' . $form['fid']['#value'];
+    }
+  }
+}
+
+
+/**
+ *
+ * @param unknown_type $form
+ * @param unknown_type $form_state
+ */
+function cmc_wysiwyg_form_media_edit_submit($form, &$form_state) {
+
+  if (cmc_wysiwyg_is_media_popup($form)) {
+    $file = $form_state['file'];
+  
+    //$form_state['redirect'] = array('media/browser', array('query' => array('render' => 'media-popup')));
+    $form_state['redirect'] = array('media/browser', array('query' => array('render' => 'media-popup', 'fid' => $file->fid)));
+  }
+}
+
+
+
+
+/**
+ * hook_node_update
+ */
+function cmc_wysiwyg_node_update($node) {
+  // TODO:
+  // IS THIS A GOOD IDEA?!
+  // check if node type is part of the ckeditor link node autocomplete types
+  // if it is we want to remove the cached copy of the node contents on save
+  // so it can rebuild the updated path in nodes that reference it otherwise
+  // we have to manually resave the nodes that reference it for the path to update
+  $ckeditor_node_types = variable_get('ckeditor_link_autocomplete_node_types', array());
+
+  if (in_array($node->type, array_values($ckeditor_node_types))) {
+    $view = views_get_view('cmc_wysiwyg');
+    // make sure view overrides defaults!
+    $view->display['block_1']->display_options['filters']['body_value']['value'] = 'node/' . $node->nid;
+    $content = $view->preview('_block_1');
+    foreach ($view->result as $res) {
+      // clear cache -
+      // should only bust the cache for nodes that reference current node
+      cache_clear_all('field:node:' . $res->nid, 'cache_field');
+    }
+  }
+  
+}
+
+
+/**
+ * hook_media_token_to_markup_alter
+ * look at media_token_to_markup();
+ */
+function cmc_wysiwyg_media_token_to_markup_alter(&$element, &$tag_info, &$settings) {
+
+  // domain access adds on current domain
+  // and node view caches it so if node is on de, the file gets cached
+  // as coming from UK or some other domain
+  $file = $element['#file'];
+  $base_url = $GLOBALS['base_url'];
+  
+  if ($file->type == 'default') {
+    $GLOBALS['base_url'] = ''; // set global so filepath doesn't include domain
+    $element = media_get_file_without_label($element['#file'], $tag_info['view_mode'], $settings);
+    $GLOBALS['base_url'] = $base_url; // reset global so it should't screw with other stuff
+  }
+  else if ($file->type == 'image') {
+    
+    if (isset($element['#view_mode'])) {
+      $GLOBALS['base_url'] = ''; // set global so filepath doesn't include domain
+      $element = media_get_file_without_label($element['#file'], $tag_info['view_mode'], $settings);
+      
+      // unset the theme function so we can stuff our own markup in
+      // if we don't unset, the theme function just runs
+      // and setting markup has no effect
+      unset($element['#theme']);
+      $element['#markup'] = theme('cmc_wysiwyg_image', $element);
+      $GLOBALS['base_url'] = $base_url; // reset global so it should't screw with other stuff
+    }
+    
+  }
+}
+
+/**
+ *
+ */
+function cmc_wysiwyg_media_format_form_prepare_alter(&$form, &$form_state) {
+//echo '<pre>', print_r($form, 1), '</pre>';
+  //echo __METHOD__;
+  $media_file = $form['#media'];
+  if ($media_file->type == 'default') {
+    // add extra link
+    $form['options']['link_class'] = array(
+      '#type' => 'select',
+      '#title' => 'Link Class',
+      '#options' => array (
+        '' => 'Default',
+        'arrow' => 'Arrow/More',
+        'button blue' => 'Button Blue',
+        'button yellow' => 'Button Yellow',
+        'button pink' => 'Button Pink',
+      ),
+      '#default_value' => 'media_link',
+    
+    );
+  }
+}
+
+
+
+/**
+ * hook_theme
+ */
+function cmc_wysiwyg_theme($existing, $type, $theme, $path) {
+
+  $base_path = drupal_get_path('module', 'cmc_tracking');
+  $path = $base_path ."/theme";
+
+	$array = array(
+		'cmc_wysiwyg_image' => array(
+	    'variables' => array('element' => NULL),
+		),
+	);
+	
+	return $array;
+}
+
+
+/**
+ * Theme our media token elements
+ * @param unknown_type $element
+ */
+function theme_cmc_wysiwyg_image($element) {
+  //print_r($element);
+  
+  $stylename = (isset($element['#style_name'])) ? $element['#style_name'] : '';
+  
+  if (!isset($element['#path'])) {
+    // stop errors showing up if file is not there
+    return;
+  }
+  
+  // set up the image
+  $image = array(
+    'path' => $element['#path'],
+    'style_name' => $stylename,
+    'alt' => $element['#attributes']['alt'],
+    'class' => $element['#attributes']['class'],
+    'width' => $element['#attributes']['width'],
+    'height' => $element['#attributes']['height'],
+  );
+  
+  if (!$stylename) {
+	  $image = theme('image', $image);
+	}
+	else {
+	  $image = theme('image_style', $image);
+	}
+  
+  // define the classes for our media-image tokens
+  $style_classes = array(
+		'media_icon'=> 'icon',
+    'media_small'=> 'third left',
+  	'media_small_left'=> 'third left',
+    'media_small_border'=> 'third border left',
+    'media_small_right'=> 'third right',
+    'media_small_right_border'=> 'third border right',
+    'media_medium'=> 'half left',
+    'media_medium_border'=> 'half border left',
+    'media_medium_right'=> 'half right',
+    'media_medium_right_border'=> 'half right border',
+    'media_large'=> 'full',
+    'media_original'=> '',
+	);
+  
+	$classes = 'media_original img ';
+	$classes .= $style_classes[$element['#view_mode']];
+		
+  $output = '<div class="' . $classes . '">' . $image . '</div>';
+  return $output;
+}
+
+
+function cmc_wysiwyg_init() {
+
+ if (arg(0) == 'media') {
+    $path = drupal_get_path('module', 'cmc_wysiwyg');
+	drupal_add_css($path . '/css/cmc_media.css');
+    drupal_add_js($path . '/js/cmc_media.js');
+  }
+}

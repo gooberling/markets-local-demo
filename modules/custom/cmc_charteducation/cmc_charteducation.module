@@ -1,0 +1,305 @@
+<?php
+/**
+ * @file
+ * Code for the cmc_charteducation feature.
+ */
+
+include_once 'cmc_charteducation.features.inc';
+//include_once('cmc_charteducation.migrate.inc');
+
+/**
+ * Markitup buttons for item caption
+ * <i> <u> <b>
+ * <item type="caption"> <item="headline">
+ * <item type="image"> <item type="dotted-line">
+ *
+ * migrate the cmc_charteducation nodes
+ * Migrate the images
+ *
+ * Need the images of current sites and put them into the files directory
+ */
+
+
+/**
+ * Implementation of hook_permission().
+ */
+function cmc_charteducation_permission() {
+  return array(
+    'cmc_charteducation admin' => array(
+      'title' => t('cmc_charteducation admin'),
+      'restrict access' => TRUE,
+     ),
+    'cmc_charteducation configure' => array(
+      'title' => t('cmc_charteducation configure'),
+      'restrict access' => TRUE,
+     ),
+  );
+}
+
+
+/**
+ * hook_menu
+ */
+function cmc_charteducation_menu() {
+  $items = array();
+
+  $items['admin/config/cmc/charteducation'] = array(
+      'title' => 'CMC Chart Education Settings',
+      'page callback'     => 'drupal_get_form',
+      'page arguments' => array('cmc_charteducation_settings'),
+      'access callback' => 'user_access',
+      'access arguments' => array('cmc_charteducation configure'),
+  );
+
+  $items['charteducation'] = array(
+      'title' => 'CMC Chart Education Settings',
+      'page callback'     => 'cmc_charteducation_xml',
+      'page arguments' => array(1,2),
+      'access callback' => 'user_access',
+      'access arguments' => array('access content'),
+  );
+
+  $items['charteducation_list'] = array(
+      'title' => 'CMC Chart Education Settings',
+      'page callback'     => 'cmc_charteducation_list_xml',
+      'page arguments' => array(1),
+      'access callback' => 'user_access',
+      'access arguments' => array('access content'),
+  );
+
+  return $items;
+}
+
+
+/**
+ * return a xml list of chart education nodes
+ * @param unknown_type $lang
+ */
+function cmc_charteducation_list_xml($lang) {
+
+  // load a view and output the raw content
+  // views module encodes output so some content is returned as html entities
+  // which we don't want as flex won't convert these
+  $args = array($lang);
+  $view = views_get_view('cmc_charteducation');
+  $view->preview('list', $args);
+
+  if (!empty($view->result[0]->nid)) {
+    $data = array();
+//print_r($view->result);
+    foreach ($view->result as $i => $res) {
+      $row = array(
+        'language' => cmc_charteducation_cdata_wrap($res->node_language),
+        'chart_id' => cmc_charteducation_cdata_wrap($res->field_field_chart_education_id[0]['raw']['value']),
+        'title' => cmc_charteducation_cdata_wrap($res->node_title),
+      );
+
+      $data[] = $row;
+    }
+
+    drupal_add_http_header('Content-Type', 'text/xml; utf-8');
+    echo theme('cmc_charteducation_node_list_xml', array('data' => $data));
+    exit;
+  }
+
+  drupal_not_found();
+  exit;
+}
+
+
+/**
+ * return xml content for a chart education xml
+ * @param unknown_type $lang
+ * @param unknown_type $chart_id
+ * @return string
+ */
+function cmc_charteducation_xml($lang, $chart_id) {
+
+  // load a view and output the raw content
+  // views module encodes output so some content is returned as html entities
+  // which we don't want as flex won't convert these
+  $args = array($lang, $chart_id);
+  $view = views_get_view('cmc_charteducation');
+  $content = $view->preview('node_language_chart_id', $args);
+
+  if (!empty($view->result[0]->nid)) {
+    $node = node_load($view->result[0]->nid);
+
+    $data = array(
+      'language' => cmc_charteducation_cdata_wrap($node->language),
+      'chart_id' => cmc_charteducation_cdata_wrap($node->field_chart_education_id['und'][0]['value']),
+      'title' => cmc_charteducation_cdata_wrap($node->title),
+      'body' => cmc_charteducation_parse_body($node),
+    );
+
+    drupal_add_http_header('Content-Type', 'text/xml; utf-8');
+    echo theme('cmc_charteducation_node_xml', array('data' => $data));
+    exit;
+  }
+
+  drupal_not_found();
+  exit;
+}
+
+
+/**
+ * Parse the body content
+ * Replace the
+ * @param unknown_type $node
+ */
+function cmc_charteducation_parse_body($node) {
+
+  // body should be valid xml
+  // have to add a root element other simplexml chokes
+  $body = '<body>' . trim($node->body['und'][0]['value']) . '</body>';
+  $xml = simplexml_load_string($body, "SimpleXMLElement" , LIBXML_NOENT);
+
+  $parsed = array();
+
+  foreach ($xml->item as $item) {
+    $item_element = $item->getName();
+    $item_type = $item['type'];
+    $item_content = (string) $item[0];
+
+    if ($item_type == 'image') {
+      $index = (string) $item[0];
+      $index = ($index-1);
+      $item_content = cmc_charteducation_get_image($node, $index);
+    }
+    // horrible way of doing this
+    else if (!empty($item->b) || !empty($item->i) || !empty($item->u)) {
+      $item_content = $item->asXml();
+      $item_content = str_replace('</item>', '', $item_content);
+      $item_content = str_replace('<item type="' . $item_type . '">', '', $item_content);
+      
+    }
+    
+    
+    $parsed[] = sprintf('<%s type="%s">%s</%s>',
+      $item_element,
+      $item_type,
+      cmc_charteducation_cdata_wrap($item_content),
+      $item_element
+    );
+  }
+
+  return implode("\n", $parsed);
+}
+
+
+/**
+ * wrap content in cdata
+ */
+function cmc_charteducation_cdata_wrap($text) {
+  return '<![CDATA[' . $text . ']]>';
+}
+
+
+/**
+ * Return the image path for a chart education node given it's inde
+ */
+function cmc_charteducation_get_image($node, $index) {
+  $file = $node->field_chart_education_image['und'][$index]['uri'];
+  $image = file_create_url($file);
+  return $image;
+}
+
+
+/**
+ * hook_theme
+ */
+function cmc_charteducation_theme($existing, $type, $theme, $path) {
+  return array(
+      'cmc_charteducation_node_xml' => array(
+        'template'	=> 'theme/cmc_charteducation_node_xml',
+        'variables' => array(
+            'data' => NULL
+        ),
+      ),
+      'cmc_charteducation_node_list_xml' => array(
+        'template'	=> 'theme/cmc_charteducation_node_list_xml',
+        'variables' => array(
+            'data' => NULL
+        ),
+      ),
+  );
+}
+
+
+
+/**
+ * Settings form
+ */
+function cmc_charteducation_settings() {
+  $form = array();
+
+  $filter_formats = filter_formats();
+
+  $options = array('' => 'All');
+  foreach ($filter_formats as $k => $v) {
+    $options[$k] = $v->name;
+  }
+
+  $form['cmc_charteducation_filter_format'] = array(
+      '#type' => 'select',
+      '#options' => $options,
+      '#default_value' => variable_get('cmc_charteducation_filter_format', 'cmc_charteducation'),
+      '#required' => TRUE,
+      '#description' => 'Choose the allowed filter format. Leave blank if you want user to choose from all.',
+      '#title' => t('Chart Education Filter format')
+  );
+
+  return system_settings_form($form);
+}
+
+
+/**
+ * hook_form_alter
+ * @param unknown_type $form
+ * @param unknown_type $form_state
+ * @param unknown_type $form_id
+ */
+function cmc_charteducation_form_alter(&$form, &$form_state, $form_id) {
+
+  if (isset($form['#node']) && $form['#node']->type == 'cmc_charteducation') {
+    $form['body']['und'][0]['#format'] = variable_get('cmc_charteducation_filter_format', 'cmc_charteducation');
+
+    $cmc_charteducation_path = drupal_get_path('module', 'cmc_charteducation');
+    // need to add buttons for editor
+    // add custom validation function
+    $form['#validate'][] = 'cmc_charteducation_node_edit_validate';
+
+  }
+}
+
+/**
+ * Validate to check if valid xml
+ *
+ * @param unknown_type $form
+ * @param unknown_type $form_state
+ */
+function cmc_charteducation_node_edit_validate(&$form, &$form_state) {
+  
+  $values = $form_state['values'];
+  $body = trim($values['body']['und'][0]['value']);
+  
+  libxml_use_internal_errors(true);
+  // stick a root element so it parses correctly
+  $sxe = simplexml_load_string('<body>' . $body . '</body>');
+  if (!$sxe) {
+    $msg = array();
+    foreach(libxml_get_errors() as $error) {
+        $msg[] = $error->message;
+    }
+    form_set_error('xml', t('BAD XML in body, please check it') . '<br />' . implode("<br />", $msg));
+  }
+}
+
+
+
+function cmc_charteducation_migrate_api() {
+  $api = array(
+    'api' => 2,
+  );
+  return $api;
+}

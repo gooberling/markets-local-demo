@@ -1,0 +1,10 @@
+name = "CMC Related Content"
+description = "Creates blocks which show related content"
+package = "CMC"
+core = 7.x
+
+dependencies[] = views
+dependencies[] = search_api
+
+files[] = cmc_related.inc
+files[] = cmc_related.module

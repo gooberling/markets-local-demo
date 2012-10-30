@@ -1,0 +1,175 @@
+// CMC Markets Theme	
+// name = CMC Markets V4
+// description = CMC Markets Base Theme - as of 17/02
+// Footer SASS
+
+.is-front #footer
+	margin-top: 0em
+
+#footer
+	overflow: hidden
+	clear: both
+	position: relative
+	z-index: 10
+	.region-risk
+		background: #F3F3F3
+		+box-shadow(0px 0px 3px 0px #dddddd inset)
+		padding: 3em 0 2.3em
+		a:hover
+			//color:$yellow;
+	//-----------------------------------------------------------------------------------------------
+	// Risk warning
+	//-----------------------------------------------------------------------------------------------
+	#block-block-1,
+	#block-cmc-framework-cmc-risk-warning
+		h4
+			margin-bottom: 1em
+			font-weight: bold
+	//-----------------------------------------------------------------------------------------------
+	// SEO footer
+	//-----------------------------------------------------------------------------------------------
+	#block-cmc-framework-cmc-seo-footer
+		overflow: hidden
+		padding: 38px 0
+		background: url(/#{$themepath}/v4_bg_footer_2.png) repeat-x left top #0ea9c6
+		//	@include gradient(#0fb9da,#0da1bd,0%,100%);
+		+background(linear-gradient(#0fb9da 0, #0da1bd 100%))
+		+box-shadow(0px 0px 3px 0px #999999)
+		ul
+			padding: 0
+			margin: 0
+		ul li
+			line-height: 1.85em
+			list-style-type: none
+			list-style-image: none
+			margin: 0
+			padding-left: 0
+		a:link,	 a:visited
+			color: white
+		a:hover
+			color: $yellow
+		h4
+			font-family: $standardfont
+			font-size: 1.18em
+			margin: 0 0 1.6em
+			padding-top: 0
+			font-weight: bold
+		.contact
+			color: white
+			address,
+			ul li
+				line-height: 1.7em
+				font-style: normal
+	//-----------------------------------------------------------------------------------------------
+	// Legal links
+	//-----------------------------------------------------------------------------------------------
+	#block-cmc-framework-cmc-bottom
+		background: #0a8197
+		background: url(/#{$themepath}/v4_bg_footer_3.png) repeat-x left top #0a7d92
+		//@include gradient(#0a8197,#0a7d92,0%,61%);
+		+background(linear-gradient(#0a8197 0, #0a7d92 100%))
+		width: 100%
+		overflow: visible
+		padding: 0
+		.inner
+			//padding:18px 10px 7px;
+			//				height:25px;
+			overflow: visible
+		ul
+			padding: 0
+			margin-bottom: 0
+			margin: 0
+			overflow: hidden
+		li
+			float: left
+			margin: 0 10px 0 0
+			padding: 0 10px 0 0
+			list-style: none
+			line-height: 3.5em
+		a, a:visited
+			padding: 0
+			background: none
+			color: white
+			font-size: 1em
+			line-height: 1.2em
+			&:hover
+				background: none
+				color: $yellow
+		p
+			line-height: 1.4em
+		h3
+			+headeroverride
+			font-size: 1.1em
+	//-----------------------------------------------------------------------------------------------
+	// Country switcher
+	//-----------------------------------------------------------------------------------------------
+	#country-switcher
+		position: absolute
+		z-index: 999
+		right: 0
+		bottom: 0
+		width: 195px
+		background: #1989a1
+		border-top: 1px solid #1BB0C4
+		+background(linear-gradient(top, #1898b3, #197d94))
+		+box-shadow(0 1px 3px #15687a)
+		+ieCssFix
+		ul
+			padding: 0px 10px 10px 15px
+			width: 170px
+			list-style: none
+			margin: 0
+			li
+				list-style-type: none
+			li.first
+				padding-top: 10px
+			a
+				padding: 4px 3px 3px 10px
+				display: block
+				width: 150px
+				position: relative
+				&:after
+					//background-color: transparent;
+				&:hover
+					background-color: #15687A
+					display: block
+					-moz-border-radius: 5px 0 0 5px
+					-webkit-border-radius: 5px 0 0 5px
+					border-radius: 5px 0 0 5px
+					color: white
+					&:after
+						content: '\003e'
+						background-color: #15687A
+						color: #1891aa
+						border-radius: 0 5px 5px 0
+						display: block
+						padding: 4px 4px 3px
+						position: absolute
+						right: -3px
+						top: 0
+						width: 5%
+						//@include transition(all 0.2s ease-in);
+		a.switch
+			background: url(/#{$themepath}/logo_footer.png) no-repeat right top
+			display: block
+			padding: 15px 10px 15px 27px
+			position: relative
+			right: 0
+			top: 0
+			width: 155px
+			z-index: 100
+			color: white
+			+cursor
+			&:hover
+				color: white
+			&:before
+				content: url("/#{$themepath}/i_arrow.png")
+				position: absolute
+				left: 15px
+				top: 15px
+				+transform(rotate(0deg))
+				+transition(all 0.2s ease-in)
+				display: block
+		a.switch.up:before
+			+transform(rotate(-90deg))
+			+transition(all 0.2s ease-in)

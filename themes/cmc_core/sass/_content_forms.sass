@@ -1,0 +1,70 @@
+// CMC Markets Theme	
+// name = CMC Markets V4
+// description = CMC Markets Base Theme - as of 17/02
+// Form styling
+//-----------------------------------------------------------------------------------------------
+
+.webform-client-form
+	background: url(/#{$themepath}/v4_bg_divider.png) repeat-x
+	margin-top: 2em
+	padding-top: 1.2em
+	overflow: hidden
+	label
+		font-weight: normal
+		margin-bottom: 0.8em
+	.webform-component
+		float: left
+		width: 48%
+		min-height: 55px
+		margin-top: 0.5em
+		margin-bottom: 0.7em
+	.webform-component:nth-child(2n)
+		margin-left: 4%
+	.form-text
+		border: 1px solid #C0C0C0
+		+box-shadow(0 0 3px rgba(0, 0, 0, 0.2) inset)
+		padding: 6px
+		width: 93%
+	.form-select
+		width: 99%
+		padding: 5px
+	.webform-component-date
+		.form-select
+			width: 32%
+	.form-submit
+		color: white
+		border: 0
+		padding: 7px 15px
+		background: $blue
+		text-align: center
+	.form-actions
+		clear: both
+		padding-top: 1.2em
+		
+// --------------------------
+// Contact us page
+// --------------------------
+#block-cmc-framework-cmc-contact-form
+	form
+		background: url(/#{$themepath}/i_contact.gif) no-repeat -550px 0
+		padding: 0 0 0 70px
+		width: 400px
+		float: left
+	.webform-client-form 
+		.webform-component
+			float: none
+			width: 95%
+			margin: 0 0 1.8em 0 
+		.webform-component:nth-child(2n)
+			margin-left: 0
+	dl
+		float: left
+		background: url(/#{$themepath}/i_contact.gif) no-repeat 0 0
+		padding-left: 70px
+		margin-top: 2em
+		dd
+			line-height: 1.5em
+			margin-bottom: 1.5em
+		dt 
+			font-family: $titlefont
+			font-size: 1.2em

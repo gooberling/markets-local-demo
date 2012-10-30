@@ -1,0 +1,158 @@
+// CMC Markets Theme	
+// name = CMC Markets V4
+// description = CMC Markets Base Theme - as of 17/02
+// Markets section SASS
+
+#block-cmc-framework-cmc-markets-landing
+	background: url(/#{$themepath}/loadera64.gif) no-repeat 50% 50%
+	margin-top: 2.8em
+
+.markets-section
+	.tabbed > ul
+		border: 1px solid #E3E3E3
+		height: 49px
+	.tabbed > ul > li .detail
+		padding: 0px
+		padding-top: 2em
+	.tabbed
+		border: 0
+		border-top: 1px solid #E3E3E3
+		margin-top: -2.7em
+	.detail 
+		line-height: 1.4em
+	h2
+		margin: 0 0 0.4em !important
+	//-----------------------------------------------------------------------------------------------
+	// header for makrets
+	//-----------------------------------------------------------------------------------------------
+	#main-content header
+		background: url(/#{$themepath}/bg_market_h1_ie.png) #3e3e3e repeat-x
+		//@include gradient-complex(#797979,#535353,#313131, #393939, 0%,25%,50%,100%);
+		+background(linear-gradient(top, #797979 0%, #535353 25%, #313131 50%, #393939 100%))
+		margin-bottom: 3em
+		h1
+			color: white
+			font-size: 2em
+			margin: 0 0 30px
+			padding: 7px 15px
+			span
+				display: block
+				font-size: 1em
+				font-size: 0.7em
+	.gradient
+		z-index: 3
+	//-----------------------------------------------------------------------------------------------
+	// Product data table
+	//-----------------------------------------------------------------------------------------------
+	table.product-data
+		border: 0
+		tr:nth-of-type(2n),
+		tr.even
+			background-color: #fff !important
+		td,th
+			padding: 0
+			background-repeat: no-repeat
+			background-image: url(/#{$themepath}/i_products.png)
+			font-size: 1.2em
+			padding: 0 0 0.38em 50px
+			font-family: $titlefont
+		td.shorting
+			background-position: 0px 0px
+		td.country
+			background-position: 0px -195px
+		td.max
+			background-position: 0px -325px
+		td.margin
+			background-position: 0px -390px
+		td.spread
+			background-position: 0px -65px
+		td.currency
+			background-position: 0px -260px
+		td.hours
+			background-position: 0px -130px
+		td.commission
+			background-position: 0px -460px
+		h4
+			margin: 0.05em 0
+			color: $darkesttext
+		h4.opening-times
+			display: none
+		td.hours ul
+			height: 34px
+			margin: 0 0 0.5em
+			padding: 0
+			position: relative
+			li
+				display: inline
+				list-style: none outside none
+				a.opening-day, a:visited.opening-day
+					color: #5F6569
+					margin-right: 1em
+					text-transform: uppercase
+				a:hover.opening-day
+					color: #1B242A
+				span.opening-times
+					display: none
+			li.active
+				a.opening-day
+					color: #1B242A
+					font-weight: bold
+				span.opening-times
+					display: inline
+					left: 0
+					position: absolute
+					top: 1.4em
+					width: 100%
+	//-----------------------------------------------------------------------------------------------
+	// Productlist table
+	//-----------------------------------------------------------------------------------------------
+	.view-browse-markets
+		table
+			border: 0
+			margin-top: 0
+			margin-bottom: 3em
+		th
+			font-weight: 300
+			font-family: $titlefont
+			font-size: 1.1em
+		tr.even, tr.odd
+			background-color: #fff !important
+			border-bottom: 0
+			padding: 0.1em 0.6em
+		tr.odd
+			background-color: #f9f9f9 !important
+		.views-field-title
+			width: 400px
+
+//-----------------------------------------------------------------------------------------------
+// Background header images
+//-----------------------------------------------------------------------------------------------
+.markets-section.node-type-product
+	.gradient
+		background: url(/#{$themepath}/bg_m_corn.jpg) no-repeat top center
+		min-height: 100
+	.region-text-search
+		margin-top: 80px
+	.region-content
+		margin-top: 0
+
+//-----------------------------------------------------------------------------------------------
+// Productlist table
+//-----------------------------------------------------------------------------------------------
+.markets-section #main-content
+	//.latest-story {
+	//		float:right;
+	//		width:675px;
+	//		header { 
+	//			background:none!important;
+	//			h1 {
+	//				padding:0;
+	//			}
+	//		}
+	//	}
+	//	.recent-stories {
+	//		float: left;
+	//		width: 241px;
+	//		margin-right: 20px;
+	//		
+	//	}

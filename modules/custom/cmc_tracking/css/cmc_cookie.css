@@ -1,0 +1,240 @@
+.block-cmc-tracking {
+	background: url("../img/bg_lightbox.png") repeat;
+    background: none repeat scroll 0 0 rgba(0, 0, 0, 0.3);
+    display: none;
+    height: 100%;
+    left: 0;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1000;
+font-size: 12px;
+}
+
+.block-cmc-tracking .inner.grid-10 {
+    overflow: visible;
+    padding: 0;
+    width: auto;
+}
+
+.block-cmc-tracking form {
+	background: url("../img/bg_lightbox.png") repeat;
+    background: none repeat scroll 0 0 rgba(10, 189, 215, 0.3);
+    border-radius: 3px 3px 3px 3px;
+    padding: 4px;
+    position: relative;
+    top: 100px;
+}
+.block-cmc-tracking form h3 {
+    color: #0DBBDB;
+    font-family: Ubuntu,"Trebuchet MS",Trebuchet,Arial,Helvetica,sans-serif !important;
+    font-size: 1.5em !important;
+    font-weight: 300;
+    margin-bottom: 0.6em !important;
+    padding: 0;
+}
+
+.block-cmc-tracking form > div {
+    background-color: black;
+    color: white;
+    overflow: hidden;
+    padding: 26px 30px 30px;
+}
+
+.block-cmc-tracking hr {
+    background: url("../img/bg_track_hr.png") repeat-x;
+    border: 0 none;
+    height: 20px;
+    margin: 1.3em 0 0;
+    width: 100%;
+}
+
+.block-cmc-tracking #cmc-tracking-consent-form-step1 {
+    width: 390px;
+}
+
+.block-cmc-tracking #cmc-tracking-consent-form-step2 {
+    position: relative;
+    visibility: hidden;
+    width: 80%;
+	max-width:1100px;
+}
+.block-cmc-tracking #cmc-tracking-consent-form-step2 .item-list {
+    float: left;
+    width: 48%;
+}
+.block-cmc-tracking #cmc-tracking-consent-form-step2 .item-list li {
+    background: url("../img/i_track_tick.png") no-repeat scroll left 0 transparent;
+    line-height: 1.4em;
+    list-style: none outside none;
+    margin-bottom: 0.3em;
+    margin-left: 0;
+    padding-left: 27px;
+}
+.block-cmc-tracking #cmc-tracking-consent-form-step2 .item-list:first-child {
+    margin-right: 2%;
+}
+.block-cmc-tracking #cmc-tracking-consent-form-step2 .form-radios {
+/*  	z-index:1;
+	    left: 140px;
+	    margin: 0;
+	    position: absolute;
+	    top: 0px;
+	    width: 70px;*/
+		z-index:1;
+	    left: 135px;
+	    margin: 0;
+	    position: absolute;
+	    top: 0px;
+}
+.block-cmc-tracking #cmc-tracking-consent-form-step2 .form-radios .form-item{
+	float:left;
+	margin-right:5px;
+	width:41px;
+}
+
+/*@media screen and (-webkit-min-device-pixel-ratio:0) {
+
+	.block-cmc-tracking #cmc-tracking-consent-form-step2 .form-item {
+	   
+		   right: 30%;
+		top: 3px;
+		   
+	}
+}*/
+
+
+
+.block-cmc-tracking .other {
+ position:relative;
+float:left;
+width:48%;
+}
+
+.block-cmc-tracking .other .change {
+	margin-top:20px;
+}
+
+
+.block-cmc-tracking .other .item-list {
+ float:none !important;
+width:100% !important;
+}
+
+.block-cmc-tracking .other .item-list{ 
+	opacity: 0.4; 
+	-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=40)"}
+
+.block-cmc-tracking .other.selected .item-list{
+    opacity: 1;
+-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=100)"
+}
+
+.block-cmc-tracking .cookie-accept, .block-cmc-tracking .cookie-update, .block-cmc-tracking .save input {
+background: #10CAE3;   
+background: -webkit-linear-gradient(
+	#10CAE3, 
+	#0CB2D8);
+	background: -moz-linear-gradient(
+	#10CAE3, 
+	#0CB2D8);
+	background: -o-linear-gradient(
+	#10CAE3, 
+	#0CB2D8);
+	background: linear-gradient(
+	#10CAE3, 
+	#0CB2D8);
+    border: 0 none;
+    color: black;
+    display: block;
+    float: left;
+    line-height: 2.5em;
+    margin: 10px 15px 0 0;
+    text-align: center;
+    width: 155px;
+}
+.block-cmc-tracking .cookie-accept:hover, .block-cmc-tracking .cookie-update:hover, .block-cmc-tracking .save input:hover {
+    color: white;
+}
+
+.block-cmc-tracking .cookie-update {
+color: 
+white;
+background: 
+#6F747A;
+background: -webkit-linear-gradient(
+#6F747A, 
+#525657);
+background: -moz-linear-gradient(
+#6F747A, 
+#525657);
+background: -o-linear-gradient(
+#6F747A, 
+#525657);
+background: linear-gradient(
+#6F747A, 
+#525657);
+margin: 10px 0 0 0;
+}
+
+.block-cmc-tracking .more {
+    float: left;
+    margin-top: 10px;
+}
+
+.block-cmc-tracking .save {
+    float: right;
+}
+.block-cmc-tracking .save input {
+    height: 35px;
+    margin: 0;
+}
+
+.block-cmc-tracking .cookie-update {
+    background: -moz-linear-gradient(#6F747A, #525657) repeat scroll 0 0 transparent;
+    color: white;
+    margin: 10px 0 0;
+}
+.block-cmc-tracking .cookie-update:hover {
+    color: black;
+}
+
+#edit-other-cookie-options-wrapper label {width:auto}
+
+
+
+.form-type-checkbox .iPhoneCheckContainer, .form-type-checkbox .iPhoneCheckHandle {
+    height: 25px;
+}
+
+.form-type-checkbox label.iPhoneCheckLabelOn {
+    color: black;
+    font-size: 13px !important;
+    padding-top: 6px !important;
+    text-shadow: none;
+}
+
+.form-type-checkbox label.iPhoneCheckLabelOff {
+	padding-top: 3px!important;
+}
+	
+
+.form-type-checkbox label.iPhoneCheckLabelOff span {
+    font-size: 13px !important;
+    padding-top: 6px !important;
+    text-shadow: none;
+   padding-right: 5px!important;
+}
+
+.form-type-checkbox .iPhoneCheckHandleRight {
+    padding-right: 0;
+    width: 19px;
+}
+
+.form-type-checkbox .iPhoneCheckHandle {
+    padding-left: 16px;
+}
+
+.form-type-checkbox .iPhoneCheckHandleCenter {
+	background:none;
+}

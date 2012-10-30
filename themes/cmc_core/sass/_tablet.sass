@@ -1,0 +1,417 @@
+// CMC Markets Theme	
+// name = CMC Markets V4
+// description = CMC Markets Base Theme - as of 17/02
+// Tablet SASS
+// this is for tablet screens
+
+#main-wrapper
+	padding-top: 2.9em
+	font-size: 0.95em
+	.inner
+		overflow: visible !important
+
+.line
+	display: none!important
+
+.grid-10, .inner
+	width: 98%
+	padding: 0 1%
+
+.grid-10 .grid-10
+	padding: 0
+	width: 100%
+
+hr
+	background-repeat: repeat-x
+
+.error
+	display: none
+	
+ul.iconlist.col-2 li 
+	width: 34%
+
+//-----------------------------------------------------------------------------------------------
+// Header stlyes
+//-----------------------------------------------------------------------------------------------
+
+// inherit the header styles for the small hero from the "header_1024" include
+
+#header
+	position: relative
+	+background(linear-gradient(top, rgba(23, 26, 32, 0.8), rgba(10, 11, 14, 0.8)))
+	padding-top: 0px
+	background-position: 0 0
+	min-height: 10px
+	height: 70px
+	.inner
+		height: 120px
+		padding: 0px 0 0 0
+		width: 100%
+		+box-sizing(border-box)
+		min-height: 10px
+	#logo a
+		top: 15px
+		background: url(/#{$themepath}/logo-mobile.png) no-repeat
+		background-size: 75px auto
+	.top-fill, 
+	.top-fill-logo, 
+	.top-fill-left, 
+	.top-fill-right
+		display: none
+
+#block-views-cmc-landing-page-hero, .block-views-cmc-landing-page-hero
+	margin-top: 5.5em
+
+.gradient
+	min-height: 130px
+
+.is-front .gradient
+	height: 430px
+
+//-----------------------------------------------------------------------------------------------
+// Heroes stlyes
+//-----------------------------------------------------------------------------------------------
+#block-views-cmc-landing-page-hero, 
+.is-front .block-views-cmc-landing-page-hero,
+.block-views-cmc-landing-page-hero
+	margin: 0 1%
+	width: 98%
+	height: 430px
+
+.block-views-cmc-landing-page-hero
+	height: 270px
+
+.hero
+	width: 98% !important
+	padding: 1%
+
+.hero-content
+	font-size: 0.95em
+	
+.is-front	.hero-content
+	height: 230px
+
+.hero-image
+	left: 30%
+	img
+		height: 100%
+		width: auto
+
+.not-front .hero-image
+	height: 430px
+
+.markets-section .hero-image, 
+.page-education .hero-image
+	height: 460px
+	width: 71%
+	top: -161px
+
+.region-landing-page
+	.signpost-links
+		background-color: rgba(255, 255, 255, 0.4)
+		top: 60px
+	.prev, 
+	.next
+		display: none !important
+
+.is-front
+	.hero
+		height: 410px !important
+	.hero-content
+		padding-top: 120px
+	.region-landing-page
+		.signpost-links
+			left: 1%
+			background-color: transparent
+			width: auto
+			top: 360px
+			font-size: 0.8em
+		.signpost-links .signpost1 a, 
+		.signpost-links .signpost1 a:visited
+			padding-top: 11px
+		.signpost-links .signpost1, 
+		.signpost-links .signpost2
+			height: 33px
+	#main-content article
+		width: 100%
+		float: none
+
+.banner
+	padding: 3em 1%
+
+.banner .grid-5.last-col
+	left: 48%
+
+#block-cmc-pricing-cmc-pricing-home
+	float: none
+	width: 100%
+	margin-top: 2.5em
+
+//-----------------------------------------------------------------------------------------------
+// Navigation stlyes
+//-----------------------------------------------------------------------------------------------
+
+#header .menu-block-wrapper, 
+.ff.stretch #header .menu-block-wrapper
+	left: 0 !important
+	top: 70px
+	width: 100% !important
+	font-size: 0.95em
+
+#header .menu-block-wrapper ul.menu a, 
+#header .menu-block-wrapper ul.menu a:visited
+	background: rgba(10, 11, 14, 0.8)
+	padding: 0
+
+.inner.main-navigation ul.menu a, 
+.inner.main-navigation ul.menu a:visited
+	padding: 0
+
+#header .menu-block-wrapper ul.menu a, 
+#header .menu-block-wrapper ul.menu a:visited
+	line-height: 2.8em
+
+li.filler
+	display: none
+
+//-----------------------------------------------------------------------------------------------
+// Footer stlyes
+//-----------------------------------------------------------------------------------------------
+
+#footer
+	#block-block-1
+		width: auto
+	#block-cmc-framework-cmc-bottom #country-switcher
+		display: none
+	#block-cmc-framework-cmc-seo-footer
+		font-size: 0.9em
+		padding: 20px 0
+	.region-risk
+		padding: 20px 0 10px
+
+//-----------------------------------------------------------------------------------------------
+// Col right stlyes
+//-----------------------------------------------------------------------------------------------
+
+.col-right
+	//margin-right:1%;
+	+transition(all 0.3s ease)
+
+.col-right .block-cmc-related, .col-left .education
+	padding-bottom: 35px
+	background-size: 99% auto
+
+//-----------------------------------------------------------------------------------------------
+// Col left stlyes
+//-----------------------------------------------------------------------------------------------
+a.menu-reveal
+	position: absolute
+	left: 0
+	top: -35px
+	background-color: #eee
+	+cursor
+	color: $textcolor
+	display: inline-block
+	font-size: 0.85em
+	text-align: center
+	margin-top: 6px
+	padding: 4px 6px
+	+box-sizing(border-box)
+
+a.menu-reveal:before
+	content: '>'
+	margin-right: 4px
+	color: black
+	-webkit-transform: rotate(0deg) scale(0.5, 1)
+	-moz-transform: rotate(0deg) scale(0.5, 1)
+	+transition(all 0.5s ease 0.2s)
+	display: block
+	float: left
+
+a.menu-reveal.slide:before
+	-webkit-transform: rotate(180deg) scale(0.5, 1)
+	-moz-transform: rotate(180deg) scale(0.5, 1)
+	+transition(all 0.5s ease 0.2s)
+
+.col-left
+	left: -22%
+	+transition(all 0.3s ease)
+	ul.menu li.active-trail
+		margin-left: -0.75em
+
+.col-left ul.menu li.active-trail a, 
+.col-left ul.menu li.active-trail a:visited, 
+.col-left ul.menu a.active, 
+.col-left ul.menu li.expanded > a.active-trail.active, 
+.col-left ul.menu li.expanded > a.active-trail.active:visited
+	padding: 10px 20px 10px 10px
+	left: 0
+	width: 145px
+
+//-----------------------------------------------------------------------------------------------
+// Animation stlyes
+//-----------------------------------------------------------------------------------------------
+.slide
+	#main-content.push-2
+		left: 24%
+		+transition(all 0.3s ease)
+	.col-right
+		margin-right: -24%
+		+transition(all 0.3s ease)
+	.col-left
+		left: 1%
+		+transition(all 0.3s ease)
+
+#main-content.push-2
+	left: 0.2%
+	+transition(all 0.3s ease)
+
+//-----------------------------------------------------------------------------------------------
+// Triptych styling
+//-----------------------------------------------------------------------------------------------
+.block-views-cmc-landing-page-hero.triptych .triptych-content
+	height: auto
+
+//-----------------------------------------------------------------------------------------------
+// Platform page
+//-----------------------------------------------------------------------------------------------
+#block-cmc-platform-page-cmc-platform-page-header
+	height: auto !important
+
+.platform-header
+	width: 100%
+	padding: 15px 1% 0
+	margin-top: 60px
+	height: auto !important
+	.hero-content
+		width: 100%
+		height: auto
+		margin-bottom: 15px
+	.hero-image
+		left: -1%
+		top: 0px !important
+		position: relative
+		width: 102% !important
+		height: 570px !important
+	img
+		width: 100%
+		height: auto
+
+.platform-header-hero
+	position: relative
+
+.platform-nav, 
+#seekbar, 
+.vid-mask, 
+#play, 
+.platform-header .hero-content .more,
+.platform-header .hero-image canvas,
+.backUp,
+video
+	display: none !important
+
+//-----------------------------------------------------------------------------------------------
+// New & Anylisis, Education
+//-----------------------------------------------------------------------------------------------
+.region-text-search
+	.view-all
+		top: 20px
+	input.form-text
+		padding: 0 5px
+		width: 99%
+		font-size: 1.1em
+		height: 33px
+		background-position: -20px -8px !important
+	input[type="submit"]
+		top: 19px
+		right: 16px
+
+.view-cmc-education .cmc_video span
+	background-position: 50% 0
+
+.view-cmc-education .views-row > a.img-block, 
+.view-cmc-education .cmc_video span
+	width: 100%
+
+.view-cmc-education p
+	line-height: 1.2em
+
+.page-market-analysis .region-text-search, 
+.page-news .region-text-search
+	margin-top: 50px
+
+.page-market-analysis
+	.tabbed
+		margin-top: 0em
+	.view-cmc-blog
+		.views-row-first
+			width: 100%
+			background-position: 324px 125px
+		.views-row-2, 
+		.views-row-3, 
+		.views-row-first h3, 
+		.views-row-first .border,
+		.views-row-first .teaser
+			width: 38.6%
+		.views-row-first h3:after, 
+		.views-row-first p.image
+			left: 38.6%
+		.views-row-first p.image
+			height: 180px
+		.views-row
+			height: 180px
+			background-position: 100% 90%
+		.views-row .teaser
+			+transition(none)
+
+.page-education .region-content
+	margin-top: 0
+
+//-----------------------------------------------------------------------------------------------
+// Faceted search
+//-----------------------------------------------------------------------------------------------
+
+.filter-actions
+	display: none
+
+//-----------------------------------------------------------------------------------------------
+// related content
+//-----------------------------------------------------------------------------------------------
+
+.region-content-related
+	height: auto
+	#block-views-further-reading-block-1 ul
+		height: auto
+	#block-views-further-reading-block-1 li
+		margin: 0 3% 0.4em 0
+		overflow: hidden
+		white-space: nowrap
+		width: 29%
+	#block-views-further-reading-block
+		height: auto
+
+//-----------------------------------------------------------------------------------------------
+// media
+//-----------------------------------------------------------------------------------------------
+
+.media-youtube-outer-wrapper object, 
+.media-youtube-outer-wrapper embed
+	width: 100%
+
+//-----------------------------------------------------------------------------------------------
+// markets
+//-----------------------------------------------------------------------------------------------
+.view-all
+	display: none
+
+.price-col-right
+	float: none
+	width: 100%
+	margin-top: 2em
+
+.price-col-left
+	float: none
+	width: 100%
+
+.pricing-group.default .pricing-panel > h3
+	padding-left: 0px

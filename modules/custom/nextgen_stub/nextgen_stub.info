@@ -1,0 +1,9 @@
+name = Nextgen Stub Implementation
+description = Provides simple dummy responses for Nextgen client
+package = CMC
+version = 0.1
+core = 7.x
+
+files[] = nextgen_stub.module
+
+dependencies[] = nextgen

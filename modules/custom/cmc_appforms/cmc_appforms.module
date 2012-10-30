@@ -1,0 +1,360 @@
+<?php
+
+define('CMC_APPFORMS_LIVE_REG', 'liveRegistration');
+define('CMC_APPFORMS_DEMO_REG', 'demoRegistration');
+
+define('CMC_ALREADY_REGISTERED_NO' , 'no');
+define('CMC_ALREADY_REGISTERED_YES' , 'yes');
+define('CMC_REGISTRATION_MULTICURRENCY', 'multicurrency');
+define('CMC_REGISTRATION_MULTILANGUAGE', 'multilanguage');
+
+define('CMC_REGISTRATION_TRADING_EXPERIENCE_NEITHER', 1);
+define('CMC_REGISTRATION_TRADING_EXPERIENCE_WORK', 3);
+define('CMC_REGISTRATION_TRADING_EXPERIENCE_BOTH', 4);
+define('CMC_REGISTRATION_TRADING_EXPERIENCE_QUALIFICATION', 2);
+
+define('CMC_REGISTRATION_TRADING_FREQUENCY_NEVER', 1);
+define('CMC_REGISTRATION_TRADING_FREQUENCY_RARELY', 2);
+define('CMC_REGISTRATION_TRADING_FREQUENCY_OCCASIONALLY', 3);
+define('CMC_REGISTRATION_TRADING_FREQUENCY_REGULARLY', 4);
+
+define('CMC_REGISTRATION_OPTION_YES', TRUE);
+define('CMC_REGISTRATION_OPTION_NO', FALSE);
+
+
+function cmc_appforms_appforms_info() {
+  return array(
+    'api' => '1.0',
+    'features' => array('core' => 'Appforms core'),
+  );
+}
+
+function cmc_appforms_permission() {
+  return array(
+    'administer cmc application forms' => array(
+      'title' => t('Administer CMC Account Registration'),
+      'description' => t('Administer the account registration forms')
+    ),
+    'register for demo account' => array(
+      'title' => t('Register for demo account'),
+      'description' => t('Allows users to register for CMC demo account')
+    ),
+    'register for live account' => array(
+      'title' => t('Register for live account'),
+      'description' => t('Allows users to register for CMC live account')
+    )
+  );
+}
+
+/**
+ * Implementation of hook_menu()
+ * For dev purposes, we're using a menu hook to display the form. In production
+ * we may want to embed the form in a block.git
+ */
+function cmc_appforms_menu() {
+  $items = array();
+
+  $items['onboarding/%/demo/%'] = array(
+    'title' => t('Demo Account Registration'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('cmc_appforms_onboarding_form',1,CMC_APPFORMS_DEMO_REG,3),
+    'file' => 'includes/cmc_appforms.inc',
+    'type' => MENU_CALLBACK,
+  );
+  
+  $items['onboarding'] = array(
+    'title' => t('Start'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('cmc_appforms_start'),
+    'access arguments' => array('register for live account'),
+    'file' => 'includes/cmc_appforms.inc',
+    'type' => MENU_CALLBACK,
+  );
+  
+  $items['onboarding/%/live/%'] = array(
+    'title' => t('Live Account Registration'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('cmc_appforms_onboarding_form',1,CMC_APPFORMS_LIVE_REG,3),
+    'access arguments' => array('register for live account'),
+    'file' => 'includes/cmc_appforms.inc',
+    'type' => MENU_CALLBACK,
+  );
+
+
+  $items['admin/config/appforms'] = array(
+    'title' => t('CMC Onboarding forms'),
+    'description' => 'Configuration settings for Onboarding services',
+    'position' => 'left',
+    'page callback' => 'system_admin_menu_block_page',
+    'access arguments' => array('administer cmc application forms'),
+    'file' => 'system.admin.inc',
+    'file path' => drupal_get_path('module', 'system'),
+    'type' => MENU_NORMAL_ITEM,
+    'weight' => -15,
+  );
+
+  $items['admin/config/appforms/countries'] = array(
+    'title' => t('Manage Countries'),
+    'description' => 'Manage list of regions and countries',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('cmc_appforms_region_settings_form'),
+    'access arguments' => array('administer cmc application forms'),
+    'file' => 'admin/cmc_appforms.templates.admin.inc',
+    'type' => MENU_NORMAL_ITEM,
+  ); 
+ 
+  $items['admin/config/appforms/countries/countries'] = array(
+    'title' => t('Manage Countries'),
+    'description' => 'Manage list of regions and countries',
+    'access arguments' => array('administer cmc application forms'),  
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+  ); 
+  
+  
+  $items['admin/config/appforms/countries/templates'] = array(
+    'title' => t('Configuration Templates'),
+    'description' => 'Manage list of templates',
+    'position' => 'left',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('cmc_appforms_templates_settings', 5),
+    'access arguments' => array('administer cmc application forms'),
+    'file' => 'admin/cmc_appforms.templates.admin.inc',
+    'type' => MENU_LOCAL_TASK,
+  ); 
+  
+ $items['admin/config/appforms/registration'] = array(
+    'title' => t('CMC Account Registration'),
+    'description' => 'Configure live and demo registration forms.',
+    'access arguments' => array('administer cmc registration'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('cmc_appforms_settings_form', 4),
+    'file' => 'admin/cmc_appforms.admin.inc',
+    'type' => MENU_NORMAL_ITEM,
+
+  );
+
+ $items['admin/config/appforms/registration/settings'] = array(
+    'title' => t('Settings'),
+    'description' => 'Configure general settings',
+    'access arguments' => array('administer cmc registration'),
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+ );
+
+ $items['admin/config/appforms/registration/live'] = array(
+    'title' => t('Account Registration LIVE'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('cmc_appforms_config_settings_form',4,5),
+    'file' => 'admin/cmc_appforms.admin.config.inc',
+    'description' => 'Configure live registration forms.',
+    'access arguments' => array('administer cmc registration'),
+    'type' => MENU_LOCAL_TASK,
+  );
+
+ 
+ 
+ 
+  $items['admin/config/appforms/registration/demo'] = array(
+    'title' => t('Account Registration DEMO'),
+    'description' => 'Configure demo registration forms.',
+    'page callback' => 'drupal_get_form', 
+    'page arguments' => array('cmc_appforms_config_settings_form',4,5),
+    'file' => 'admin/cmc_appforms.admin.config.inc',
+    'description' => 'Configure live registration forms.',
+    'access arguments' => array('administer cmc registration'),
+    'type' => MENU_LOCAL_TASK,
+  );
+  
+  
+  return $items;
+}
+
+
+/**
+ * Implements hook_preprocess_html
+ * @param string $variables 
+ */
+function cmc_appforms_preprocess_html(&$variables) {
+  if (array_key_exists('inapp', $_GET) && ($_GET['inapp'] == '1')) {
+    $variables['classes_array'][] = 'inapp';
+  }
+}
+
+
+
+
+/**
+ *Implements hook_l10n_strings_alter
+ * There is a bug with Drupal core translations that stops it fro
+ * @param type $strings
+ * @param type $language 
+ */
+function cmc_appforms_l10n_strings_alter(&$strings, $language) {
+  $result = db_query("SELECT s.source, t.translation, s.textgroup, s.context FROM {locales_source} s LEFT JOIN {locales_target} t ON s.lid = t.lid WHERE (s.location LIKE :location) OR (s.location LIKE :location1)", array(':location' => '%cmc_registration%',':location1' => '%cmc_js_validation%'));
+  // select s.source, t.translation, s.textgroup, s.context from locales_source s left join locales_target t on s.lid = t.lid
+  foreach ($result as $data) {
+      if (!array_key_exists($data->source, $strings[$data->textgroup])) {
+        $strings[$data->textgroup][$data->context][$data->source] = (empty($data->translation) ? TRUE : $data->translation);
+      }
+    }
+}
+
+/**
+ *
+ * @return type 
+ */
+function cmc_appforms_base_data() {
+  return array(
+    'base' => array(
+      'name' => 'Base forms',
+      'class' => "cmcAppForms",
+    )    
+  );
+}
+
+/**
+ * Retrieve a list of all subforms that have extended either CMC Live or CMC Demo
+ * forms to provide additional form fields.
+ *
+ * @return
+ *  Array of migration objects, keyed by the machine name.
+ */
+function cmc_appforms_allforms($form_type) {
+  static $forms = array();
+  
+  if (!empty($forms)) {
+    return $forms;
+  }
+
+  $result = db_select('cmc_application_form', 'cp')
+            ->fields('cp', array('machine_name', 'class_name', 'arguments'))
+            ->execute();
+  
+  foreach ($result as $row) {
+    if (class_exists($row->class_name)) {
+      $reflect = new ReflectionClass($row->class_name);
+      if (!$reflect->isAbstract() && ($reflect->isSubclassOf($form_type) || ($row->class_name == $form_type))) {
+        $form = AppForm::getInstance($row->machine_name,
+          $row->class_name, unserialize($row->arguments));
+          // No dependencies, just add
+          $forms[$row->machine_name] = $form;
+      }
+      else {
+          //        AppForm::displayMessage(t('Class !class is no longer a valid concrete migration class',
+          //                                      array('!class' => $row->class_name)));
+      }
+    }
+  }
+  return $forms;
+}
+
+/**
+ * Implements hook_flush_caches
+ * Scan through code repository to identify all classes that have extended AppForm base class and register them 
+ */
+function cmc_appforms_flush_caches() {
+  $modules = module_implements('appforms_info');
+
+  // Classes already registered
+  $exisiting = db_select('cmc_application_form', 'ca')
+                      ->fields('ca', array('class_name'))
+                      ->execute()
+                      ->fetchCol();
+  
+  // New Classes
+  
+   $result = db_select('registry', 'r')
+            ->fields('r', array('name'))
+            ->condition('type', 'class')
+            ->condition('module', $modules, 'IN')
+            ->condition('filename', '%.test', 'NOT LIKE')
+            ->execute();
+   
+   foreach($result as $record) {
+     $class_name = $record->name;
+     if (isset($existing[$class_name])) {
+       continue;
+     } 
+
+     // register new class
+     try{
+       $class = new ReflectionClass($class_name);
+     }
+     catch(Exception $e) {
+       continue;
+     }
+
+     if (!$class->isAbstract() && $class->isSubclassOf('AppForm')) {
+       AppForm::registerApplicationForm($class_name);
+     }
+   }
+}
+
+/**
+ * List of CMC application product types
+ * @return type 
+ */
+function cmc_appforms_product_type() {
+  $products = array(
+    'sb' => t('Spread Betting'),
+    'cfd' => t('CFD'),
+  );
+  
+  drupal_alter('cmc_appforms_products', $products); 
+  return $products;
+}
+
+
+/**
+ * Create the navigation block
+ */
+function cmc_appforms_block_info() { 
+  $blocks = array(); 
+  $blocks['appforms_nav'] = array( 
+    'info' => t('CMC AppForms Navigation'), 
+    'region' => 'navigation',
+    'visibility' => BLOCK_VISIBILITY_LISTED,
+    'pages' => 'onboarding/*/live/*',
+   ); 
+   return $blocks;
+}
+
+function cmc_appforms_block_view($block_name = '') {
+  if ($block_name == 'appforms_nav') { 
+    $block = array( 
+      'subject' => t('CMC AppForms Navigation'), 
+      'content' => _cmc_appforms_appforms_nav_content(),
+    );
+  return $block; 
+  } 
+}
+
+function _cmc_appforms_appforms_nav_content() {
+  return array(
+    'appforms_nav' => array(
+      '#markup' => t('<div class="steps"><ul>
+        <li class="one"><div class="txt"><span>Step</span>Register</div><div class="aro"></div></li>
+        <li class="two "><div class="txt"><span>Step</span>About You</div><div class="aro"></div></li>
+        <li class="three"><div class="txt"><span>Step</span>Financial Background</div><div class="aro"></div></li>
+        <li class="four"><div class="txt"><span>Step</span>Declarations</div><div class="aro"></div></li>
+      </ul></div>'),
+    ),
+  );
+}
+
+
+/**
+ * Helper function that seperates a nested form_state['values] array into 
+ * multiple arrays of each product type
+ * @param type $product_id
+ * @param type $form_values
+ * @return type 
+ */
+function _cmc_appforms_extract_form_product_values($product_id, $form_values) {
+  $values = array();
+  foreach($form_values as $element => $value) {
+    if (strpos($element, "_{$product_id}")) {
+      $values[$element] = $value;
+    }
+  }
+  return $values;
+}

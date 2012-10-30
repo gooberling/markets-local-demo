@@ -1,0 +1,284 @@
+// CMC Markets Theme	
+// name = CMC Markets V4
+// description = CMC Markets Base Theme - as of 17/02
+// Facet search SASS
+
+//-----------------------------------------------------------------------------------------------
+// facet search block styling
+//-----------------------------------------------------------------------------------------------
+
+.region-filter-block
+	overflow: hidden
+	height: 260px
+	background-color: #f8f8f8
+	+box-shadow(0 0 3px 0 #e3e3e3 inset)
+	position: relative
+	border: 1px solid #e3e3e3
+	border-bottom: 0
+	display: none
+
+.faqs .region-filter-block
+	height: auto
+	display: block
+
+.block-facetapi
+	float: left
+	width: auto
+	width: 100%
+	position: absolute
+	left: 0
+	top: 65px
+	display: block
+	+background(linear-gradient(top, white, #f8f8f8))
+	+box-shadow(0px -4px 3px 0px #eeeeee inset)
+	.ajax-progress
+		display: inline
+		float: right
+		position: absolute
+		right: 0
+		top: -3px
+	h2
+		position: absolute
+		top: -44px
+		border: 1px solid #e3e3e3
+		z-index: 2
+		background-color: #FEFEFE
+		font-family: $standardfont
+		line-height: 3.4em
+		text-align: center
+		width: 135px
+		font-size: 1em
+		margin: 0
+		+background(linear-gradient(top, #f9f9f9, #e1e1e1))
+		padding-top: 0
+	.item-list
+		overflow: hidden
+		border: 1px solid #e3e3e3
+		padding: 20px
+		height: 155px
+		position: relative
+		z-index: 1
+		font-size: 0.9em
+	ul
+		margin: 0
+		padding: 0
+		list-style: none
+		li
+			float: left
+			list-style: none
+			margin: 0 0 0.6em
+			white-space: nowrap
+			width: 20%
+			color: $darkesttext
+			position: relative
+	a, a:visited
+		color: $darkesttext
+		display: block
+		padding-left: 23px
+		background: url(/#{$themepath}/bg_facettab_tick.gif) no-repeat 0 -25px
+	a.facetapi-active, a.facetapi-active:visited
+		background-position: 0 0
+		text-indent: -300em
+		float: left
+	a.selected, a.selected:visited
+		background-position: 0 0
+	.disabled
+		opacity: 0.35
+		//	-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=35%)";
+		a, a:hover
+			pointer-events: none
+			cursor: default
+			color: $textcolor
+	a.clear
+		background: none repeat scroll 0 0 transparent
+		//display: none;
+		font-size: 0
+		height: 50px
+		left: 1px
+		padding: 0
+		position: absolute
+		top: -43px
+		width: 175px
+		z-index: 10
+	a.clear + .ajax-progress
+		display: none
+
+//-----------------------------------------------------------------------------------------------
+// Filter show hide
+//-----------------------------------------------------------------------------------------------
+.filter-actions
+	border: 1px solid #e3e3e3
+	background: url(/#{$themepath}/i_filter_grid.gif) no-repeat 5px 4px
+	margin-bottom: 2.7em
+
+.filter-actions > a, .filter-actions > a:visited
+	display: block
+	padding: 10px 10px 10px 65px
+	color: black
+	position: relative
+	&:hover
+		color: $blue
+	&:after
+		content: url(/#{$themepath}/i_filter_aro_d.gif)
+		padding: 4px
+		+transition(all 0.5s ease 0s)
+		+transform(rotate(0deg))
+		left: 135px
+		padding: 4px
+		position: absolute
+		top: 7px
+
+.filter-actions.open	> a:after
+	+transform(rotate(-180deg))
+	+transition(all 0.5s ease 0s)
+
+//-----------------------------------------------------------------------------------------------
+// Active tab highlighting
+//-----------------------------------------------------------------------------------------------
+.block-facetapi.active
+	color: $darkesttext
+	font-weight: bold
+	h2
+		border-bottom: 1px solid white
+		color: $darkesttext
+		font-weight: bold
+		background: url(/#{$themepath}/bg_facettab.gif) top left repeat-x
+	.item-list
+		display: block
+
+//-----------------------------------------------------------------------------------------------
+// market section tabs
+//-----------------------------------------------------------------------------------------------
+
+.markets-section
+	a.clear
+		top: -51px
+		height: 19px
+		width: 150px
+	.filter-actions
+		background: url(/#{$themepath}/i_filter_grid_list.gif) no-repeat 5px 4px
+	.block-facetapi h2
+		font-weight: normal
+		+cursor
+	.block-facetapi a.active
+		background: url(/#{$themepath}/bg_filtered.png) no-repeat 0 0
+	.block-facetapi.one
+		h2, a.active
+			left: 176px
+	.block-facetapi.two
+		h2, a.active
+			left: 20px
+		//ul li {float:none;}
+	.block-facetapi.three
+		h2, a.active
+			left: 332px
+		//ul li {float:none;}
+	.block-facetapi.four
+		h2, a.active
+			left: 488px
+	.item-list
+		display: none
+	.view-browse-markets .item-list
+		display: block
+	h2
+		padding-top: 0
+	span.filtered
+		display: none
+
+//-----------------------------------------------------------------------------------------------
+// Education sections and Market anylisis
+//-----------------------------------------------------------------------------------------------
+.page-education, .page-market-analysis
+	.region-filter-block
+		padding: 0px 0 0 20px
+		height: 220px
+	.block-facetapi
+		float: left
+		position: relative
+		left: auto !important
+		top: 65px
+		width: 20%
+		+box-shadow(none)
+		background: transparent
+		h2
+			left: auto
+			width: 60%
+			text-align: left
+			padding-left: 60px
+			line-height: 3.9em
+			background-image: url(/#{$themepath}/i_education_sprite.png)
+			background-repeat: no-repeat
+			cursor: default
+			color: $darkesttext
+		li
+			width: 93%
+			float: none
+		.item-list
+			border: 0
+			padding: 30px 0 0
+			height: auto
+			min-height: 115px
+	.filtered h2
+		+box-shadow(0 0 7px rgba(0, 0, 0, 0.1) inset)
+
+//-----------------------------------------------------------------------------------------------
+// Education sections
+//-----------------------------------------------------------------------------------------------
+
+.page-education
+	.one
+		width: 40%
+		h2
+			width: 80%
+			background-position: 0 -250px
+		li
+			float: left
+			width: 50%
+	.one.filtered h2
+		background-position: 0 -200px
+	.two
+		h2
+			background-position: 0 -350px
+	.two.filtered h2
+		background-position: 0 -300px
+	.three
+		h2
+			background-position: 0 -150px
+	.three.filtered h2
+		background-position: 0 -100px
+	.four
+		h2
+			background-position: 0 -50px
+	.four.filtered h2
+		background-position: 0 0px
+
+//-----------------------------------------------------------------------------------------------
+// page-blog sections
+//-----------------------------------------------------------------------------------------------
+
+.page-market-analysis
+	.one
+		width: 40%
+		h2
+			width: 80%
+			background-position: 0 -50px
+		li
+			float: left
+			width: 50%
+	.one.filtered h2
+		background-position: 0 0px
+	.two
+		h2
+			background-position: 0 -550px
+	.two.filtered h2
+		background-position: 0 -500px
+	.three
+		h2
+			background-position: 0 -650px
+	.three.filtered h2
+		background-position: 0 -600px
+	.four
+		h2
+			background-position: 0 -750px
+	.four.filtered h2
+		background-position: 0 -700px

@@ -1,0 +1,294 @@
+// CMC Markets Theme	
+// name = CMC Markets V4
+// description = CMC Markets Base Theme - as of 17/02
+// Admin SASS
+
+.maintenance-page
+	background: #f7f7f7
+	padding: 3em
+	#page
+		background: white
+		+box-shadow(0 0 3px #cccccc)
+		+border-radius(4px)
+		margin-bottom: 3em
+		padding: 2em
+		width: 50em
+	.error
+		margin-bottom: 30px
+	#name-and-slogan
+		float: right
+	#header
+		min-height: 70px
+
+h2.version-info
+	z-index: 100
+
+.logged-in
+	.vertical-tabs
+		ul.vertical-tabs-list li
+			list-style: none
+	.ui-widget.ui-widget-content.media-wrapper
+		padding: 0
+		overflow: visible
+		+box-shadow(0 0 5px #333333)
+		iframe
+			padding: 0
+	#edit-actions
+		input
+			border: 0
+			margin-right: 10px
+			background: $pink
+			padding: 5px 10px
+			color: white
+	#main-wrapper
+		.inner
+			overflow: visible
+			min-height: 300px
+	.form-text,
+	textarea
+		border: 1px solid #ccc
+	label
+		margin-bottom: 10px
+		color: #666
+	.preview .node
+		background-color: #fff
+	.markItUpEditor
+		font-family: $standardfont
+		padding: 8px
+		width: 100%
+		height: 600px
+		border: 0
+	.markItUp
+		width: auto
+	input#edit-title
+		width: 97%
+		font-size: 1.5em
+		padding: 4px
+		color: $blue
+	.inner.main-navigation
+		top: 143px
+	.group-taxonomy
+		padding: 15px
+		border: 1px solid $blue
+		background: #F7F7F7
+		margin-bottom: 1.5em
+		.form-text
+			border: 1px solid #ccc
+			padding: 3px
+	.fieldset-description
+		line-height: 1.4em
+	.fieldset-legend
+		font-size: 1.5em
+	.field-type-taxonomy-term-reference
+		float: left
+		margin-right: 15px
+	.field-widget-options-buttons
+		float: none
+		clear: both
+		border-top: 1px dotted #ccc
+		margin: 5px 0
+		overflow: hidden
+		.form-type-checkbox
+			float: left
+			margin: 0 10px 10px 0
+			width: 22%
+	.field-widget-options-buttons
+		#edit-field-blog-publish-und
+			.form-type-checkbox
+				width: 100%
+	.field-name-field-keywords
+		border-top: 1px dotted #ccc
+		margin-right: 0
+		width: 100%
+	.filter-wrapper
+		.filter-help,
+		.form-item,
+		.filter-guidelines
+			float: none
+			padding: 0 0 0.5em
+		.filter-help a
+			padding: 0
+	.text-format-wrapper
+		background: #F7F7F7
+		margin-bottom: 1.5em
+		padding: 10px
+	table
+		//border:0;
+	.fieldset-wrapper
+		line-height: 1.4em
+	.fieldset-description
+		padding: 5px 0
+	.date-float
+		margin-bottom: 15px
+	.date-no-float:nth-of-type(even)
+		background-color: #fff
+	.container-inline-date > .form-item
+		border: 0
+	.token-tree
+		font-size: 0.95em
+		margin-left: 0px
+	.treeTable tr.collapsed td .expander, .treeTable tr.expanded td .expander
+		margin-left: 0 !important
+	.token-tree td, .token-tree th
+		padding-bottom: 10px
+		padding-top: 10px
+	.media-item
+		margin: 0 20px 0 0
+	.form-wrapper
+		//margin:0 0 1em 0;
+	fieldset
+		margin: 2em 0
+		.fieldset-legend
+			background-position: 0 50% !important
+	.form-wrapper#edit-search
+		padding: 15px 15px 0px
+		border: 1px solid $blue
+		background: #F7F7F7
+		margin-bottom: 1.5em
+		.fieldset-legend
+			color: $blue
+			display: block
+		#search_results,
+		#selected_results
+			width: 530px
+			padding: 5px
+			height: 100px
+			margin-bottom: 1em
+			border: #CCC 1px solid
+		input[type="button"]
+			border: 0
+			color: white
+			background: $blue
+			padding: 5px 9px
+	.form-item .description
+		clear: both
+	.blog-publish, #blog-publish
+		padding: 15px
+		border: 1px solid $blue
+		background: #F7F7F7
+		margin-bottom: 1.5em
+
+fieldset.group-taxonomy
+	background-color: #F7F7F7
+	border: 1px solid #eee
+	font-size: 0.83em
+	line-height: 1.4em
+	padding: 0 10px
+	.field-label
+		font-weight: bold
+		float: left
+	.field-label:after
+		content: '>'
+		color: $pink
+	.fieldset-wrapper a, 
+	.fieldset-wrapper a:visited
+		margin: 0 30px 5px 5px
+		float: left
+
+.tabs
+	position: absolute
+	top: -21px
+	padding: 0
+	width: 100%
+	z-index: 100
+	ul.primary
+		border: 0
+		padding: 0
+		li
+			list-style: none
+			display: inline
+		li a,
+		li a:visited
+			background-color: $pink
+			border: none
+			color: white
+			margin-right: 0.5em
+			padding: 5px 10px
+			text-decoration: none
+			display: block
+			float: left
+		li a:hover
+			background-color: black
+
+.not-logged-in .tabs
+	left: 15%
+
+.page-node-edit,
+.page-node-add
+	#main-content
+		margin-top: -16px
+	h1
+		color: white
+		font-size: 0
+		em
+			color: #BBBBBB
+			display: block
+			font-size: 13px
+			line-height: 0.9em
+	.field-name-field-teaser
+		position: relative
+		border: 1px dotted #AAAAAA
+		border-width: 1px 0
+		margin-bottom: 15px
+		label
+			margin-bottom: 30px
+		textarea
+			height: 50px
+		.description
+			font-size: 0.85em
+			position: absolute
+			top: 30px
+	.col-left,
+	.col-right,
+	.line,
+	.gradient,
+	#crumbtrail,
+	.region-content-related,
+	#footer
+		opacity: 0.4
+	.tabs
+		top: -21px
+
+ul.secondary
+	border-bottom: 1px solid #BBBBBB
+	margin: 0
+	padding: 0.5em
+	top: 28px
+	width: auto
+
+#webform-configure-form
+	padding-top: 3em
+
+//-----------------------------------------------------------------------------------------------
+// for the admin view login
+//-----------------------------------------------------------------------------------------------
+
+#user-login
+	background: #efefef
+	padding: 25px 30px
+	width: 50%
+	position: relative
+	margin: 45px auto 30px
+	color: #333
+	.form-item , label
+		text-align: left
+		margin-bottom: 10px
+		font-size: 18px
+	input[type=text],
+	input[type=password]
+		position: relative
+		border: 1px solid #bbb
+		+box-shadow(0 2px 2px #dddddd inset)
+		width: 95%
+		background: white
+		padding: 10px
+		font-size: 16px
+	.description
+		margin-top: 8px
+		font-size: 0.9
+		color: #999
+	input[type=submit]
+		padding: 5px 30px
+		color: white
+		border: 0
+		background: $blue

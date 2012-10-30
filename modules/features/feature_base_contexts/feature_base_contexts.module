@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the Base contexts feature.
+ */
+
+include_once('feature_base_contexts.features.inc');

@@ -1,0 +1,125 @@
+// CMC Markets Theme	
+// name = CMC Markets V4
+// description = CMC Markets Base Theme - as of 17/02
+// Education SASS
+
+//-----------------------------------------------------------------------------------------------
+// Education landing page
+//-----------------------------------------------------------------------------------------------
+.page-blog 
+	.tabbed > ul
+		border: 1px solid #E3E3E3
+		height: 49px
+	.tabbed > ul > li .detail
+		padding: 0px
+		padding-top: 2em
+	.tabbed
+		border: 0
+		border-top: 1px solid #E3E3E3
+
+.page-education 
+	h1#page-title
+		display: none
+	h2 span.record_count
+		color: $blue
+	.gradient
+		z-index: 3
+
+.view-cmc-education
+	// count the view divs and then remove margin
+	$y: 15
+	@while $y > 0
+		.views-row-#{$y}
+			margin-right: 0
+		$y: $y - 5
+	h3
+		font-size: 1.15em
+		margin: 0 0 0.2em
+		a, a:visited
+			color: $darkesttext
+	p
+		line-height: 1.4em
+	p.date
+		position: absolute
+		left: 0
+		bottom: 0
+		color: $darkesttext
+	.views-row > a.img-block
+		+box-sizing(border-box)
+		background-color: #f7f7f7
+		width: 180px
+		height: 80px
+		border-bottom-width: 3px
+		border-bottom-style: solid
+		display: inline-block
+		&:after
+			width: 3px
+			bottom: -3px
+			content: ""
+			left: auto
+			position: absolute
+			z-index: 1
+			right: 0px
+			top: 0
+			width: 3px
+			height: 80px
+	.cmc_event
+		@extend .education-bg_e_seminar
+		border-bottom-color: #EC5617
+		&:after
+			+background(linear-gradient(top, #e88b25, #ec5617))
+	.cmc_video
+		@extend .education-bg_e_video
+		border-bottom-color: #4921CF
+		position: relative
+		&:after
+			+background(linear-gradient(top, #7838dc, #4921cf))
+		span
+			display: block
+			position: absolute
+			z-index: 2
+			background-image: url("/#{$themepath}/i_play_but.png")
+			width: 180px
+			height: 80px
+			left: 0px
+			top: 0px
+	.cmc_document_guide
+		@extend .education-bg_e_pdf
+		border-bottom-color: #68AD19
+		&:after
+			+background(linear-gradient(top, #a0cb2b, #68ad19))
+	.view-content
+		overflow: hidden
+		height: 230px
+	div.pager-actions
+		border: 1px solid #E3E3E3
+		display: block
+		background: white
+		padding: 5px
+		text-align: center
+		margin: -20px 0 35px
+		a
+			color: black
+			padding-right: 14px
+		a.show-more
+			background: url("/#{$themepath}/i_filter_aro_d.gif") no-repeat scroll right 5px transparent
+		a.show-less
+			display: none
+			background: url("/#{$themepath}/i_filter_aro.gif") no-repeat scroll right 5px transparent
+			margin-right: 20px
+		a.show-all
+			display: none
+			background: url("/#{$themepath}/bg_arrow-link.gif") no-repeat scroll right 0 transparent
+
+
+.node-cmc-event
+	.meta
+		margin: 0
+		padding: 0
+		li
+			font-size: 1.4em
+			font-family: $titlefont
+			list-style: none outside none
+
+.node-cmc-document-guide img
+	@extend .media-youtube-outer-wrapper

@@ -1,0 +1,9 @@
+<?php
+
+
+function cmc_appforms_ml_appforms_info() {
+  return array(
+    'api' => '1.0',
+    'features' => array('multilanguage' => 'Multilanguage Support'),
+  );
+}

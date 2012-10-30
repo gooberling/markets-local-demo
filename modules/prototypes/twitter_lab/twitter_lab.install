@@ -1,0 +1,14 @@
+<?php
+/**
+ * @file
+ * Installation routines for the Twitter lab module.
+ */
+
+/**
+ * Implements hook_schema().
+ */
+function twitter_lab_schema() {
+  $schema['cmcmarkets_twitter_followers'] = drupal_get_schema_unprocessed('system', 'cache');
+  $schema['cmcmarkets_twitter_followers']['description'] = 'Cache list of twitter followers';
+  return $schema;
+}

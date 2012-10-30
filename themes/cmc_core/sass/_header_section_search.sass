@@ -1,0 +1,151 @@
+// CMC Markets Theme	
+// name = CMC Markets V4
+// description = CMC Markets Base Theme - as of 17/02
+// Search box in header
+
+.region-text-search
+	background: url(/#{$themepath}/bg_black_ie.png) repeat
+	+background(linear-gradient(top, rgba(23, 26, 32, 0.8), rgba(10, 11, 14, 0.8)))
+	margin-top: 1px
+	position: relative
+	z-index: 4
+	//margin-top:30px;
+	.inner
+		overflow: visible
+	.form-item
+		margin: 0
+	label
+		display: none
+	input.form-text
+		background-image: url(/#{$themepath}/bg_search_big.png) !important
+		background-repeat: no-repeat
+		background-color: transparent
+		background-position: -20px 0 !important
+		border: 0
+		padding: 0 60px 0 20px
+		width: 900px
+		height: 52px
+		margin: 10px 0
+		color: $blue
+		font-size: 1.5em
+		position: relative
+		z-index: 2
+	input[type="submit"]
+		background: url(/#{$themepath}/v4_bg_magnify.png) no-repeat 0 0 transparent
+		border: none
+		top: 28px
+		right: 40px
+		position: absolute
+		text-indent: -5000px
+		font-size: 0px
+		line-height: 999px
+		overflow: hidden
+		width: 17px
+		height: 19px
+		opacity: 0.6
+		z-index: 5
+		+transition(opacity 0.5s ease 0s)
+	input[type="submit"]:hover
+		opacity: 1
+		+transition(opacity 0.5s ease 0s)
+		+cursor
+	.views-exposed-form .views-exposed-widget
+		float: none
+		padding: 0
+	.view-all
+		position: absolute
+		right: 10px
+		top: 14px
+		width: 175px
+		height: 45px
+		.link
+			position: absolute
+			right: 0px
+			top: 3px
+			text-transform: uppercase
+			font-size: 0.9em
+			line-height: 1em
+		.total-results-count
+			position: absolute
+			left: 103px
+			top: 19px
+			color: $blue
+			font-size: 1.9em
+			font-family: $titlefont
+			font-weight: 300
+			width: 72px
+			text-align: right
+			line-height: 1em
+			span
+				position: absolute
+				left: 0
+				top: -1px
+		.results-count
+			position: absolute
+			right: 75px
+			top: 0px
+			color: white
+			font-size: 3.5em
+			font-family: $titlefont
+			font-weight: 300
+			line-height: 1em
+			strong
+				color: $blue
+				font-size: 1em
+				font-weight: normal
+	form#views-exposed-form-blog-solr-page .view-all, form#views-exposed-form-third-party-news-page .view-all
+		right: 46px
+
+.page-blog .view-all,
+.page-education .view-all
+	//right: 40px;
+
+#autocomplete
+	width: 957px !important
+	background: white
+	border: 1px solid #E3E3E3
+	border-width: 0 1px 1px
+	top: 36px !important
+	padding: 25px 10px 20px
+	z-index: 1
+	left: 10px !important
+	position: absolute!important
+	+box-shadow(0 5px 3px -3px #eeeeee)
+	display: block
+	ul
+		list-style: none
+		margin: 0
+		padding: 0
+	li
+		list-style-type: none
+		margin: 0 0 0.2em
+		padding: 0.3em 10px
+	li.selected
+		background: #f7f7f7
+		+cursor
+	.search-api-autocomplete-suggestion
+		position: relative
+		.autocomplete-suggestion-note
+			//font-size: 2.5em
+			color: #ccc
+		.autocomplete-suggestion-suffix
+			color: #aaa
+		.autocomplete-user-input
+			font-weight: bold
+			color: black
+		.autocomplete-suggestion-results
+			position: absolute
+			right: 0.2em
+			color: $blue
+
+// markets section has narrower search box
+
+.markets-section
+	#autocomplete
+		width: 767px !important
+	input.form-text
+		background-position: -210px 0 !important
+		padding: 0 60px 0 20px
+		width: 710px
+	input[type="submit"]
+		right: 230px

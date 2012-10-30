@@ -1,0 +1,264 @@
+// CMC Markets Theme	
+// name = CMC Markets V4
+// description = CMC Markets Base Theme - as of 17/02
+// Platforms landing page header SASS
+
+.node-type-cmc-platform-page
+	.gradient
+		background: #29B5D0
+	#main-wrapper,
+	#crumbtrail
+		z-index: 100
+		position: relative
+	.anchor 
+		display: block
+		height: 1px
+		//float: right
+		width: 1px
+
+.vid-mask
+	position: absolute
+	left: 394px
+	width: 4px
+	top: -145px
+	background: url(/#{$themepath}/mask.png) repeat
+	z-index: 2
+
+#seekbar
+	height: 20px
+	width: 17px
+	right: 20px
+	bottom: 110px
+	position: absolute
+	background: url(/#{$themepath}/i_loading_clock.png) no-repeat
+	z-index: 100
+
+canvas:hover
+	+cursor
+
+canvas:hover + div#play
+	background-position: -100px 0
+	
+.backUp
+	display: block
+	padding: 10px 40px 10px 0
+	background: url(/#{$themepath}/i_p_aro.png) no-repeat right 50%
+	+cursor
+	position: absolute
+	top: 0px
+	right: 0
+	color: $blue
+	font-size: 1em
+	&:hover
+		text-decoration: underline
+
+//-----------------------------------------------------------------------------------------------
+// hero styling
+//-----------------------------------------------------------------------------------------------
+
+.block-cmc-platform-page
+	// hide while JQuery loads
+	visibility: hidden
+
+.platform-header
+	width: 980px
+	margin: 0 auto
+	overflow: visible
+	padding: 0
+	position: relative
+	text-align: left
+	z-index: 1
+	padding-top: 15px
+	+box-sizing(border-box)
+	.hero-image
+		height: auto
+		width: auto
+		left: 395px
+		top: -145px
+		text-align: right
+		background-repeat: no-repeat
+		//background-size:100% auto;
+		background-position: top left
+		img
+			height: 100%
+			width: auto
+	.more
+		color: white
+		background: url(/#{$themepath}/bg_platform_readmore.gif) no-repeat
+		display: block
+		line-height: 2.2em
+		margin-top: 2em
+		padding-left: 44px
+
+div#play
+	background: url(/#{$themepath}/i_play.png) no-repeat 0 0
+	width: 100px
+	height: 100px
+	position: absolute
+	top: 50%
+	left: 20px
+	+cursor
+	&:hover
+		background-position: -100px 0
+
+//-----------------------------------------------------------------------------------------------
+// bottom page nav
+//-----------------------------------------------------------------------------------------------
+.platform-nav
+	background: url(/#{$themepath}/bg_nav_bg.gif) repeat-x left bottom
+	bottom: 0px
+	height: 160px
+	position: absolute
+	text-align: center
+	width: 100%
+	z-index: 100
+	left: 0
+
+//-----------------------------------------------------------------------------------------------
+// jCarousel styling
+//-----------------------------------------------------------------------------------------------
+.jcarousel-skin-default
+	width: 1000px
+	margin: 0 auto
+	.jcarousel-container-horizontal
+		height: 160px
+		margin: auto
+		width: 1000px
+		padding: 0px 0 0
+		overflow: hidden
+	.jcarousel-clip-horizontal
+		overflow: visible
+		width: 1000px
+	ul.jcarousel
+		overflow: visible!important
+		height: 160px
+	.jcarousel-item
+		background-color: transparent
+		border: none
+		position: relative
+		overflow: visible
+		height: 160px
+		text-align: left
+		color: white
+		font-size: 0.9em
+		h3,h2
+			font-family: $standardfont
+			font-size: 1em
+			color: white
+			padding-top: 0
+			padding-left: 90px
+		img
+			position: absolute
+			left: 10px
+			top: 12px
+		p
+			height: 54px
+			overflow: hidden
+			padding-left: 90px
+		a
+			color: #FFF
+		div.nav-links
+			color: #ccc
+			display: none
+			position: absolute
+			left: 0px
+			bottom: 88px
+			width: 192px
+			height: 67px
+			//+transition(all 0.3s ease-out)
+			z-index: 2
+			text-align: center
+			&:before
+				content: ''
+				display: inline-block
+				height: 100%
+				vertical-align: middle
+				margin-right: -0.25em
+			.nav-links-pos
+				padding: 5px 8px
+				margin: 0 auto
+				min-width: 46px
+				background: url(/#{$themepath}/bg_platform_sub-blank.png) no-repeat center top
+				height: 67px
+				display: inline-block
+				vertical-align: middle
+				padding: 5px 0px 0 8px
+			a
+				display: block
+				height: 50px
+				color: black
+				font-size: 0
+				margin-right: 8px
+				float: left
+				background-image: url(/#{$themepath}/bg_platform_sub2.png)
+				background-repeat: no-repeat
+			a.desktop
+				background-position: -9px -5px
+				width: 41px
+			a.desktop:hover,
+			a.desktop.playing
+				background-position: -66px -5px
+			a.ipad
+				background-position: -9px -52px
+				width: 39px
+			a.ipad:hover,
+			a.ipad.playing
+				background-position: -66px -52px
+			a.iphone
+				background-position: -15px -104px
+				width: 25px
+			a.iphone:hover,
+			a.iphone.playing
+				background-position: -72px -104px
+			a.android
+				background-position: -9px -155px
+				width: 33px
+			a.android:hover,
+			a.android.playing
+				background-position: -66px -155px
+		div.nav-content
+			height: 53px
+			overflow: hidden
+			padding: 8px 10px 10px
+			position: relative
+			top: 79px
+			z-index: 3
+			&:hover
+				background: $blue
+				color: white
+
+	.jcarousel-item.active
+		div.nav-content
+			background: $blue
+		div.nav-links
+			bottom: 88px
+			display: block !important 
+		
+
+	.jcarousel-next, 
+	.jcarousel-prev
+		//display: block;
+		height: 90px
+		width: 41px
+		z-index: 3
+	.jcarousel-next-horizontal
+		background: url(/#{$themepath}/bg_arrow-r.png) no-repeat left top
+		right: 0px
+		bottom: 0px
+		top: auto
+		&:hover
+			background-position: 0 0
+	.jcarousel-prev-horizontal
+		background: url(/#{$themepath}/bg_arrow-l.png) no-repeat left top
+		bottom: 0px
+		left: 0px
+		top: auto
+		&:hover
+			background-position: 0 0
+	.jcarousel-next-disabled, .jcarousel-prev-disabled
+		display: block !important
+		background-position: 0 -90px
+		&:hover
+			//pointer-events: none;
+			cursor: default
+			background-position: 0 -90px

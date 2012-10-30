@@ -1,0 +1,311 @@
+<?php
+define('CMC_INSIGHTS_MORNING_CALL', 100);
+define('CMC_INSIGHTS_AFTERNOON_CALL', 101);
+define('CMC_INSIGHTS_EVENING_CALL', 102);
+define('CMC_INSIGHTS_NOT_INSIGHT', 0);
+
+define('CMC_INSIGHTS_PLATFORM_DRAFT', 'platform_draft');
+define('CMC_INSIGHTS_PLATFORM', 'platform');
+define('CMC_INSIGHTS_RETAIL', 'retail');
+
+define('CMC_INSIGHTS_PUBLISHED', 'PUBLISH');
+
+
+function cmc_insights_node_load($nodes, $types) {
+  if (in_array('cmc_blog', $types)) {
+    $result = db_query("SELECT * FROM {cmc_insights} WHERE nid IN (:nids)",
+              array(':nids' => array_keys($nodes)), array('fetch' => PDO::FETCH_ASSOC));
+    foreach ($result as $record) {
+      $nodes[$record['nid']]->insight = $record;
+    }
+  }
+}
+
+/**
+ * Implements hook_node_update
+ * @param type $node 
+ */
+function cmc_insights_node_update($node) {
+  if ($node->type === 'cmc_blog' && cmc_insights_is_insight($node)) {
+    // already posted
+    if (isset($node->insight)) {
+      cmc_insights_post_update($node);
+      
+    } else {
+      cmc_insights_post_new($node);
+    }
+  }
+  
+}
+
+/**
+ * Implements hook_node_insert
+ * @param type $node 
+ */
+function cmc_insights_node_insert($node) {
+  if ($node->type === 'cmc_blog' && cmc_insights_is_insight($node)) {
+    // already posted
+    try{
+      // $content_id = nextgen_call($request);
+      $request = cmc_insights_post_new($node);
+    }
+    catch (NextgenExcepption $e) {
+      drupal_set_message("Unable to publish Insight", "error");
+    }
+  }
+}
+
+/**
+ * Implements hook_node_delete
+ * @param type $node 
+ */
+function cmc_insights_node_delete($node) {
+  if ($node->type === 'cmc_blog' && cmc_insights_is_insight($node)) {
+    cmc_insights_post_delete($node);
+  }
+}
+
+/**
+ * Creates a new insight also saves information to local schema
+ * @param type $node
+ * @return type 
+ */
+function cmc_insights_post_new($node) {
+  if ($node->status == NODE_NOT_PUBLISHED) {
+    drupal_set_message("Content not sent to Insights, Only published content is sent to Insights");
+    return;
+  }
+ 
+  
+  $request = cmc_insights_build_request($node);
+  if (cmc_insights_publish_platform($node)){
+    $request->setContentVersion($node->vid)
+      ->setContentStatus('NEW')
+      ->setRequestMode('PUBLISH');
+       
+      // Unused code that is meant to be for posting drafts to platform
+      // $request->setContentVersion($node->vid)
+      //  ->setContentStatus('DRAFT')
+      //  ->setRequestMode('DRAFTPUBLISH');
+      //  break;
+  }
+  
+  // Make insight request
+  try{
+    $response = nextgen_call($request);
+    db_insert("cmc_insights")
+      ->fields(array(
+          "nid" => $node->nid,
+          "version" => $node->vid,
+          "content_services_id" => $response->getContentID(),
+       ))
+      ->execute();
+    } catch(NextgenException $e) {
+  }  
+  return ;
+}
+
+/**
+ * Updates Insight if a node is updated in Drupal
+ * @param type $node 
+ */
+function cmc_insights_post_update($node) {
+  if (!cmc_insights_publish_platform($node)) {
+    return;
+  }
+  
+  $requestMode = "";
+  $requestStatus = "";
+  $request = cmc_insights_build_request($node);
+   // There are three possibilities 
+  // 1. An already published content is moved back to unpublished state, which means
+  //    We will need to set the content status to Draft
+  // 
+  // 2. An already published content which was moved to draft and has since been published
+  // 
+  // 3. An already published content has been updated
+  
+  switch($node->status) {
+      // Ideally we should be able to move the content back into draft or some mode, however there 
+      // is no support for that type of action hence code commented out
+      
+      // case NODE_NOT_PUBLISHED:
+      // We know that node is not published check if this node was published to 
+      // content services if yes, set it back to draft else don't do anything
+      
+      // if (!($node->insight) || empty($node->insight["content_services_id"])) {
+      //   return;
+      // } 
+      // $requestStatus = "DRAFT";
+      // $requestMode = "UPDATEDRAFT";
+      // break;
+    case NODE_NOT_PUBLISHED:
+      cmc_insights_post_delete($node);
+      // Delete reference of the insight from local Drupal schema
+      db_delete("cmc_insights")
+      ->condition(":content_services_id", $node->insight['content_services_id'], "=")
+      ->execute();
+      break;
+    case NODE_PUBLISHED:
+      $requestStatus = "UPDATE";
+      $requestMode = "UPDATEPUBLISH";
+      break;
+  }
+
+  try{
+    $request
+      ->setContentID($node->insight['content_services_id'])
+      ->setContentVersion($node->insight['version'])
+      ->setContentStatus($requestStatus)
+      ->setRequestMode($requestMode);
+    
+   
+    $response = nextgen_call($request);
+    // Update Local schema of content services
+    db_update("cmc_insights")
+      ->fields(array(
+          "version" => $node->vid,
+       ))
+      ->condition('nid', $node->nid, '=')
+      ->condition('content_services_id', $node->insight["content_services_id "], '=')
+      ->execute();
+    
+    } catch(NextgenException $e) {
+    //  dsm($e);
+      drupal_set_message("Unable to update insight");
+  }
+}
+
+/**
+ * Creates a new insight also saves information to local schema
+ * @param type $node
+ * @return type 
+ */
+function cmc_insights_post_delete($node) {
+  $request = cmc_insights_build_request($node);
+  $request->setContentVersion($node->vid)
+    ->setContentStatus('DELETION')
+    ->setRequestMode('DELETE');
+  //retrieve insight id from database if its not set
+  if (!empty($node->insight['content_services_id'])) {
+    $request->setContentID($node->insight['content_services_id']);
+  } 
+  else 
+    {
+    $insight= db_select('cmc_insights', 'c')
+            ->fields('c')
+            ->condition('nid', $node->nid, '=')
+            ->execute()
+            ->fetchAssoc();
+    $request->setContentID($insight->content_services_id);
+   }
+  
+  // Make insight request
+  try{
+    $response = nextgen_call($request);
+    db_delete("cmc_insights")
+      ->condition('nid', $node->nid, '=')
+      ->execute();
+    drupal_set_message("Insight deleted");
+    } catch(NextgenException $e) {
+  }  return;
+}
+
+/**
+ * Build a request object that is used to post insight
+ * @param type $node
+ * @return PublishContentRequest 
+ */
+function cmc_insights_build_request($node) {
+
+  $request = new PublishContentRequest();
+
+  $request->setContentTypesList(array('NEWS'));
+  $request->setSourceTypesList(array('INSIGHTS'));
+
+  $headline = new HeadlineData();
+  $headline->setNewsHeadline($node->title);
+  $request->setHeadline($headline);
+
+  $request->setContentBody($node->body['und'][0]['value']);
+  $request->setIntroduction($node->field_teaser['und'][0]['value']);
+  $request->setAbstract($node->field_teaser['und'][0]['value']);
+
+  $author = user_load($node->uid);
+  $request->setAuthor($author->field_display_name['und'][0]['value']);
+
+  $request->setLanguage('en-US');
+  $request->setDestination('INSIGHT');
+
+  $category = cmc_insights_story_category($node);
+  $request->setStoryCategory($category);
+
+  $product_keys_list = cmc_insights_product_keys($node);
+  if ($product_keys_list) {
+    $request->setProductKeysList($product_keys_list); 
+  }
+   
+  $request->setScheduledPublishingDate(($node->created) * 1000);
+
+  
+  /* Un-set at this point:
+     - RequestMode (PUBLISH, UPDATEPUBLISH or DELETE)
+     - ContentStatus (NEW, UPDATE or DELETION) (^^ redundancy?)
+     - ContentVersion (int counter)
+  */
+
+  return $request;
+}
+
+
+function cmc_insights_product_keys($node) {
+  $keys = array();
+
+  $field = field_get_items('node', $node, 'field_instruments');
+  
+  // If there are no products associated with insight return FALSE
+  if (empty($field[0]['value']) || trim($field[0]['value']) == ""){
+    return FALSE;
+  }
+
+  $product_keys =  explode(',', $field[0]['value']); 
+  foreach ($product_keys as $code) {
+    $key = new ProductKey();
+    $key->setInstrumentCode($code);
+    $keys[] = $key;
+  }
+  return $keys;
+}
+
+function cmc_insights_is_insight($node) {
+  return cmc_insights_story_category($node) != CMC_INSIGHTS_NOT_INSIGHT;
+}
+
+function cmc_insights_story_category($node) {
+  $tid = $node->field_insight_category['und'][0]['tid'];
+  $term = taxonomy_term_load($tid);
+
+  $categories = array(
+    t('Not an Insight') => CMC_INSIGHTS_NOT_INSIGHT,
+    t('Morning Call') => CMC_INSIGHTS_MORNING_CALL,
+    t('Afternoon Call') => CMC_INSIGHTS_AFTERNOON_CALL,
+    t('Evening Call') => CMC_INSIGHTS_EVENING_CALL
+  );
+
+  return isset($categories[$term->name]) ? $categories[$term->name] : CMC_INSIGHTS_NOT_INSIGHT;
+}
+
+/**
+ * Helper function that checks to see if a node is set to be published to platform
+ * @param type $node
+ * @return type 
+ */
+function cmc_insights_publish_platform($node) {
+  $publishing_options = field_get_items('node', $node, 'field_blog_publish');
+  foreach($publishing_options as $key => $option){
+    if ($option["value"] == CMC_INSIGHTS_PLATFORM) {
+      return TRUE;
+    }
+  }
+  return FALSE;
+} 

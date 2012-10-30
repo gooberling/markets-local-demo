@@ -1,0 +1,149 @@
+// CMC Markets Theme	
+// name = CMC Markets V4
+// description = CMC Markets Base Theme - as of 17/02
+// Related content
+
+//-----------------------------------------------------------------------------------------------
+// Related content after man content
+//-----------------------------------------------------------------------------------------------
+
+.is-front .region-content-related
+	display: none
+
+.region-content-related
+	clear: both
+	position: relative
+	border: 1px solid #E2E2E2
+	margin-bottom: 5em
+	padding: 15px 0px 11px 20px
+	height: 190px
+	&:after
+		clear: both
+		content: "."
+		display: block
+		height: 0
+		visibility: hidden
+	#block-views-further-reading-block-1
+		width: 56%
+		float: left
+		h2
+			padding-top: 3.4em
+			font-size: 1.2em
+		ul
+			height: 105px
+			margin: 0
+			overflow: hidden
+			padding: 0
+		li
+			margin: 0 1% 0.4em 0
+			list-style: none
+			float: left
+			width: 32%
+			a, a:visited
+				color: $blue
+				&:hover
+					color: $pink
+	#block-views-further-reading-block
+		width: 39.7%
+		position: relative
+		float: left
+		margin-right: 3.3%
+		+box-sizing(border-box)
+		padding-right: 20%
+		height: 185px
+		h2
+			margin-bottom: 1.8em
+			font-size: 1.5em
+		div.view-further-reading
+			margin-right: 10px
+		h4
+			margin-bottom: .5em
+			font-size: 1.2em
+			line-height: 1.2em
+		.re-image
+			position: absolute
+			background: url(/#{$themepath}/bg_rel-image.png) no-repeat transparent bottom center
+			background-size: 100% auto
+			width: 48%
+			height: 170px
+			right: 0px
+			bottom: -45px
+
+#block-cmc-framework-cmc-follow
+	a
+		height: 30px
+		margin: 15px 0 0 0px
+		padding: 10px
+		width: 30px
+
+#block-cmc-framework-cmc-share-this,
+#block-cmc-framework-cmc-follow
+	border: 1px solid #E2E2E2
+	border-bottom: 0
+	background: white
+	position: absolute
+	
+	right: -1px
+	bottom: 100%
+	width: 150px
+	padding: 0 15px
+	text-align: center
+	#share-this-buttons
+		a
+			float: left
+	#share-this-toggle
+		display: block
+		padding: 12px 0 0
+		clear: both
+		background: url(/#{$themepath}/i_plus.gif) no-repeat right 11px
+		text-align: center
+		width: 50%
+		padding-right: 17px
+		margin: 0 auto
+		font-size: 0.9em
+		&:hover
+			+cursor
+	.FBConnectButton_Simple
+		background-image: url("/#{$themepath}/share-this-facebook.png") !important
+		
+@-moz-document url-prefix() 
+	#block-cmc-framework-cmc-share-this,
+	#block-cmc-framework-cmc-follow 
+		bottom: 99.5%
+ 
+
+
+//-----------------------------------------------------------------------------------------------
+// Download PDF
+//-----------------------------------------------------------------------------------------------
+
+#main-content .view-cmc-document-guide
+	overflow: hidden
+	padding: 1.2em 1.5em 1.5em
+	position: relative
+	+greybox
+	margin-top: 1.5em
+	.teaser-image
+		position: absolute
+		right: 0em
+		top: 0em
+	h3
+		font-size: 1.22em
+		line-height: 1.2em
+		margin: 0 0 0.8em
+		padding: 0
+		a, a:visited
+			color: #333333
+	p.teaser
+		width: 65%
+	.button
+		background: url("/#{$themepath}/i_pdf.png") no-repeat
+		a, a:visited
+			background-color: $blue
+			color: white
+			display: inline-block
+			margin-top: 15px
+			padding: 0.6em 0.9em
+			text-align: center
+			&:hover
+				background-color: $pink

@@ -1,0 +1,81 @@
+// CMC Markets Theme	
+// name = CMC Markets V4
+// description = CMC Markets Base Theme - as of 17/02
+// Triptych landing page header SASS
+
+//-----------------------------------------------------------------------------------------------
+// main block style
+//-----------------------------------------------------------------------------------------------
+.block-views-cmc-landing-page-hero.triptych
+	min-height: 540px
+	z-index: 1
+	.triptych-panels
+		width: 100%
+		float: none
+		position: absolute
+		z-index: 5
+		clear: both
+		bottom: 40px
+		left: 0
+		overflow: hidden
+	.triptych-content
+		float: left
+		width: 32%
+		+box-sizing(border-box)
+		padding: 1.2em 1.6em 0
+		margin-left: 2%
+		height: 285px
+		a:before
+			+arrow
+		p
+			margin-bottom: 1.2em
+	h2
+		margin-bottom: 1em
+	.triptych-content:first-child
+		margin-left: 0
+	.triptych-content.white
+		background: white
+	.triptych-content.black
+		background: black
+		color: white
+		h2
+			color: white
+	.triptych-content.blue
+		background: $blue
+		color: white
+		h2
+			color: white
+		a, a:visited
+			color: black
+	.hero-content.white
+		h2
+			color: white
+	.hero-content.black
+		h1
+			color: $darkesttext
+		h2, p
+			color: $textcolor
+
+//-----------------------------------------------------------------------------------------------
+// bg image
+//-----------------------------------------------------------------------------------------------
+
+.hero-image-triptych
+	left: 0
+	overflow: hidden
+	position: absolute
+	top: 0px
+	width: 100%
+	z-index: 0
+	min-height: 705px
+	background-repeat: no-repeat
+	background-position: bottom center
+
+//-----------------------------------------------------------------------------------------------
+// gradient
+//-----------------------------------------------------------------------------------------------
+.triptych-hero
+	.gradient
+		background: transparent
+	#main-wrapper
+		z-index: 2

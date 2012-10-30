@@ -1,0 +1,71 @@
+// CMC Markets Theme	
+// name = CMC Markets V4
+// description = CMC Markets Base Theme - as of 17/02
+// Sign up page
+
+//-----------------------------------------------------------------------------------------------
+// Sign up blocks
+//-----------------------------------------------------------------------------------------------
+
+.sign-up
+	h1
+		margin-bottom: 0.85em
+	.region-filter-block
+		background-color: transparent
+		border: none
+		+box-shadow(none)
+		height: auto
+		margin-bottom: 0.85em
+	div.signup
+		height: 190px
+		+box-sizing(border-box)
+		padding: 17px 20px 20px
+		h2
+			color: white
+			font-size: 2.3em
+			span
+				display: block
+				font-size: 0.85em
+				color: #FFF000
+				margin-top: 0.1em
+			strong
+				font-size: 0.8em
+				color: #BB3AB0
+				color: rgba(255, 255, 255, 0.3)
+				font-weight: normal
+		a, a:visited
+			color: $darkesttext
+			display: block
+			padding: 10px 0 10px 20px
+			position: absolute
+			background: url(/#{$themepath}/bg_signup-aro.png) no-repeat
+			width: 298px
+			height: 44px
+			left: -2px
+			top: 127px
+			font-family: $titlefont
+			font-size: 1.5em
+			opacity: 1
+			+transition(all 0.5s ease 0s)
+			&:hover
+				opacity: 0.8
+				+transition(all 0.5s ease 0s)
+	div.demo
+		background: url(/#{$themepath}/bg_signup-demo.png) repeat-y
+		+background(linear-gradient(#0cb2d8 0, $blue 100%))
+		+box-shadow(0 5px 3px -3px #0dacc2 inset)
+		a, a:visited
+			color: white
+			background: url(/#{$themepath}/bg_signup-aro-demo.png) no-repeat
+		h2 span
+			color: #B8E8F2
+			color: rgba(255, 255, 255, 0.6)
+	.spreadbet
+		background: url(/#{$themepath}/bg_signup-sb.png) no-repeat
+		+background(image-url("/#{$themepath}/i_signup-bg.png") no-repeat bottom right, linear-gradient(top left, #692065, #922d7d))
+	.cfd
+		background: url(/#{$themepath}/bg_signup-cfd.png) no-repeat
+		+background(image-url("/#{$themepath}/i_signup-bg.png") no-repeat bottom right, linear-gradient(top left, #0e626d, #29cec8))
+	.marketmaker
+		background: url(/#{$themepath}/bg_signup-demo.png) no-repeat
+		+background(linear-gradient(top, #0cb2d8, $blue))

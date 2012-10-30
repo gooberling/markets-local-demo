@@ -1,0 +1,284 @@
+<?php
+/**
+ * @File
+ * @author : Ravi Julapalli 
+ * Identity services are called as a result of one of  the following actions 
+ * within CMC Flex / CMC Pega CRM
+ * 
+ * 1. Change primary email
+ *    Customer has called in support team and asked for change of email address, 
+ *    at this point Customer executive change email within CRM, which results in 
+ *    email is sent to customer old email address with a one time verification
+ *    link. Clicking on the link results in customr getting redirected here with
+ *    URL identity/update-account/id/<token>.
+ * 
+ * 2. Forgotten Password
+ *    Customer visit Flex platform and user forgotten password option to retrieve
+ *    their password. This results in a one time link sent to customer email address
+ *    along with a token. Clicking on the link in email results in customer 
+ *    getting redirected here with URL identity/password-reset/id/<token>.
+ * 
+ * 3. Confirm verification email
+ *    This action can result from multiple sources. Custome registers for account
+ *    online and is sent a verification email with link. 
+ *    
+ *    Customer hasn't received verification email and call CMC customer support. 
+ *    Customer support executive resends verification email from pega system.
+ * 
+ *    Clicking on the link in email results in customer 
+ *    getting redirected here with URL identity/confirm-registration/id/<token>.
+ * 
+ *    
+ * 
+ */
+// $Id$ 
+
+/**
+ * Error code returned by identity server if token is invalid
+ */
+define('CMC_IDENTITYSERVICE_INVALID_TOKEN', 410);
+define('CMC_IDENTITYSERVICE_RESET_PASSWORD', 'Identity service reset password');
+
+function cmc_identityservice_theme() {
+  return array(
+    'cmc_identityservice_password_reset' => array(
+      'render element' => 'form',  
+      'template' => 'cmc_identityservice_password_reset',
+      'path' => drupal_get_path('module', 'cmc_identityservice') ."/theme",
+    ),
+    'cmc_identityservice_forgot_password' => array(
+      'render element' => 'form',  
+      'template' => 'cmc_identityservice_forgot_password',
+      'path' => drupal_get_path('module', 'cmc_identityservice') ."/theme",
+    ),
+    'cmc_identityservice_error' => array(
+      'render element' => '',  
+      'arguments' => array('title' => NULL, 'message' => NULL),
+      'template' => 'cmc_identityservice_error',
+      'path' => drupal_get_path('module', 'cmc_identityservice') ."/theme",
+    ),
+    'cmc_identityservice_success' => array(
+      'render element' => '',
+      'arguments' => array('title' => NULL, 'message' => NULL),
+      'template' => 'cmc_identityservice_success',
+      'path' => drupal_get_path('module', 'cmc_identityservice') ."/theme",
+    ),
+  );
+}
+
+/**
+ * Implementation of hook_menu
+ * @param unknown_type $vars
+ */
+function cmc_identityservice_menu() {
+  $items = array();
+  
+  $items['identity/reset-password/%'] = array(
+    'page callback'     => 'drupal_get_form',
+    'page arguments'    => array('cmc_identityservice_password_reset_form', 2),
+    'access callback'   => 'user_access',
+    'access arguments'  => array('access content'),
+    'file' => 'cmc_identityservice.forms.inc', 
+    'type'              => MENU_CALLBACK, 
+  );
+  $items['identity/reset-password/%/%'] = array(
+    'page callback'     => 'cmc_identityservice_password_reset_done',
+    'page arguments'    => array(2, 3),
+    'access callback'   => 'user_access',
+    'access arguments'  => array('access content'),
+    'file' => 'cmc_identityservice.forms.inc', 
+    'type'              => MENU_CALLBACK, 
+  );
+  
+  $items['identity/forgot-password'] = array(
+    'page callback'     => 'drupal_get_form',
+    'page arguments'    => array('cmc_identityservice_forgot_password_form', 3),
+    'access callback'   => 'user_access',
+    'access arguments'  => array('access content'),
+    'file' => 'cmc_identityservice.forms.inc', 
+    'type'              => MENU_CALLBACK, 
+  );
+  
+  $items['identity/forgot-password/done'] = array(
+    'page callback'     => 'cmc_identityservice_forgot_password_done',
+    'access callback'   => 'user_access',
+    'access arguments'  => array('access content'),
+    'file' => 'cmc_identityservice.forms.inc', 
+    'type'              => MENU_CALLBACK, 
+  );
+  
+  $items['identity/update-account/%'] = array(
+    'page callback'     => 'cmc_identityservice',
+    'page arguments'    => array(1, 2),
+    'access callback'   => 'user_access',
+    'access arguments'  => array('access content'),
+    'type'              => MENU_CALLBACK, 
+  );
+  
+  $items['identity/confirm-registration/%'] = array(
+    'page callback'     => 'cmc_identityservice',
+    'page arguments'    => array(1, 2),
+    'access callback'   => 'user_access',
+    'access arguments'  => array('access content'),
+     'type'              => MENU_CALLBACK, 
+  );
+  
+  $items['admin/config/cmc/identity_service'] = array(
+    'title' => t('CMC Identity service settings'),
+    'description' => t('Configuration settings for identity services.'),
+    'access arguments' => array('administer cmc identity services'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('cmc_identityservice_settings_form'),
+    'file' => 'cmc_identityservice.admin.inc',
+    'type' => MENU_NORMAL_ITEM,
+
+  );
+  return $items;
+}
+
+function cmc_identityservice_permission() {
+  return array(
+    'administer cmc identity services' => array(
+      'title' => t('Administer CMC Identity Services'),
+      'description' => t('Administer Identity Service configurations')
+    ),
+  );
+}
+
+
+
+/**
+ * Call back to identity service
+ * @param type $context
+ * @param type $token
+ * @return type 
+ */
+function cmc_identityservice($context, $token) {
+
+  if (!$context || !$token) {
+      return theme('cmc_identityservice_error', array('title' => t('Oops...'), 'message' => t('!message', array('!message' => variable_get('cmc_identityservice_errorpage')))));
+  }
+
+  switch($context) {
+    case 'reset-password': 
+      module_load_include('inc', 'cmc_identityservice', 'cmc_identityservice.forms');
+      $form = drupal_get_form('cmc_identityservice_password_reset_form', $token);
+      return $form;
+      break;
+    
+    case 'update-account': 
+      $x = _confirm_registration($token);
+      if ($x) {
+        
+        $message = t('Your account details have been updated <br/><br/>');
+        
+        if (variable_get('cmc_identityservice_sblogin_path', FALSE)) {
+           $message .= '<a class = "bluebutton button-inline" href="'.variable_get('cmc_identityservice_sblogin_path') .'">'. t('Login to Spreadbet') .'</a>';
+        }
+        if (variable_get('cmc_identityservice_cfdlogin_path', FALSE)) {
+          $message .= '<a class = "bluebutton button-inline" href="'.variable_get('cmc_identityservice_cfdlogin_path') .'">'. t('Login to CFD') .'</a>';
+        }
+          
+         return theme('cmc_identityservice_success', array('title' => t('Success'), 'message' => $message));
+      }
+      else {
+        $message = variable_get('cmc_identityservice_errorpage');
+        $message .= l(t('Back to home'),
+                       variable_get('cmc_registration_region_url'),
+                      array('attributes' => array('class' => "bluebutton button-inline")));
+        
+//        t('!home_button', array('!home_button' => '<a class = "bluebutton button-inline" href="'. .'">Back to home
+//          </a>')); 
+        return theme('cmc_identityservice_error', array('title' => t('Oops...'), 'message' => t('!message', array('!message' => $message))));
+      }
+      break;
+    case 'confirm-registration':
+      
+      $x = _confirm_registration($token);   
+      if ($x) {
+        $node = node_load(variable_get('cmc_registration_live_confirmation'));
+        // This is a temp fix and  needs to be changed
+        drupal_goto('registration/confirmation');
+        
+        
+        //  Old code commented out. needs to be put back in 
+        /*
+         * 
+         
+        module_load_include('inc', 'cmc_registration', 'includes/cmc_registration');
+        $steps = _cmc_registration_steps();
+          // Add in final step for confirmation
+        $steps[] = array(
+              'title' => $node->title,
+              'active' => true,
+              'teaser' => $node->body['und'][0]['summary'],
+        );
+
+        $teaser =  theme('cmc_registration_subheading', array('subheading' => $node->body['und'][0]['summary']));
+        _cmc_registration_get_teaser($teaser);
+        _cmc_registration_get_form_errors();
+        drupal_goto('registration/confirmation');
+        $output = theme('cmc_registration_live_confirmation',
+        array('data' => array('title' => $node->title, 'body_text' => $node->body['und'][0]['value'] ) ));
+        return($output); 
+         
+         */       
+      } 
+      else {
+       
+        $message = variable_get('cmc_identityservice_errorpage');
+        $message .= l(t('Back to home'),
+                       variable_get('cmc_registration_region_url'),
+                      array('attributes' => array('class' => "bluebutton button-inline")));
+        
+        return theme('cmc_identityservice_error', array('title' => t('Oops...'), 'message' => t('!message', array('!message' => $message)))); 
+       }
+      break;
+    default:
+      return  theme('cmc_identityservice_error', array('title' => t('Oops...'), 'message' => t('!message', array('!message' => variable_get('cmc_identityservice_errorpage')))));
+      break;
+  }
+  //module_load_include('cmc_identityservice.forms.inc');
+}
+	
+/**
+ * Verify if provided token is valid.
+
+ * @param type $context
+ * @param type $token
+ * @return type 
+ */
+function _verifytoken($context, $token) {
+  try{
+    $result = nextgen_verify_token($token); 
+    if ($result['code'] == 200) {
+      return $result;
+    } 
+    else {
+      return FALSE;
+    } 
+  } catch(Exception $e) {
+     watchdog('Identity Exception', 'Error in _verifytoken - @tk', array('@tk' => $token) , WATCHDOG_NOTICE);
+     return FALSE;
+  }
+} 
+
+
+function _confirm_registration($token) {
+  try{
+    $result = nextgen_complete_registration($token); 
+    if ($result['code'] == 200) {
+      return $result;
+    } 
+    else {
+      return FALSE;
+    } 
+  } catch(Exception $e) {
+     watchdog('Complete registration', 'Error in _verifytoken - @tk', array('@tk' => $token) , WATCHDOG_NOTICE);
+     return FALSE;
+  }
+} 
+
+
+
+

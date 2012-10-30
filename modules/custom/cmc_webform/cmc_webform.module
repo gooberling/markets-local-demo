@@ -1,0 +1,154 @@
+<?php
+/**
+ * @file
+ */
+function cmc_webform_menu() {
+  $items = array();
+  
+  $items['thanks'] = array(
+    'title' => t('Thank you'),
+    'page callback' => 'cmc_webform_thanks_page',
+    'access arguments' => array('access content'),
+  );
+  
+  return $items;
+}
+
+
+
+// Drupal needs this blank file.
+function cmc_webform_form_alter(&$form, &$form_state, $form_id) {
+  
+  // replace the action property of event webform
+  if (cmc_webform_is_embedded_webform($form)){
+
+    $form['#action'] = url($_GET['q']);
+
+    // so we remvoe the confirmation message
+    $form['#node']->webform['confirmation'] = '';
+    
+    if ($form['#node']->webform['redirect_url'] == 'cmc_webform_thanks') {
+      $form['#submit'][] = 'cmc_webform_client_form_submit';
+    }
+    //print_r($form['#submit']);
+  }
+}
+
+
+/**
+ *
+ * Enter description here ...
+ * @param unknown_type $form
+ */
+function cmc_webform_is_embedded_webform($form) {
+  $node = isset($form['#node']) ? $form['#node'] : '';
+  // replace the action property of event webform
+  if (preg_match('#^webform_client_form#', $form['#form_id']) && is_object($node)
+    && $node->type == 'webform' && $_GET['q'] != 'node/' . $node->nid) {
+    return true;
+  }
+  return false;
+}
+
+
+/**
+ *
+ * Enter description here ...
+ */
+function cmc_webform_client_form_submit($form, &$form_state) {
+  
+  $sid = $form_state['values']['details']['sid'];
+  $webform_nid = $form_state['values']['details']['nid'];
+  //print_r($form_state['values']);
+  //exit;
+
+  // redirect to our thankyou page
+  // url relating to event for Wil's GA tracking
+  $thank_you_url = 'thanks' . url($_GET['q']);
+  $options = array();
+  $form_state['redirect'] = array($thank_you_url, $options);
+  
+  // stuff variables into session so we can get it
+  // back out on the thank you page
+  $_SESSION['cmc_webform'] = $form_state['values'];
+}
+
+
+/**
+ * Webform Thank you page
+ */
+function cmc_webform_thanks_page() {
+  
+  if (!isset($_SESSION['cmc_webform'])) {
+    return MENU_NOT_FOUND;
+    drupal_not_found(); // should actually redirect to 404;
+    drupal_exit();
+  }
+  
+  // Get values from the session
+  $cmc_webform_values = $_SESSION['cmc_webform'];
+  $sid = $cmc_webform_values['details']['sid'];
+  $webform_nid = $cmc_webform_values['details']['nid'];
+  
+  $webform = node_load($webform_nid);
+  //print_r($cmc_webform_values);
+  //print_r($webform);
+  
+  $output = array();
+  // using webform localization for translations
+  // have to entity decode as string translations convert them to entities
+  $confirmation_content = html_entity_decode($webform->webform['confirmation']);
+  
+  // call hook here
+  //hook_cmc_webform_thanks_page_output();
+  drupal_alter('cmc_webform_thanks', $confirmation_content, $cmc_webform_values);
+  
+  // run this through a filter!
+  $format = $webform->webform['confirmation_format'];
+  $output= check_markup($confirmation_content, $format);
+  
+  // unset the session variables as we only want to use once?
+  // unset($_SESSION['cmc_webform']);
+  return $output;
+}
+
+
+/**
+ *
+ * @param unknown_type $node
+ * @param unknown_type $sids
+ */
+function cmc_webform_download($node, $sids) {
+  
+  // copied from webform_results_download_form
+  $csv_components = array(
+    'info' => t('Submission information'),
+    'serial' => '-' . t('Submission Number'),
+    'sid' => '-' . t('Submission ID'),
+    'time' => '-' . t('Time'),
+    'draft' => '-' . t('Draft'),
+    'ip_address' => '-' . t('IP Address'),
+    'uid' => '-' . t('User ID'),
+    'username' => '-' . t('Username'),
+  );
+  $csv_components += webform_component_list($node, 'csv', TRUE);
+  
+  $csv_components = array_keys($csv_components);
+  
+  $format = 'delimited';
+  $delimiter = ',';
+  $options = array(
+    'delimiter' => $delimiter,
+    'components' => $csv_components,
+    'select_keys' => 0,
+    'select_format' => 'separate',
+    'range_type' => 'all',
+    'download' => 1,
+    'sids' => $sids,
+  );
+  
+  module_load_include('inc', 'webform', 'includes/webform.report');
+  $export_info = webform_results_export($node, $format, $options);
+  
+  webform_results_download($node, $export_info);
+}

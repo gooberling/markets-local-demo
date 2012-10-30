@@ -1,0 +1,796 @@
+<?php
+/**
+ * @file
+ * Code for the CMC Pricing feature.
+ * http://londhdev3l03:20025/pricefeed/rest/v2/products/en
+ * http://londhdev3l03:20025/pricefeed/rest/v2/prices/cfd/UK100.SPOT.GBP.CMC
+ * http://londhdev3l03:20025/pricefeed/rest/v2/prices/sb/UK100.SPOT.GBP.CMC
+ */
+
+include_once('cmc_pricing.features.inc');
+
+
+/**
+ * hook_menu
+ */
+function cmc_pricing_menu() {
+  $items = array();
+
+
+  $items['admin/config/cmc/pricing'] = array(
+    'title' => t('CMC pricing Configuration'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('cmc_pricing_settings'),
+    'access arguments' => array('administer cmc_pricing'),
+  );
+  
+  $items['admin/config/cmc/pricing/list'] = array(
+    'title' => t('CMC pricing Configuration'),
+    //'page callback' => 'drupal_get_form',
+    'page callback' => array('cmc_pricing_admin_list'),
+    'access arguments' => array('administer cmc_pricing'),
+    'file' => 'cmc_pricing.admin.inc',
+  );
+  
+  $items['admin/config/cmc/pricing/edit/%'] = array(
+    'title' => t('CMC pricing Edit'),
+    //'page callback' => 'drupal_get_form',
+    //'page callback' => array('cmc_pricing_admin_edit'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('cmc_pricing_admin_edit', 5),
+    'access arguments' => array('administer cmc_pricing'),
+    'file' => 'cmc_pricing.admin.inc',
+  );
+  
+  $items['admin/config/cmc/pricing/delete/%'] = array(
+    'title' => t('CMC pricing Delete'),
+    //'page callback' => 'drupal_get_form',
+    //'page callback' => array('cmc_pricing_admin_edit'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('cmc_pricing_admin_delete_confirm', 5),
+    'access arguments' => array('administer cmc_pricing'),
+    'file' => 'cmc_pricing.admin.inc',
+  );
+
+
+  $items['admin/config/cmc/pricing/product_import'] = array(
+    'title' => t('Import Products into cmc_pricing table'),
+    'page callback' => 'cmc_pricing_product_import',
+    'access arguments' => array('administer cmc_pricing'),
+    'file' => 'cmc_pricing.import.inc',
+  );
+
+  $items['admin/config/cmc/pricing/product_match_codes'] = array(
+    'title' => t('Match Products with codes'),
+    'page callback' => 'cmc_pricing_product_match_codes',
+    'access arguments' => array('administer cmc_pricing'),
+    'file' => 'cmc_pricing.import.inc',
+  );
+
+  // ajax call to pick up latest prices
+  $items['cmc_pricing/%'] = array(
+    'title' => t('Pricing Snapshot'),
+    'page callback' => 'cmc_pricing_snapshot',
+    'page arguments' => array(1),
+    'access arguments' => array('access content'),
+    'file' => 'cmc_pricing.snapshot.inc',
+  );
+
+  return $items;
+}
+
+/**
+ * Implementation of hook_perm().
+ */
+function cmc_pricing_permission() {
+  return array(
+    'administer cmc_pricing' => array(
+      'title' => t('administer cmc_pricing'),
+      'restrict access' => TRUE,
+     ),
+  );
+}
+
+/**
+ * Pricing settings form
+ */
+function cmc_pricing_settings() {
+  $form = array();
+
+  $form['cmc_pricing_products_feed_url'] = array(
+    '#type' => 'textfield',
+    '#title' => t('CMC pricing products url'),
+    '#default_value' =>  variable_get('cmc_pricing_products_feed_url', 'http://londhdev3l03:20025/pricefeed/rest/v2/products/en.json'),
+  );
+  
+  
+
+  $form['cmc_pricing_price_feed_url'] = array(
+    '#type' => 'textfield',
+    '#title' => t('CMC pricing product price url'),
+    '#default_value' =>  variable_get('cmc_pricing_price_feed_url', 'http://londhdev3l03:20025/pricefeed/rest/v2/prices'),
+  );
+
+  $form['cmc_pricing_js_cache_time'] = array(
+    '#type' => 'textfield',
+    '#title' => t('CMC pricing javascript cache'),
+    '#description' => t('Time in seconds, should be < 30. Feed returns last 30 movements and we might have more than 1 movement per second'),
+    '#default_value' =>  variable_get('cmc_pricing_js_cache_time', '20'),
+  );
+  
+  
+  //
+  $terms = taxonomy_get_tree(3);
+  //print_r($terms);
+  $options = array();
+  foreach ($terms as $i => $term) {
+    $options[$term->tid] = $term->name;
+  }
+  
+  $form['cmc_pricing_suppression'] = array(
+    '#type' => 'select',
+    '#options' => $options,
+    '#title' => t('CMC pricing suppression'),
+    '#description' => t('Which instrument types to suppress pricing for'),
+    '#default_value' =>  variable_get('cmc_pricing_suppression', array()),
+    '#multiple' => TRUE,
+  );
+  
+  
+  //$nodequeues = nodequeue_load_queues();
+  $nodequeues = nodequeue_load_queues(nodequeue_get_all_qids(25));
+  $options = array();
+  foreach ($nodequeues as $i => $nq) {
+    $options[$nq->qid] = $nq->title;
+  }
+  ////print_r($nodequeues);
+  $qid = variable_get('cmc_pricing_nodequeue', '');
+  $qid_edit_link = '';
+  if ($qid) {
+    $qid_edit_link = ' ' . l(t('Edit Nodequeue items'), 'admin/structure/nodequeue/' . $qid . '/view');
+  }
+  
+  $form['cmc_pricing_nodequeue'] = array(
+    '#type' => 'select',
+    '#options' => $options,
+    '#title' => t('CMC pricing random nodequeue'),
+    '#description' => t('Nodequeue for randomised products') . $qid_edit_link,
+    '#default_value' =>  $qid,
+  );
+  
+  
+  
+  
+  $form['home'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Homepage Pricing'),
+    '#collapsible' => FALSE,
+    '#collapsed' => FALSE,
+  );
+  
+  // get all the pricing panel nodes
+  $view = views_get_view('cmc_pricing');
+  $content = $view->preview('pricing_panel_list');
+
+  $options = array('' => 'None');
+  foreach ($view->result as $res) {
+    $options[$res->nid] = $res->node_title;
+  }
+  
+  for ($i=1; $i<=3; $i++) {
+    $key = 'cmc_pricing_home_panel' . $i;
+    $form['home'][$key] = array(
+      '#type' => 'select',
+      '#options' => $options,
+      '#title' => t('CMC home pricing panel ') . $i,
+      //'#description' => t('Time in seconds, should be < 30. Feed returns last 30 movements and we might have more than 1 movement per second'),
+      '#default_value' =>  variable_get($key, ''),
+    );
+  }
+  
+  $form['home']['cmc_pricing_home_pricing_scroller'] = array(
+    '#type' => 'select',
+    '#options' => $options,
+    '#title' => t('CMC home scrolling pricing'),
+    //'#description' => t('Time in seconds, should be < 30. Feed returns last 30 movements and we might have more than 1 movement per second'),
+    '#default_value' =>  variable_get('cmc_pricing_home_pricing_scroller', ''),
+  );
+  
+  return system_settings_form($form);
+}
+
+
+
+
+/**
+ * hook_block_info
+ */
+function cmc_pricing_block_info() {
+  $blocks['cmc_pricing_product_node'] = array(
+    'info' => t('CMC Product Node Pricing '),
+  );
+  
+  $blocks['cmc_pricing_home'] = array(
+    'info' => t('CMC Homepage Pricing '),
+  );
+  
+  $blocks['cmc_pricing_home_scroller'] = array(
+    'info' => t('CMC Homepage Pricing Scroller'),
+  );
+  
+  $blocks['cmc_pricing_random'] = array(
+    'info' => t('CMC Pricing: Random Product'),
+  );
+
+  return $blocks;
+}
+
+
+/**
+ * hook_block_view
+ * @param unknown_type $delta
+ */
+function cmc_pricing_block_view($delta = '') {
+  //$path = drupal_get_path('module', 'cmc_framework');
+  $block = array();
+  if ($delta == 'cmc_pricing_product_node') {
+    $block['content'] = cmc_pricing_block_node();
+  }
+  else if ($delta == 'cmc_pricing_home') {
+    $block['content'] = cmc_pricing_block_homepage();
+  }
+  else if ($delta == 'cmc_pricing_home_scroller') {
+    $block['content'] = cmc_pricing_block_homepage_scroller();
+  }
+  else if ($delta == 'cmc_pricing_random') {
+    $block['content'] = cmc_pricing_block_random();
+  }
+  
+
+  return $block;
+}
+
+
+function cmc_pricing_block_homepage_scroller() {
+  
+  $nid = variable_get('cmc_pricing_home_pricing_scroller', '');
+  //echo $key, ':' . $i . ':', $nid, '<br />';
+  
+  if (!$nid) {
+    return;
+  }
+  // do a node load rather than a view?
+  // then pass a bunch of stuff into view
+  // then pass a bunch of instrument codes to get the panel data
+  $node = node_load($nid);
+  $instruments = cmc_pricing_node_get_instruments($node);
+
+  $data = array(
+    'node' => $node,
+    'instruments' => $instruments,
+  );
+  
+  
+  $options = array(
+    'attributes' => array(
+      'class' => 'pricing-edit-scroller',
+    ),
+    'query' => array('destination' => $_GET['q']),
+  );
+  
+  if (user_access('administer cmc_pricing')) {
+    $data['edit_link'] = l('Edit Pricing Scroller', 'node/' . $node->nid . '/edit', $options);
+  }
+  
+  $path = drupal_get_path('module', 'cmc_pricing');
+  drupal_add_js($path . '/js/wonksticker.plugin.js');
+  
+  
+  return theme('cmc_pricing_scroller', $data);
+}
+
+
+/**
+ *
+ * Enter description here ...
+ * @param unknown_type $node
+ */
+function cmc_pricing_node_get_instruments($node) {
+  // loop thru the tabs in pricing panel
+  $product_nids = array();
+  
+  for ($i=1; $i<=5; $i++) {
+    // get all the products for panel
+    $product_field = 'field_pricing_products'. $i;
+    
+    if (!empty($node->{$product_field}['und'])) {
+      // only if we have some products
+      foreach  ($node->{$product_field}['und'] as $p) {
+        $product_nids[] = $p['nid'];
+      }
+    }
+  }
+  
+  //print_r($product_nids);
+  $instrument_codes = array();
+  
+  if (count($product_nids)) {
+    $view = views_get_view('cmc_pricing');
+    $content = $view->preview('instrument_codes', array(implode(',', $product_nids)));
+    
+    foreach ($view->result as $res) {
+      $product = array(
+        'title' => $res->node_title,
+        'nid' => $res->nid,
+      );
+      $instrument_code = $res->field_field_instrument_code[0]['raw']['value'];
+      $pricing = cmc_pricing_get_price($instrument_code);
+      
+      if (!empty($pricing)) {
+        $instrument_codes[$res->nid] = array(
+          'product' => $product,
+          'pricing' => $pricing,
+        );//$res->field_field_instrument_code[0]['raw']['value'];
+      }
+      else {
+        $vars = array(
+          'title' => $res->node_title,
+          'nid' => $res->nid,
+          'instrument_code' => $instrument_code,
+        );
+        cmc_pricing_log_product_pricing_warning($vars);
+      }
+    }
+  }
+  
+  //print_r($instrument_codes);
+  return $instrument_codes;
+}
+
+function cmc_pricing_log_product_pricing_warning($data) {
+  $message = t('Product does not having Pricing Code! Product: %product nid:%nid Instrument Code: %instrument_code ');
+  $vars = array(
+    '%product' => $data['title'],
+    '%nid' => $data['nid'],
+    '%instrument_code' => $data['instrument_code'],
+  );
+  watchdog('cmc_pricing', $message, $vars, WATCHDOG_ERROR);
+}
+
+/**
+ *
+ * Enter description here ...
+ */
+function cmc_pricing_block_homepage() {
+  $panels = array();
+  
+  for ($i=1; $i<=3; $i++) {
+    $key = 'cmc_pricing_home_panel' . $i;
+    $nid = variable_get($key, '');
+    //echo $key, ':' . $i . ':', $nid, '<br />';
+    
+    if (!$nid) {
+      continue;
+    }
+    // do a node load rather than a view?
+    // then pass a bunch of stuff into view
+    // then pass a bunch of instrument codes to get the panel data
+    $node = node_load($nid);
+    $instruments = cmc_pricing_node_get_instruments($node);
+
+    $data = array(
+      'node' => $node,
+      'instruments' => $instruments,
+      'i' => $i,
+      'edit_link' => '',
+    );
+    
+    if (user_access('administer cmc_pricing')) {
+      $options = array(
+        'attributes' => array(
+          'class' => 'pricing-edit',
+        ),
+        'query' => array('destination' => $_GET['q']),
+      );
+      $data['edit_link'] = l('Edit Pricing Panel', 'node/' . $node->nid . '/edit', $options);
+    }
+    
+    $panels[] = theme('cmc_pricing_panel', $data);
+  }
+    
+  return implode("\n", $panels);
+}
+
+
+/**
+ * returns the price of an instrument
+ * @param unknown_type $instrument_code
+ */
+function cmc_pricing_get_price($instrument_code) {
+  $pricing = cmc_pricing_load($instrument_code);
+  
+  // can't find the pricing!
+  if (empty($pricing)) {
+    return array();
+  }
+  
+  // static so called only once per request
+  static $results;
+  if (!empty($results[$instrument_code])) {
+    return $results[$instrument_code];
+  }
+    
+  $prices = cmc_pricing_get_current_price($pricing['symbol']);
+  
+  if (empty($prices->prices->price) || !is_array($prices->prices->price)) {
+    $latest_price = array();
+  }
+  else {
+    // return the latest price
+    $latest_prices = array_reverse($prices->prices->price);
+    //print_r($latest_prices);
+    $latest_price = array_shift($latest_prices);
+  }
+  //$latest_price = array_reverse
+  $result = array(
+    'pricing' => $pricing,
+    'price' => $latest_price,
+  );
+  
+  $results[$instrument_code] = $result;
+  return $result;
+  
+}
+
+
+/**
+ * check if this product type is to suppressed
+ * @param unknown_type $node
+ */
+function cmc_pricing_suppressed_product($node) {
+  $suppress = variable_get('cmc_pricing_suppression', array());
+  $suppress = array_values($suppress);
+  
+  foreach ($node->field_instrument_type['und'] as $term) {
+    if (in_array($term['tid'], $suppress)) {
+      // suppressed, so don't show
+      return true;
+    }
+  }
+  
+  return false;
+}
+
+/**
+ *
+ */
+function cmc_pricing_block_node() {
+
+  $node = menu_get_object();
+  if (empty($node)){
+   return;
+  }
+  
+  if (cmc_pricing_suppressed_product($node)) {
+    return;
+  }
+  
+  $data = cmc_pricing_display_data($node);
+  if ($data) {
+    cmc_pricing_add_js();
+    //print_r($data);
+    return theme('cmc_pricing_product', $data);
+  }
+  else {
+    return;
+  }
+}
+
+
+/**
+ * Random pricing from a nodequeue
+ */
+function cmc_pricing_block_random() {
+  
+  $qid = variable_get('cmc_pricing_nodequeue', '');
+  if (!$qid) {
+    return;
+  }
+    
+  $view = views_get_view('cmc_pricing');
+  $content = $view->preview('pricing_random', array($qid));
+  
+  if (count($view->result)) {
+    $node = $view->result[0]->_field_data['nid']['entity'];
+    
+    if (cmc_pricing_suppressed_product($node)) {
+      return;
+    }
+    
+    $data = cmc_pricing_display_data($node);
+    if ($data) {
+      cmc_pricing_add_js();
+      
+      // add the edit nodequeue link
+      $edit_link = '';
+      if (user_access('administer cmc_pricing')) {
+        $edit_link = l('Edit Random Product List', 'admin/structure/nodequeue/' . $qid . '/view');
+      }
+      return theme('cmc_pricing_product', $data) . $edit_link;
+    }
+  }
+  
+}
+
+
+/**
+ * Add js
+ */
+function cmc_pricing_add_js() {
+  $path = drupal_get_path('module', 'cmc_pricing');
+
+  $period = variable_get('cmc_pricing_js_cache_time', 20);
+  $data = array(
+    'cmc_pricing' => array(
+      'refresh_period' => $period,
+    ),
+  );
+  drupal_add_js($data, 'setting');
+  drupal_add_js($path . '/js/cmc_pricing.update.js');
+
+  drupal_add_css($path . '/css/cmc_pricing.css');
+}
+
+
+/**
+ *
+ * @param unknown_type $symbol
+ */
+function cmc_pricing_get_current_price($symbol) {
+
+  // grab the feed now, assume it will be json encoded
+  $feed = variable_get('cmc_pricing_price_feed_url', 'http://londhdev3l03:20025/pricefeed/rest/v2/prices');
+  
+  // sb or cfd!!
+  // DEFAULTING TO SB
+  $feed .= '/sb/' . $symbol . '.json';
+
+  // for testing as actual feed seems flakey and not sure if this is the current one
+//  $feed = 'http://localhost.d7-uk-cmcmarkets-dev.cmc.local/profiles/cmc_installer/modules/custom/cmc_pricing/data/UK100.SPOT.GBP.CMC.json';
+  $response = drupal_http_request($feed);
+//echo $feed;
+
+  if ($response->code != 200) {
+    echo "FAIL!!!! \n\n";
+    print_r($response);
+    return;
+  }
+
+  // response is in json
+  $data = json_decode($response->data);
+  return $data;
+}
+
+
+/**
+ * hook_theme
+ */
+function cmc_pricing_theme($existing, $type, $theme, $path) {
+  return array(
+    'cmc_pricing_product' => array(
+      'template'	=> 'theme/cmc_pricing_product',
+      'variables' => array(
+        'data' => NULL
+      ),
+    ),
+    //$panels = theme('cmc_pricing_panel', $node, $instruments, $i);
+    'cmc_pricing_panel' => array(
+      'template'	=> 'theme/cmc_pricing_panel',
+      'variables' => array(
+        'data' => NULL
+      ),
+    ),
+    
+    'cmc_pricing_scroller' => array(
+      'template'	=> 'theme/cmc_pricing_scroller',
+      'variables' => array(
+        'data' => NULL
+      ),
+    ),
+    'cmc_pricing_product_title' => array(
+      'template'	=> 'theme/cmc_pricing_product_title',
+      'variables' => array(
+        'data' => NULL
+      ),
+    ),
+  );
+}
+
+
+
+function cmc_pricing_load($pid) {
+  if (is_numeric($pid)) {
+    $result = db_select('cmc_pricing', 'cp')
+      ->fields('cp', array(
+                'pid',
+                'instrument_code',
+                'name',
+                'symbol',
+                'type',
+                'subtype',
+                'country',
+                'region',
+                'created',
+                'updated',))
+      ->condition('pid', $pid, '=')
+      ->execute()
+      ->fetchAssoc();
+  }
+  else {
+    $result = db_select('cmc_pricing', 'cp')
+      ->fields('cp', array(
+                'pid',
+                'instrument_code',
+                'name',
+                'symbol',
+                'type',
+                'subtype',
+                'country',
+                'region',
+                'created',
+                'updated',))
+      ->condition('instrument_code', $pid, '=')
+      ->execute()
+      ->fetchAssoc();
+  }
+  
+    
+   return $result;
+}
+
+/**
+ *
+ * @param unknown_type $pricing
+ */
+function cmc_pricing_save($pricing) {
+  
+  if (empty($pricing['pid'])) {
+    $result = db_insert('cmc_pricing')
+        ->fields(array(
+          'symbol' => $pricing['symbol'],
+          'instrument_code' => $pricing['instrument_code'],
+          'name' => $pricing['name'],
+          'type' => $pricing['type'],
+          'subtype' => $pricing['subtype'],
+          'country' => $pricing['country'],
+          'region' => $pricing['region'],
+          'created' => REQUEST_TIME,
+        	'updated' => REQUEST_TIME,
+        ))
+        ->execute();
+  }
+  else {
+      $result = db_update('cmc_pricing')
+        ->fields(array(
+          'symbol' => $pricing['symbol'],
+          'instrument_code' => $pricing['instrument_code'],
+          'name' => $pricing['name'],
+          'type' => $pricing['type'],
+          'subtype' => $pricing['subtype'],
+          'country' => $pricing['country'],
+          'region' => $pricing['region'],
+          'updated' => REQUEST_TIME,
+        ))
+        ->condition('pid', $pricing['pid'], '=')
+        ->execute();
+  }
+  
+  return $result;
+}
+
+/**
+ *
+ * @param unknown_type $pricing
+ */
+function cmc_pricing_delete($pricing) {
+  
+  if (!empty($pricing['pid'])) {
+    $res = db_delete('cmc_pricing')
+      ->condition('pid', $pricing['pid'])
+      ->execute();
+    
+    return $res;
+  }
+}
+
+
+
+function cmc_pricing_form_alter(&$form, &$form_state, $form_id) {
+    return;
+  if ($form_id == 'cmc_framework_markets_landing_settings') {
+    echo $form_id;
+    //print_r($form);
+    
+    $view = views_get_view('cmc_pricing');
+    $content = $view->preview('pricing_panel_list');
+  
+    $options = array('' => 'None');
+    foreach ($view->result as $res) {
+      $options[$res->nid] = $res->node_title;
+    }
+    
+    for ($i=1; $i<=5; $i++) {
+      $key = 'cmc_framework_markets_tab' . $i . '_pricing';
+      $form['tab' . $i][$key] = array(
+        '#type' => 'select',
+        '#options' => $options,
+        '#title' => t('Tab Pricing panel'),
+        //'#description' => t('Time in seconds, should be < 30. Feed returns last 30 movements and we might have more than 1 movement per second'),
+        '#default_value' =>  variable_get($key, ''),
+      );
+    }
+  }
+  
+  /*
+  if ($form_id == 'views_exposed_form') {
+    $form['search_api_views_fulltext']['#attributes']['autocomplete'] = 'off';
+    if (isset($form['created'])) {
+      $form['created']['#type'] = 'value';
+    }
+  } elseif ($form_id == 'search_block_form') {
+    $form['search_block_form']['#attributes']['autocomplete'] = 'off';
+  }
+
+  // default text for search textfields
+  $search_textfield_defaults = cmc_search_textfield_defaults();
+
+  if (!empty($search_textfield_defaults[$form['#id']])) {
+    $setting = $search_textfield_defaults[$form['#id']];
+    $form[$setting[1]]['#attributes']['placeholder'] = t($setting[2]);
+  }
+  */
+}
+
+
+function cmc_pricing_display_data($node) {
+  $instrument_code = $node->field_instrument_code['und'][0]['value'];
+  
+  $data = array(
+    'node' => $node,
+    'pricing' => cmc_pricing_get_price($instrument_code),
+  );
+  
+  if (empty($data['pricing'])) {
+    $vars = array(
+      'title' => $node->title,
+      'nid' => $node->nid,
+      'instrument_code' => $instrument_code,
+    );
+    cmc_pricing_log_product_pricing_warning($vars);
+    return false;
+  }
+  
+  return $data;
+}
+
+
+/**
+ *
+ */
+function cmc_pricing_node_pricing($node) {
+
+  if (cmc_pricing_suppressed_product($node)) {
+    return;
+  }
+  
+  $data = cmc_pricing_display_data($node);
+  if ($data) {
+    cmc_pricing_add_js();
+    //print_r($data);
+    return theme('cmc_pricing_product_title', $data);
+  }
+  else {
+    return;
+  }
+  
+}

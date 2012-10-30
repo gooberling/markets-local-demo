@@ -1,0 +1,184 @@
+<?php
+
+define('CMC_PRODUCT_SEARCH_CONTENT', 'content_search');
+define('CMC_PRODUCT_SEARCH_KEYWORDS', 'keywords_search');
+
+//function cmc_products_migrate_api() {
+//  $api = array(
+//    'api' => 2,
+//  );
+//  return $api;
+//}
+
+
+function cmc_products_menu() {
+  $items = array();
+
+  $items['instruments_lookup'] = array(
+    'title' => 'Instruments Lookup', // @todo proper title
+    'page callback' => 'cmc_products_instruments_search',
+    'page arguments' => array(1),
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+    'file' => 'cmc_products.search.inc',
+  );
+  return $items;
+}
+
+/*
+ * Implements hook_theme 
+ */
+function cmc_products_theme($existing, $type, $theme, $path) {
+  $base_path = drupal_get_path('module', 'cmc_products');
+  $path = $base_path ."/theme";
+  return array(
+    'cmc_product_instruments_search_checkboxes' => array(
+      'variables' => array('result' => NULL),
+      'template' => 'cmc_product_instruments_search_checkboxes',
+      'path' => $path,
+    ),
+  );
+}
+
+function cmc_products_form_alter(&$form, &$form_state, $form_id ) {
+ $options = array();
+ $selected_markup = "";
+ 
+  if ($form_id == "cmc_blog_node_form") {
+    if (isset($form_state["node"]) && !empty($form_state["node"]->field_instruments["und"][0]["value"])) {
+
+      $product_codes = explode(",",$form_state["node"]->field_instruments["und"][0]["value"]); 
+      if (isset($product_codes)) {
+        foreach($product_codes as $indx => $key) {
+          $query = new EntityFieldQuery;
+          $result = $query
+            ->entityCondition('entity_type', 'node')
+            ->fieldCondition('field_instrument_code', 'value', $key, '=')
+            ->execute();
+
+          $nids = array_keys($result["node"]);
+          $nodes = node_load_multiple($nids);
+
+          if($nodes) {
+            foreach($nodes as $node) {
+              $options[$node->field_instrument_code["und"][0]["value"]] = $node->title;
+            }
+          }
+        }
+      }
+
+
+      if (!empty($options)) {
+        foreach($options as $instrument_code => $title) {
+          $selected_markup .=  '<option value="' .$instrument_code .'">' .$title.'</option>';
+        }
+      } 
+      else {
+        $selected_markup .=  '<option value="1">Instruments not selected</option>';
+      }
+    }
+
+    // Purely theming as requested by Nick 
+    
+    $form['blog-publish'] = array(
+      '#type' => 'fieldset',
+      '#tree' => FALSE,
+      '#weight' => $form['field_blog_publish']['#weight']
+    ); 
+
+    $form['blog-publish']['field_blog_publish'] = $form['field_blog_publish'];
+    unset($form['field_blog_publish']);
+
+
+    // Insights schema does have a field field_instruments that stores product keys
+    // related to a insight, however this being a free text field requires editor
+    // to manually enter product codes, which may they might not know most of the time,
+    // 
+    // We hide the field using CSS and then add additional pseudo fields that provide
+    // a way for performing Solr Search for product codes.
+    // 
+    // Values surfaced in solr search and selected by admin are added to field_instruments via javascript.
+    // @see includes/cmc_products_instruments.js within this module
+    // 
+    
+    $form["field_instruments"]["#prefix"] = "<div class=\"element-hidden\">";
+    $form["field_instruments"]["#suffix"] = "</div>";
+    
+    $elements['search'] = array(
+      '#type' => 'fieldset',
+      '#title' => 'Products search',
+      '#weight' =>  $form["body"]["#weight"] + 1,
+    );
+
+    $form["node_cmc_blog_form_group_taxonomy"]['#weight'] = $form["body"]["#weight"] + 2;
+    $elements['search']['search_type'] = array(
+      '#type' => 'radios',
+      '#options' => array(CMC_PRODUCT_SEARCH_CONTENT => 'content', CMC_PRODUCT_SEARCH_KEYWORDS => 'keywords'),
+      '#weight' =>  1
+    );    
+
+    $elements['search']['search_keywords'] = array(
+      '#type' => 'textfield',
+      '#weight' => 2,
+      '#states' => array(
+        'visible' => array(
+          ':input[name=search_type]' => array('value' => CMC_PRODUCT_SEARCH_KEYWORDS)
+        )
+      ),
+    );    
+
+    $elements['search']['instrument_search_button'] = array(
+      '#type' => 'markup',
+      '#prefix' => '',
+      '#markup' => '<div class="form-item form-type-button form-item-get-instruments"><input class="noEnterSubmit form-submit" type="button" id="edit-get-instruments" name="get_instruments" value="Get Instruments"></div>
+            <div class="form-item form-type-select form-item-search-results">
+            <div id="results-status"></div>
+            <select id="search_results" name = "search_results" multiple="multiple">
+              <option value="1">Use search tool above to find results</option>
+              </select>
+
+              <div id="move-items" class="button-shift-items">
+              <input id="MoveRight" type="button" value="+" />
+              <input id="MoveLeft" type="button" value="-" />
+              </div>
+              <div class="form-item form-type-select form-item-selected-results">
+              <select id="selected_results" name ="selected_results" multiple="multiple">'
+              .$selected_markup .
+              '</select>
+              </div>
+        </div>',
+      '#suffix' => '<div id="instruments_container"> </div>',
+      '#weight'=> 3,
+    );
+
+    $form =    cmc_array_insert($form, 'field_instruments', $elements, FALSE);
+
+    drupal_add_js(drupal_get_path('module', 'cmc_products') . '/js/cmc_products_instruments.js',
+      array(
+        'type' => 'file',
+        'group' => JS_LIBRARY,
+        'every_page' => TRUE
+      )
+    );
+  }
+  
+}
+
+
+/** 
+ * Helper function that does inserts a element into a array before / after a given key
+ */
+function cmc_array_insert($arr1,$key, $arr2, $before = FALSE ) {
+  $index = array_search($key, array_keys($arr1)); 
+  if ($index === FALSE) {
+    $index = count($arr1);
+  }
+  else {
+    if (!$before) {
+      $index++;
+    }
+  }
+  
+  $end = array_splice($arr1, $index);
+  return  array_merge($arr1, $arr2, $end);
+}

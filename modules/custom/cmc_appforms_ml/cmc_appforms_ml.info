@@ -1,0 +1,10 @@
+name = Multilanguage support for CMC Onboarding
+description = Provides functionality for users to register for trading accounts
+package = CMC
+version = 0.2
+core = 7.x
+
+dependencies[]= cmc_appforms
+
+
+files[] = cmc_appforms_ml.class.inc

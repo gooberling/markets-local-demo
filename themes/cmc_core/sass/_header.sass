@@ -1,0 +1,332 @@
+// CMC Markets Theme	
+// name = CMC Markets V4
+// description = CMC Markets Base Theme - as of 17/02
+// Header SASS
+
+//-----------------------------------------------------------------------------------------------
+// Main heading stlyles
+//-----------------------------------------------------------------------------------------------
+#header.loading
+	.top-fill
+		height: 120px
+	.top-fill-logo
+		display: none
+	.menu-block-wrapper ul.menu a, #header .menu-block-wrapper ul.menu a:visited
+		background: none
+
+#header
+	position: relative
+	min-height: 110px
+	z-index: 5
+	.inner
+		min-height: 110px
+		overflow: visible
+		padding-bottom: 30px
+		float: left
+		clear: none
+		padding-top: 10px
+		z-index: 3
+	.top-fill-left
+		height: 120px
+		width: 50%
+		margin-right: -500px
+		float: left
+		overflow: hidden
+		.insert
+			height: 120px
+			margin-right: 500px
+			+headerGradientFills
+	.top-fill-right
+		height: 120px
+		width: 50%
+		float: left
+		margin-left: -500px
+		.insert
+			height: 120px
+			margin-left: 500px
+			+headerGradientFills
+	.top-fill
+		background: url(/#{$themepath}/bg_head_ie.png) repeat-x
+		+background(linear-gradient(top, rgba(23, 26, 32, 0.8) 0, rgba(10, 11, 14, 0.8) 150%))
+		width: 100%
+		height: 78px
+		position: absolute
+		top: 0px
+		left: 0px
+	.top-fill-logo
+		background: url(/#{$themepath}/v4_bg_head_nav.png) repeat-x
+		+background(linear-gradient(top, rgba(23, 26, 32, 0.8) -165%, rgba(10, 11, 14, 0.8) 100%))
+		width: 100%
+		width: 11%
+		height: 42px
+		position: absolute
+		top: 78px
+		left: 0px
+		display: block
+	#logo a
+		display: block
+		text-indent: -3000em
+		background: url(/#{$themepath}/logo-reg.png) no-repeat
+		width: 80px
+		height: 46px
+		position: absolute
+		left: 10px
+		top: 60px
+		z-index: 2
+	
+	//-----------------------------------------------------------------------------------------------
+	// Search box
+	//-----------------------------------------------------------------------------------------------
+	.block-search
+		position: absolute
+		right: 10px
+		top: 10px
+		z-index: 1
+		h3, 
+		.form-item label
+			display: none
+	.form-text
+		position: relative
+		border: 0
+		width: 135px
+		padding: 8px 30px 7px 15px
+		overflow: hidden
+		background: #142B31
+		+border-radius(15px)
+		color: white
+		+box-shadow(0px 0px 6px 0px #13272e inset)
+		+ieCssFix
+	div.form-item
+		margin-bottom: 0
+		margin-top: 0px
+	.form-submit
+		background: url(/#{$themepath}/v4_bg_magnify.png) no-repeat 0 0 transparent !important
+		border: none
+		top: 6px
+		right: 10px
+		position: absolute
+		text-indent: -5000px
+		font-size: 0px
+		line-height: 999px
+		overflow: hidden
+		width: 17px
+		height: 19px
+		opacity: 0.6
+		+transition(opacity 0.5s ease 0s)
+	.form-submit:hover
+		opacity: 1
+		+transition(opacity 0.5s ease 0s)
+		+cursor
+
+//-----------------------------------------------------------------------------------------------
+// hide moblie menu link
+//-----------------------------------------------------------------------------------------------
+
+.mobile-menu
+	display: none
+
+//-----------------------------------------------------------------------------------------------
+// main nav styling
+//-----------------------------------------------------------------------------------------------
+
+#header
+	.menu-block-wrapper
+		position: absolute
+		top: 78px
+		left: 11%
+		width: 89%
+		ul.menu
+			list-style: none outside none
+			margin: 0 0 0
+			overflow: hidden
+			padding: 0
+			width: 100%
+			display: -webkit-box
+			display: -moz-box
+			-webkit-box-orient: horizontal
+			-moz-box-orient: horizontal
+			-moz-box-align: stretch
+			-webkit-box-align: stretch
+			li
+				list-style-image: none
+				list-style: none !important
+				padding: 0
+				margin: 0
+				text-align: center
+				-webkit-box-flex: 1
+				-moz-box-flex: 1
+			li.filler
+				background: url(/#{$themepath}/v4_bg_head_nav.png) repeat-x
+				+background(linear-gradient(top, rgba(23, 26, 32, 0.8) -165%, rgba(10, 11, 14, 0.8) 100%))
+				height: 42px
+			a, a:visited
+				display: block
+				text-align: center
+				color: #f5f5f5
+				font-size: 1em
+				text-decoration: none
+				line-height: 3.3em
+				padding: 0 1em
+				background: url(/#{$themepath}/v4_bg_head_nav.png) repeat-x 0 0px
+				+transition(background-position 0.5s ease 0s)
+			a:hover
+				background-position: 0 -42px
+				+transition(background-position 0.5s ease 0s)
+			a.active,
+			li.active-trail a,
+			a.active:visited, 
+			li.active-trail a:visited
+				color: #fff
+				background: none
+		ul.menu ul.menu
+			display: none
+
+//-----------------------------------------------------------------------------------------------
+//use a width for FF as it doesn't line up properly for some reason
+//-----------------------------------------------------------------------------------------------
+
+.ff.stretch #header .menu-block-wrapper
+	width: 89.1%
+
+.ff.win.stretch #header .menu-block-wrapper
+	width: 89.05%
+
+//-----------------------------------------------------------------------------------------------
+// bg gradient
+//-----------------------------------------------------------------------------------------------
+
+.gradient
+	min-height: 150px
+	background: url(/#{$themepath}/v4_bg_head.png) repeat-y top center #0091ac
+	+background(linear-gradient(top left, #0091ac 0%, #52daf4 100%))
+	//@include gradient(#0091ac,#52daf4,0%,100%);
+	position: relative
+	z-index: 3
+
+//-----------------------------------------------------------------------------------------------
+// crumbtrail
+//-----------------------------------------------------------------------------------------------
+.is-front #crumbtrail
+	// Remove from homepage
+	display: none
+
+#crumbtrail
+	background-color: #F3F3F3
+	font-size: 11px
+	line-height: 2.6em
+	position: relative
+	z-index: 2
+	margin-bottom: -1px
+	ul
+		margin: 0px
+		overflow: hidden
+		padding: 0
+	li
+		float: left
+		margin: 0
+		padding: 0 6px 0 0px
+		list-style: none
+		line-height: 2.7em
+	li:first-child
+		//background: none;
+		padding-left: 0
+	li:after
+		+arrow
+		-webkit-transform: scale(0.5, 1)
+		-moz-transform: scale(0.5, 1)
+		margin-left: 3px
+		font-size: 110%
+	li.breadcrumb-last:after
+		content: ''
+	a, 
+	a:visited
+		padding: 0
+		color: #606060
+	.breadcrumb-last
+		color: $blue
+	a:hover, 
+	.breadcrumb-last a:hover
+		color: black
+	//-----------------------------------------------------------------------------------------------
+	// top links 
+	//-----------------------------------------------------------------------------------------------
+.buttons
+	position: absolute
+	top: 10px
+	right: 220px
+	z-index: 10
+	margin: 0
+	a.signup:hover, 
+	a.login:hover
+		opacity: 0.75
+		+transition(opacity 0.5s ease 0s)
+	.login,.signup
+		display: block
+		text-decoration: none
+		line-height: 2.3em
+		color: white
+		float: left
+		padding: 0 10px
+	.signup
+		margin-right: 10px
+		color: #FFEF00
+		opacity: 1
+		+transition(opacity 0.5s ease 0s)
+	div.login-layer
+		display: none
+		position: absolute
+		top: 28px
+		right: 0px
+		background: url(/#{$themepath}/bg_login.png)
+		background: rgba(0, 0, 0, 0.8)
+		padding: 30px 30px 15px
+		width: 325px
+		z-index: 1000
+		a,a:visited
+			display: block
+			text-align: center
+			font-size: 1em
+			color: white
+			line-height: 2.3em
+			background-repeat: no-repeat
+			background-image: url(/#{$themepath}/bg_padlock.png)
+			&:hover
+				color: black
+		.spreadbet
+			background: #82256B
+			+background(linear-gradient(top, #a33492, #82256b))
+			border-top: 1px solid #A664AC
+			a, a:visited
+				background-position: right 3px
+		.cfd
+			background: #017F7B
+			+background(linear-gradient(top, #00a29d, #017f7b))
+			border-top: 1px solid #01B8B6
+			a, a:visited
+				background-position: right -42px
+		.marketmaker
+			background: #E8E8E8
+			+background(linear-gradient(top, #eeeeee, #e8e8e8))
+			border-top: 1px solid #fff
+			a, a :visited
+				color: $textcolor
+				background-position: right -88px
+		.login-promo
+			overflow: hidden
+			margin-top: 20px
+			.login-promo-image
+				float: right
+			.login-promo-text
+				float: left
+				color: white
+				font-size: 0.9em
+				width: 70%
+				h2, h3
+					color: $blue
+					font-size: 1.3em
+	div.login-layer.active
+		display: block
+	.login.active
+		background: url(/#{$themepath}/bg_login.png)
+		background: rgba(0, 0, 0, 0.8)
+		color: $blue

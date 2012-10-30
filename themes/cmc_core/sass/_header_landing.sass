@@ -1,0 +1,178 @@
+// CMC Markets Theme	
+// name = CMC Markets V4
+// description = CMC Markets Base Theme - as of 17/02
+// Normal landing page header SASS
+
+//-----------------------------------------------------------------------------------------------
+// region styling
+//-----------------------------------------------------------------------------------------------
+.region-landing-page
+	text-align: center
+	z-index: 1
+
+.is-front	 #header .inner
+	padding-bottom: 0
+
+//-----------------------------------------------------------------------------------------------
+// hero styling
+//-----------------------------------------------------------------------------------------------
+
+.block-views-cmc-landing-page-hero
+	//	width:980px;
+	margin: 15px auto 0
+	overflow: visible
+	padding: 0
+	position: relative
+	text-align: left
+	height: 290px
+	+box-sizing(border-box)
+
+.hero-content
+	color: white
+	position: relative
+	z-index: 5
+	overflow: hidden
+	height: 230px
+	background-color: transparent !important
+	h1
+		color: white
+		font-size: 2.7em
+		line-height: 1.2em
+		margin-bottom: 0.5em
+		margin-top: -6px
+	h2
+		color: #9DD7E1
+		line-height: 1.2em
+	h1 + h2
+		padding-top: 0
+
+.hero-image
+	height: 480px
+	left: 260px
+	overflow: hidden
+	position: absolute
+	top: -160px
+	width: 720px
+	z-index: 1
+	
+
+// hide rest of slide show on load
+
+.hero.row1,
+.hero.row2,
+.hero.row3,
+.hero.row4,
+.hero.row5,
+.hero.row6,
+.hero.row7
+	display: none
+
+//-----------------------------------------------------------------------------------------------
+// hero home styling
+//-----------------------------------------------------------------------------------------------
+
+.region-landing-page .prev,
+.region-landing-page .next
+	top: 50%
+	width: 41px
+	height: 82px
+	padding: 0
+	font-size: 0
+	display: none
+	position: absolute
+	cursor: pointer
+	cursor: hand
+	opacity: 0.35
+	z-index: 3
+	+transition(opacity 0.3s ease-in)
+	&:hover
+		opacity: 1
+		+transition(opacity 0.3s ease-in)
+
+.region-landing-page .next
+	background: url(/#{$themepath}/bg_hero_next.png) no-repeat transparent
+	right: 5%
+
+.region-landing-page .prev
+	background: url(/#{$themepath}/bg_hero_prev.png) no-repeat transparent
+	left: 5%
+	right: auto
+
+//-----------------------------------------------------------------------------------------------
+// signpost hero styling
+//-----------------------------------------------------------------------------------------------
+.region-landing-page
+	.signpost-links
+		position: absolute
+		right: 0
+		top: 0px
+		width: 180px
+		z-index: 10
+		margin-bottom: 0
+		.signpost2
+			background: transparent
+		.signpost2 a, .signpost2 a:visited
+			background: rgba(255, 255, 255, 0.2)
+			color: white
+			display: block
+		.disclaim
+			background: none
+			border: 0
+			+box-shadow(none)
+			color: white
+			text-align: center
+
+.is-front
+	.gradient
+		height: 480px
+		background: none repeat scroll 0 0 #121212
+	.region-landing-page
+		position: relative
+		top: -120px
+		height: 480px
+	.block-views-cmc-landing-page-hero
+		overflow: visible !important
+		padding: 0
+		text-align: left
+		height: 480px
+		margin-top: 0px
+		background: none !important
+		
+	.hero
+		background: none !important
+		width: 100%
+		overflow: visible
+		height: 480px !important
+		//padding-top:165px;
+		.hero-image
+			top: 0
+			background: none !important
+			img
+				//height: 480px
+				//width: 720px
+	.hero-content
+		padding-top: 165px
+		height: 201px
+	.hero-content h2
+		color: white
+	.signpost-links
+		left: 0
+		top: 370px
+		width: 450px
+		.signpost1,
+		.signpost2
+			float: left
+			height: 45px
+			a,
+			a:visited
+				padding: 10px 15px 0
+				font-size: 1.4em
+				padding: 17px 15px 5px
+		
+		.disclaim
+			display: block
+			text-align: left
+			clear: both
+			p
+				padding: 11px 0 0
+				font-size: 1em

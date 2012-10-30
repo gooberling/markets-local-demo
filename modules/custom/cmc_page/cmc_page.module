@@ -1,0 +1,94 @@
+<?php
+/**
+ * @file
+ * Code for the cmc page feature.
+ */
+
+include_once('cmc_page.features.inc');
+
+function cmc_page_menu() {
+  $items = array();
+  
+  $items['admin/config/cmc_page'] = array(
+    'title' => t('Settings for CMC Page'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('cmc_page_settings'),
+    'access arguments' => array('Administer site configuration'),
+  
+  );
+  $items['admin/config/cmc_page/import'] = array(
+    'title' => t('Import cmc_page nodes'),
+    'page callback' => 'cmc_page_import_nodes',
+    'page arguments' => array('cmc_analytics_settings'),
+    'access arguments' => array('Administer site configuration'),
+  
+  );
+  
+  return $items;
+}
+
+
+/**
+ *
+ */
+function cmc_page_settings() {
+  $form = array();
+  $form['cmc_page_setting'] = array(
+    '#type' => 'textarea',
+    '#prefix' => l('IMPORT NODES', 'admin/config/cmc_page/import'),
+    '#title' => t('CMC page setting'),
+    '#description' => t('CMC Page description'),
+    '#default_value' =>  variable_get('cmc_page_setting', ''),
+  );
+  
+  return system_settings_form($form);
+}
+
+/**
+ *
+ */
+function cmc_page_import_nodes() {
+  module_load_include('inc', 'cmc', 'cmc.admin');
+  module_load_include('inc', 'cmc_page', 'cmc_page.admin');
+  
+  $language_list = language_list();
+  
+  $content = cmc_page_uk_default_content();
+  //$domain = 'uk';
+  $domain = isset($_GET['domain']) ? $_GET['domain'] : '';
+  
+  foreach ($content as $top => $c) {
+    echo $top;
+    $node = cmc_admin_prepare_dummy_node('cmc_page');
+    $node->title = $top . ' ' . $domain;
+    $node->body = cmc_admin_lorem_ipsum();
+    $node->language = 'en';
+    
+    node_save($node);
+    
+    // add item to menu
+    $menu_item = array(
+      'link_path' => 'node/' . $node->nid,
+    	'link_title' => $node->title,
+      //'parent_path' => 'node/6',
+    );
+    cmc_admin_add_menu_link('main-menu-uk', $menu_item);
+    
+    foreach ($c as $title) {
+      $child_node = cmc_admin_prepare_dummy_node('cmc_page');
+      $child_node->title = $title . ' ' . $domain;
+      $child_node->body = cmc_admin_lorem_ipsum();
+      $child_node->language = 'en';
+      
+      node_save($child_node);
+      
+      $menu_item = array(
+        'link_path' => 'node/' . $child_node->nid,
+      	'link_title' => $child_node->title,
+        'parent_path' => 'node/' . $node->nid,
+      );
+      cmc_admin_add_menu_link('main-menu-uk', $menu_item);
+    }
+  }
+  return __METHOD__;
+}

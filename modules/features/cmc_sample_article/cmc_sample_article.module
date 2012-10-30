@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the cmc_sample_article feature.
+ */
+
+include_once('cmc_sample_article.features.inc');

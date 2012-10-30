@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the CRM Applications Queue feature.
+ */
+
+include_once('crm_applications_queue.features.inc');

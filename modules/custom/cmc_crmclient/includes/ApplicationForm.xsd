@@ -1,0 +1,300 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema id="ApplicationForm" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+	<xs:element name="ApplicationForm">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="RequestType">
+					<xs:simpleType>
+						<xs:restriction base="xs:string">
+							<xs:enumeration value="Score"/>
+							<xs:enumeration value="Submit"/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:element>
+				<xs:element name="TenantTemplateCode" type="xs:string" minOccurs="1" maxOccurs="1"/>
+				<xs:element name="TradingCurrency" type="xs:string" minOccurs="1" maxOccurs="1"/>
+				<xs:element name="ApplicationDate" type="xs:string" />
+				<xs:element name="ApplicationType" type="xs:string" minOccurs="1" maxOccurs="1"/>
+				<xs:element name="Language" type="xs:string" />
+				<xs:element name="SalesTraderFlag" type="xs:boolean" />
+				<xs:element name="IPAddress" type="xs:string" />
+				<xs:element name="DeviceId" type="xs:string" />
+				<xs:element name="AcceptanceofAssessment" type="xs:boolean" />
+				<xs:element name="ApplicationChannel" minOccurs="1" maxOccurs="1">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="Code">
+								<xs:simpleType>
+									<xs:restriction base="xs:int">
+										<xs:enumeration value="1"/>
+										<xs:enumeration value="3"/>
+									</xs:restriction>
+								</xs:simpleType>
+							</xs:element>
+							<xs:element name="Value">
+								<xs:simpleType>
+									<xs:restriction base="xs:string">
+										<xs:enumeration value="FlexCustomer"/>
+										<xs:enumeration value="iPhoneCustomer"/>
+									</xs:restriction>
+								</xs:simpleType>
+							</xs:element>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="PersonalDetails" minOccurs="1" maxOccurs="1">
+					<xs:complexType>
+					  <xs:sequence>
+						<xs:element name="Title" type="xs:string" />
+						<xs:element name="FirstName" type="xs:string" />
+						<xs:element name="LastName" type="xs:string" />
+						<xs:element name="Gender" type="xs:string" />
+						<xs:element name="DateOfBirth" type="xs:string" />
+						<xs:element name="Nationality" type="xs:string" />
+						<xs:element name="MobileNumber" type="xs:string" />
+						<xs:element name="HomeNumber" type="xs:string" />
+						<xs:element name="EmailAddress" type="xs:string" />
+					  </xs:sequence>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="Address" minOccurs="1" maxOccurs="1">
+					<xs:complexType>
+					  <xs:sequence>
+						<xs:element name="ServiceAddressID" type="xs:string" />
+						<xs:element name="AddressLine1" type="xs:string" />
+						<xs:element name="AddressLine2" type="xs:string" />
+						<xs:element name="AddressLine3" type="xs:string" />
+						<xs:element name="AddressLine4" type="xs:string" />
+						<xs:element name="AddressLine5" type="xs:string" />
+						<xs:element name="Country" type="xs:string" />
+						<xs:element name="PostalCode" type="xs:string" />
+					  </xs:sequence>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="BankDetails">
+					<xs:complexType>
+					  <xs:sequence>
+						<xs:element name="SortCode" type="xs:string" />
+						<xs:element name="AccountNumber" type="xs:string" />
+						<xs:element name="IBAN" type="xs:string" />
+						<xs:element name="SWIFTCode" type="xs:string" />
+						<xs:element name="BankAccountCountry" type="xs:string" />
+						<xs:element name="IsValid" type="xs:boolean" />
+						<xs:element name="IsVerified" type="xs:boolean" />
+					  </xs:sequence>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="IdentificationDetails">
+					<xs:complexType>
+					  <xs:sequence>
+						<xs:element name="IDType" type="xs:string" />
+						<xs:element name="Identification" type="xs:string" />
+						<xs:element name="AdditionalDetails" type="xs:string" />
+						<xs:element name="ExpiryDate" type="xs:string" />
+					  </xs:sequence>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="FinancialDetails">
+					<xs:complexType>
+					  <xs:sequence>
+						<xs:element name="EmploymentStatus">
+							<xs:simpleType>
+								<xs:restriction base="xs:string">
+									<xs:enumeration value="Employed"/>
+									<xs:enumeration value="Retired"/>
+									<xs:enumeration value="Self Employed"/>
+									<xs:enumeration value="UnEmployed"/>
+									<xs:enumeration value="Student"/>
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+						<xs:element name="JobTitle" type="xs:string"/>
+						<xs:element name="CompanyName" type="xs:string" />
+						<xs:element name="CompanyRegistrationNumber" minOccurs="0" type="xs:string" />  <!-- ABN -->
+						<xs:element name="EducationalEstablishmentName" type="xs:string" />
+						<xs:element name="NatureOfBusiness" type="xs:string" />
+						<xs:element name="NatureOfBusinessFurtherDetails" type="xs:string" />
+						<xs:element name="SourceOfFunds">
+							<xs:simpleType>
+								<xs:restriction base="xs:string">
+									<xs:enumeration value="Salary/Employment"/>
+									<xs:enumeration value="Savings/Investments"/>
+									<xs:enumeration value="Partner/Parent/Family"/>
+									<xs:enumeration value="Benefits/Borrowing"/>
+									<xs:enumeration value="State Pension"/>
+									<xs:enumeration value="Private Pension"/>
+									<xs:enumeration value="Other"/>
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+						<xs:element name="AnnualIncome" type="xs:string" />
+						<xs:element name="ValueOfSavings" type="xs:string" />
+						<xs:element name="SourceOfIncome" type="xs:string" />
+						<xs:element name="OtherSourceOfIncome" type="xs:string" />
+						<xs:element name="EmpAddress" minOccurs="0" maxOccurs="1">
+							<xs:complexType>
+								<xs:sequence>
+									<xs:element name="ServiceAddressID" type="xs:string" />
+									<xs:element name="AddressLine1" type="xs:string" />
+									<xs:element name="AddressLine2" type="xs:string" />
+									<xs:element name="AddressLine3" type="xs:string" />
+									<xs:element name="AddressLine4" type="xs:string" />
+									<xs:element name="AddressLine5" type="xs:string" />
+									<xs:element name="Country" type="xs:string" />
+									<xs:element name="PostalCode" type="xs:string" />
+								</xs:sequence>
+							</xs:complexType>
+						</xs:element>
+					  </xs:sequence>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="TradingRelevantExperience">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="TradedAnyShares">
+								<xs:simpleType>
+									<xs:restriction base="xs:string">
+										<xs:enumeration value="Regularly"/>
+										<xs:enumeration value="Occasionally"/>
+										<xs:enumeration value="Rarely"/>
+										<xs:enumeration value="Never"/>
+									</xs:restriction>
+								</xs:simpleType>
+							</xs:element>
+							<xs:element name="TradedAnyOTCDerivatives">
+								<xs:simpleType>
+									<xs:restriction base="xs:string">
+										<xs:enumeration value="Regularly"/>
+										<xs:enumeration value="Occasionally"/>
+										<xs:enumeration value="Rarely"/>
+										<xs:enumeration value="Never"/>
+									</xs:restriction>
+								</xs:simpleType>
+							</xs:element>
+							<xs:element name="TradedAnyETD">
+								<xs:simpleType>
+									<xs:restriction base="xs:string">
+										<xs:enumeration value="Regularly"/>
+										<xs:enumeration value="Occasionally"/>
+										<xs:enumeration value="Rarely"/>
+										<xs:enumeration value="Never"/>
+									</xs:restriction>
+								</xs:simpleType>
+							</xs:element>							
+							<xs:element name="IsDemoAccountExist" type="xs:boolean" />
+							<xs:element name="IsSeminarAttended" type="xs:boolean" />
+							<xs:element name="WorkExperience">
+								<xs:simpleType>
+									<xs:restriction base="xs:string">
+										<xs:enumeration value="ACC"/>  <!-- Accountancy -->
+										<xs:enumeration value="ACT"/>  <!-- Actuarial science -->
+										<xs:enumeration value="FIN"/>  <!-- Financial risk management -->
+										<xs:enumeration value="INV"/>  <!-- Investment products -->
+										<xs:enumeration value="LEG"/>  <!-- Legal expertise relating to any of the above -->
+										<xs:enumeration value="LTT"/>  <!-- Worked in a directly relevant role for less than 3 consecutive years or have at least one year's experience as a self-directed investor -->
+										<xs:enumeration value="MTT"/>  <!-- Worked for at least 3 consecutive years in a directly relevant role -->
+										<xs:enumeration value="NEI"/>  <!-- Neither -->
+										<xs:enumeration value="NON"/>  <!-- None of the above -->
+										<xs:enumeration value="TRE"/>  <!-- Treasury -->
+									</xs:restriction>
+								</xs:simpleType>
+							</xs:element>
+							<xs:element name="ProfessionalQualification">
+								<xs:simpleType>
+									<xs:restriction base="xs:string">
+										<xs:enumeration value="ACC"/>  <!-- Accountancy -->
+										<xs:enumeration value="ACT"/>  <!-- Actuarial science -->
+										<xs:enumeration value="BAD"/>  <!-- Business administration -->
+										<xs:enumeration value="BMA"/>  <!-- Business management -->
+										<xs:enumeration value="BST"/>  <!-- Business studies -->
+										<xs:enumeration value="BUS"/>  <!-- Business -->
+										<xs:enumeration value="CAP"/>  <!-- Capital markets -->
+										<xs:enumeration value="CFI"/>  <!-- Computational finance -->
+										<xs:enumeration value="COM"/>  <!-- Commerce -->
+										<xs:enumeration value="DAQ"/>  <!-- Hold a diploma or higher level academic qualifications in a relevant field -->
+										<xs:enumeration value="ECO"/>  <!-- Economics -->
+										<xs:enumeration value="FEN"/>  <!-- Financial engineering -->
+										<xs:enumeration value="FIN"/>  <!-- Finance -->
+										<xs:enumeration value="FPL"/>  <!-- Financial planning -->
+										<xs:enumeration value="INS"/>  <!-- Insurance -->
+										<xs:enumeration value="NEI"/>  <!-- Neither -->
+										<xs:enumeration value="NON"/>  <!-- None of the above -->
+										<xs:enumeration value="PQU"/>  <!-- Finance related professional qualification -->
+										<xs:enumeration value="QNF"/>  <!-- Hold other professional or academic qualifications in a numerate or financial services-related field -->
+									</xs:restriction>
+								</xs:simpleType>
+							</xs:element>							
+							<xs:element name="InvestmentExperience">
+								<xs:simpleType>
+									<xs:restriction base="xs:string">
+										<xs:enumeration value="CON"/>  <!-- Contracts for differences (CFD) -->
+										<xs:enumeration value="FXD"/>  <!-- FX derivatives (e.g. forwards, swaps or options) -->
+										<xs:enumeration value="LEV"/>  <!-- Leverage foreign exchange -->
+										<xs:enumeration value="NON"/>  <!-- None, I have never invested or traded -->
+										<xs:enumeration value="OTH"/>  <!-- Others (that are not described above) -->
+									</xs:restriction>
+								</xs:simpleType>
+							</xs:element>
+							<xs:element name="NoOfYearsExperience">
+								<xs:simpleType>
+									<xs:restriction base="xs:string">
+										<xs:enumeration value="LTT"/>  <!-- Less than 3 years -->
+										<xs:enumeration value="TOM"/>  <!-- 3 or more years -->
+									</xs:restriction>
+								</xs:simpleType>
+							</xs:element>							
+							<xs:element name="NoOfTransactions">
+								<xs:simpleType>
+									<xs:restriction base="xs:string">
+										<xs:enumeration value="OTF"/>  <!-- 1 to 5 -->
+										<xs:enumeration value="SOM"/>  <!-- 6 or more -->
+									</xs:restriction>
+								</xs:simpleType>
+							</xs:element>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="UnderstandingOfTheFeaturesAndRisks">
+					<xs:complexType>
+					  <xs:sequence>
+						<xs:element name="OwnershipAndRights" type="xs:boolean" />
+						<xs:element name="ConceptOfMarginAndLeverage" type="xs:boolean" />
+						<xs:element name="ConceptOfVolatility" type="xs:boolean" />
+						<xs:element name="FamiliarWithOnlinePlatform" type="xs:boolean" />
+						<xs:element name="ResponsibilityToMonitorAndManage" type="xs:boolean" />
+					  </xs:sequence>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="LegalAgreement" minOccurs="0" maxOccurs="1">
+					<xs:complexType>
+					  <xs:sequence>
+						<xs:element name="CreditConsentGiven" minOccurs="0" type="xs:boolean" />					  
+						<xs:element name="ReceiveMarketingData" minOccurs="0" type="xs:string" />
+						<xs:element name="TermsAndConditions" minOccurs="0" type="xs:string" />
+						<xs:element name="TermsOfBusinessDocName" minOccurs="1" type="xs:string" />
+						<xs:element name="TermsOfBusinessVersion" minOccurs="1" type="xs:string" />
+						<xs:element name="TermsOfBusinessDateApproved" minOccurs="1" type="xs:string" />
+					  </xs:sequence>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="Identity" minOccurs="0">
+					<xs:complexType>
+					  <xs:sequence>
+						<xs:element name="ID" type="xs:string" />
+					  </xs:sequence>
+					</xs:complexType>
+				</xs:element>
+            </xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	
+	<xs:element name="ApplicationFormResponse">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="ApplicationID" type="xs:string" />
+				<xs:element name="Status" type="xs:string" />
+				<xs:element name="AppropriatenessReason" type="xs:string" />
+            </xs:sequence>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

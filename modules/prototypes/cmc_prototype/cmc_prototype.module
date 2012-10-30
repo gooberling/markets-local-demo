@@ -1,0 +1,26 @@
+<?php
+/*
+ * @file Mini module that provides  twitter feeds as blocks, Depends on twitter_pull
+ * 
+ */
+
+/**
+ * @file Install profile for CMC Markets
+ * @author Ravi Julapalli
+ */
+
+
+function cmc_prototype_menu() {
+  return array(
+    'admin/config/cmc-prototype' => array(
+      'title' => 'CMC Prototypes',
+      'description' => 'CMC Prorotypes',
+      'position' => 'left',
+      'page callback' => 'system_admin_menu_block_page',
+      'access arguments' => array('access administration pages'),
+      'file' => 'system.admin.inc',
+      'file path' => drupal_get_path('module', 'system'),
+      'weight' => -15,
+    ),
+  );
+}

@@ -1,0 +1,197 @@
+<?php
+
+/**
+ * Implements hook_enable
+ */
+function cmc_appforms_enable() {
+  $message = t('CMC registration forms depend on Tenant Template Code being set correctly.
+             Use !configuration_settings to set appropriate Tenant Template Code',
+             array('!configuration_settings' => l('configuration settings', 'admin/config/cmc/registration')));
+  drupal_set_message($message);
+}
+
+
+function cmc_appforms_schema() {
+  $schema = array();
+  $schema['cmc_application_form'] = application_form_schema();
+  $schema['cmc_appforms_country'] = application_form_countries();    
+  $schema['cmc_appforms_templates'] = application_form_templates();
+  $schema['cmc_appforms_country_config'] = application_form_country_config();
+  
+  return $schema;
+}
+
+
+function application_form_schema() {
+  return array(
+    'description' => 'Stores information of all classes that extend AppForm Class',
+    'fields' => array(
+        'machine_name' => array(
+        'type' => 'varchar',
+        'length' => 40,
+        'not null' => TRUE,
+        'description' => 'Machine name of the class'
+      ),
+      'class_name' => array(
+        'type' => 'varchar',
+        'length' => 40,
+        'not null' => TRUE,
+        'description' => 'Class Name' 
+      ),
+      
+      'arguments' => array(
+        'type' => 'blob',
+        'not null' => TRUE,
+        'description' => 'Machine name of the class'
+      ),
+    )
+  );
+}
+
+function application_form_country_config() {
+  return  array(
+    'description' => 'Strores information of regions supported by onboarding forms.',
+    'fields' => array(
+     'config_id' => array(
+        'description' => 'Primary key for config.',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+
+      'application_type' => array(
+        'description' => 'Type of registration.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),   
+      
+      'country_machine_name' => array(
+        'description' => 'Machine name of the country.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+
+     'product' => array(
+        'description' => 'Product config is related to',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),   
+      
+      'data' => array(
+        'description' => 'serialized data of all configurations',
+        'type' => 'text',
+        'not null' => TRUE,
+      ),
+    ),
+    'primary key' => array('config_id'),
+  );
+}
+
+
+function application_form_countries() {
+  return  array(
+    'description' => 'Strores information of regions supported by onboarding forms.',
+    'fields' => array(
+      'country_id' => array(
+        'description' => 'The primary identifier of country.',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+
+     'name' => array(
+        'description' => 'Name of the country',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),   
+     
+      'machine_name' => array(
+        'description' => 'Machine name of country',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+        
+      'prefix' => array(
+        'description' => 'Enter 2-3 letter code to be used as prefix for the region.
+          e.g uk for United Kingdon, de for Germany etc',
+        'type' => 'varchar',
+        'length' => 3,
+        'not null' => TRUE,
+      ),
+      'language' => array(
+        'description' => 'Default language of the country',
+        'type' => 'varchar',
+        'length' => 12,
+        'not null' => TRUE,
+      ),
+        
+      'display_language' => array(
+        'description' => 'Languges users can view application form in',
+        'type' => 'text',
+        'not null' => TRUE,
+      ),
+    
+     'product' => array(
+        'description' => 'Type of products allowed for this region',
+        'type' => 'text',
+        'not null' => TRUE,
+      ), 
+     
+     'context' => array(
+        'description' => 'Context that shall be used for content translation',
+        'type' => 'varchar',
+        'length' => 60,
+        'not null' => TRUE,
+      ),
+   
+     'template_id' => array(
+        'description' => 'Id of config template',
+        'type' => 'int',
+        'length' => 12,
+        'not null' => TRUE,
+      ),
+    ),
+    'primary key' => array('country_id'),
+  );
+}
+
+function application_form_templates() {
+  return array(
+    'description' => 'Strores information CMC config templates.',
+    'fields' => array(
+      'template_id' => array(
+        'description' => 'The primary identifier of template.',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      
+      'machine_name' => array(
+        'description' => 'Machine name of template',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+     
+      'name' => array(
+        'description' => 'Name of template',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),   
+        
+      'data' => array(
+        'description' => 'serialized data of all features',
+        'type' => 'text',
+        'not null' => TRUE,
+      ),
+        
+    ),
+    'primary key' => array('template_id'),
+  );
+}

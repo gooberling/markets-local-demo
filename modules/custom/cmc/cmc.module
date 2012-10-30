@@ -1,0 +1,82 @@
+<?php
+
+/**
+ * Implements hook_menu
+ */
+function cmc_menu() {
+  $items = array();
+  
+  $items['admin/config/cmc'] = array(
+    'title' => t('Settings for CMC'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('cmc_settings'),
+    'access arguments' => array('Administer site configuration'),
+  );
+  
+  $items['admin/config/cmc/cmc_create_domain_menus'] = array(
+    'title' => t('Create menus for domain'),
+    'page callback' => 'cmc_create_domain_menus',
+    'page arguments' => array('cmc_settings'),
+    'access arguments' => array('Administer site configuration'),
+  );
+  
+  /*
+ $items['cmc_analytics/form_js'] = array(
+    'page callback' => 'cmc_analytics_form_js',
+    'access arguments' => array('Administer site configuration'),
+    'type' => MENU_CALLBACK,
+  );
+  */
+  return $items;
+}
+
+
+function cmc_permissions() {
+  return array();
+}
+
+
+function cmc_settings() {
+  $form = array();
+  $form['cmc_domain_main_menu'] = array(
+    '#type' => 'textarea',
+    //'#prefix' => l('Create Domain menus', 'admin/config/cmc/cmc_create_domain_menus'),
+    '#title' => t('CMC page setting'),
+    '#default_value' =>  variable_get('cmc_domain_main_menu', ''),
+  );
+  
+  return system_settings_form($form);
+}
+
+/**
+ * Stub that provides a means to disable all modules that current module is dependent on. 
+ * This function is to be called when there is a requirement to disable all the modules that
+ * current module is dependent on. 
+ * 
+ * This function works reverse to module_enable which enables all the modules current module is 
+ * dependent on
+ * 
+ * There is a risk of system going into circular dependencies Look at Line 73 and should never
+ * be deleted else system will go into a meltdown
+ * 
+ * @param type $module_name 
+ */
+function cmc_config_disable_dependencies($module_name = NULL) {
+  static $disable_start = FALSE;
+  
+  $install_file= drupal_get_path('module', $module_name)."/{$module_name}.info";
+  if (file_exists($install_file)) {
+    // Parse Info file for the module that is being disabled  
+    $file_info = drupal_parse_info_file($install_file);
+    $dependencies = $file_info['dependencies'];
+    
+    // Only disable dependencies if this function was not already called earlier.
+    if (!empty($dependencies) && $disable_start == FALSE) {
+      
+      $disable_start = TRUE;
+      foreach($dependencies as $dependent_module) {
+        module_disable(array($dependent_module), TRUE);
+      }
+    }
+  }
+}

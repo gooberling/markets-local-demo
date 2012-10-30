@@ -1,0 +1,11 @@
+core = "7.x"
+dependencies[] = "cmc_blog"
+depdedencies[] = "nextgen"
+description = "Posting of insights to content services"
+
+name = "CMC Insights"
+package = "CMC"
+project = "cmc_insights"
+version = "7.x-0.1"
+
+configure = admin/config/cmc/insights

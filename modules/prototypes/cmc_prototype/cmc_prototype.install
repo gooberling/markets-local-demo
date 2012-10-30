@@ -1,0 +1,16 @@
+<?php
+
+/**
+ * Implements hook_install().
+ *
+ * Perform actions to set up the site for this profile.
+ */
+function cmc_prototype_install() {
+
+//  // set various system variables
+//  variable_set('pathauto_node_pattern', '[node:type]/[node:title]');
+//  variable_set('pathauto_node_blog_entry_pattern', 'blog/[node:created:custom:Y-m-d]/[node:title]');
+//  variable_set('pathauto_punctuation_underscore', '1');
+//  //variable_set('statistics_count_content_views', '1');
+}
+

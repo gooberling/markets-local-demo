@@ -1,0 +1,988 @@
+<?php
+
+/**
+ * hook_menu
+ */
+function cmc_tracking_menu() {
+  $items = array();
+
+  $items['admin/config/cmc/cmc_tracking'] = array(
+    'title' => 'CMC Tracking Configuration', // @todo proper title
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('cmc_tracking_settings'),
+    'access arguments' => array('administer cmc tracking'),
+  );
+
+  return $items;
+}
+
+/**
+ * hook_block_info
+ */
+function cmc_tracking_block_info() {
+  $blocks = array();
+
+  $blocks['cmc_tracking_cookie_consent'] = array(
+    'info' => t('CMC Tracking Cookie Consent'),
+    'cache' => DRUPAL_NO_CACHE
+  );
+
+  return $blocks;
+}
+
+/**
+ * hook_block_view
+ */
+function cmc_tracking_block_view($delta) {
+  $block = array();
+
+  if ($delta == 'cmc_tracking_cookie_consent') {
+    $block['subject'] = '';
+    $block['content'] = array('forms' => array(
+                          drupal_get_form('cmc_tracking_consent_form_step1'),
+                          drupal_get_form('cmc_tracking_consent_form_step2')
+                        )
+    );
+  }
+
+  return $block;
+}
+
+/**
+ * hook_init
+ */
+function cmc_tracking_init() {
+
+  if (variable_get('cmc_tracking_consent', FALSE)) {
+	drupal_add_css(drupal_get_path('module', 'cmc_tracking') . '/css/cmc_cookie.css');
+
+    drupal_add_js(drupal_get_path('module', 'cmc_tracking') . '/js/cmc_tracking_control.js',
+      array('every_page' => TRUE));
+
+    drupal_add_js(array(
+        'cmc_tracking' => array(
+          'consent' => variable_get('cmc_tracking_consent', FALSE),
+          'consent_domain' => variable_get('cmc_tracking_consent_cookie_domain', ''),
+        ),
+      ), 'setting');
+
+    drupal_add_library('system', 'jquery.cookie', TRUE);
+  }
+}
+
+/**
+ * hook_permission
+ */
+function cmc_tracking_permission() {
+  return array(
+    'administer cmc tracking' => array(
+      'title' => t('Administer CMC Tracking'),
+      'description' => t('Administer the CMC Tracking configuration'),
+    ),
+  );
+}
+
+
+/**
+ * CMC Tracking settings form
+ */
+function cmc_tracking_settings() {
+  $form = array();
+
+  // get list of files for region overrides
+  $path = drupal_get_path('module', 'cmc_tracking');
+  $listing = file_scan_directory($path . '/config/registration', '#\.inc$#');
+  $skip_files = array(
+    'default',
+    'form_errors',
+  );
+
+  $options = array('' => 'default');
+  foreach ($listing as $path => $fileinfo) {
+    $filename = $fileinfo->name;
+    if (!in_array($filename, $skip_files)) {
+      $options[$filename] = $filename;
+    }
+  }
+
+  $form['cmc_tracking_cmc_registration_region'] = array(
+    '#type' => 'select',
+  	'#options' =>  $options,
+    '#title' => t('CMC Registration region'),
+    '#description' => t('Choose region so we know which tracking variables to override/add for the registration steps'),
+    '#default_value' => variable_get('cmc_tracking_cmc_registration_region'),
+  );
+
+
+  $form['cmc_tracking_cross_domain_selectors'] = array(
+    '#type' => 'textarea',
+    '#title' => t('CMC Google analytics cross domain tracker jquery selectors'),
+    '#description' => t('Enter the jQuery selectors for links to use the GA cross domain tracker. Each selector should be their own line'),
+    '#default_value' =>  variable_get('cmc_tracking_cross_domain_selectors', 'a[href*="mycmc."]' . "\n" . 'a[href*="cfd.cmcmarkets.com"]'),
+  );
+
+  $form['cmc_tracking_consent'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Require consent for cookies'),
+    '#description' => t('If selected, enables the cookie consent mechanism'),
+    '#default_value' => variable_get('cmc_tracking_consent', FALSE)
+  );
+
+  $form['cmc_tracking_consent_cookie_domain'] = array(
+    '#type' => 'textfield',
+    '#title' => t('The domain to save the consent cookie on'),
+    '#description' => t('The top-level domain to save the consent cookie on, e.g. ".cmcmarkets.co.uk"'),
+    '#default_value' => variable_get('cmc_tracking_consent_cookie_domain')
+  );
+
+  $form['cmc_tracking_consent_step1_link'] = array(
+    '#type' => 'textfield',
+    '#title' => t('"Find out more about cookies" link on step 1'),
+    '#description' => t('Where the "Find out more" link on step 1 goes to'),
+    '#default_value' => variable_get('cmc_tracking_consent_step1_link', '')
+  );
+
+  $form['cmc_tracking_consent_step2_link'] = array(
+    '#type' => 'textfield',
+    '#title' => t('"Find out more about cookies" link on step 2'),
+    '#description' => t('Where the "Find out more" link on step 2 goes to'),
+    '#default_value' => variable_get('cmc_tracking_consent_step2_link', '')
+  );
+
+  return system_settings_form($form);
+}
+
+
+/**
+ * hook_theme
+ */
+function cmc_tracking_theme($existing, $type, $theme, $path) {
+
+  $base_path = drupal_get_path('module', 'cmc_tracking');
+  $path = $base_path ."/theme";
+
+  $array = array(
+    'cmc_tracking_google_conversion' => array(
+      'template'	=> 'cmc_tracking_google_conversion',
+      'path' => $path,
+      'variables' => array('conversion'=> NULL),
+    ),
+    'cmc_tracking_google_track_page_view' => array(
+      'template'	=> 'cmc_tracking_google_track_page_view',
+      'path' => $path,
+      'variables' => array('pageview'=> NULL),
+    ),
+    'cmc_tracking_google_ecommerce' => array(
+      'template'	=> 'cmc_tracking_google_ecommerce',
+      'path' => $path,
+      'variables' => array('tracking'=> NULL),
+    ),
+    'cmc_tracking_storm' => array(
+      'template'	=> 'cmc_tracking_storm',
+      'path' => $path,
+      'variables' => array('tracking'=> NULL),
+    ),
+    'cmc_tracking_helios' => array(
+      'template'	=> 'cmc_tracking_helios',
+      'path' => $path,
+      'variables' => array('tracking'=> NULL),
+    ),
+    'cmc_tracking_s2d6' => array(
+      'template'	=> 'cmc_tracking_s2d6',
+      'path' => $path,
+      'variables' => array('tracking'=> NULL),
+    ),
+    'cmc_tracking_eyeblaster' => array(
+      'template'	=> 'cmc_tracking_eyeblaster',
+      'path' => $path,
+      'variables' => array('tracking'=> NULL),
+    ),
+    'cmc_tracking_google_track_event' => array(
+      'template'	=> 'cmc_tracking_google_track_event',
+      'path' => $path,
+      'variables' => array('tracking'=> NULL),
+    ),
+    'cmc_tracking_adcenter' => array(
+      'template'	=> 'cmc_tracking_adcenter',
+      'path' => $path,
+      'variables' => array('tracking'=> NULL),
+    ),
+    'cmc_tracking_consent_form_step1' => array(
+      'template' => 'cmc_tracking_consent_form_step1',
+      'path' => $path,
+      'render element' => 'form'
+    ),
+    'cmc_tracking_consent_form_step2' => array(
+      'template' => 'cmc_tracking_consent_form_step2',
+      'path' => $path,
+      'render element' => 'form'
+    ),
+  );
+
+  return $array;
+}
+
+
+/**
+ * registration hook so we know which step we're currently on
+ * If previous step has a validation hook, then this hook will get fired twice
+ * as the form will be built for valdidation
+ *
+ * We figure out which step, type of form and some other things to determin
+ * what tracking should be applied to the form
+ */
+function cmc_tracking_cmc_registration_form_alter() {
+  $args = func_get_args();
+  $form = $args[0];
+  $context = $args[1];
+  $step = $args[2];
+  
+  // need the value of already_registered in step 1 to determine
+  // if we're a live reg or a demo_to_live reg
+  // if haven't
+  // By default consider everyone as being not registered
+  $already_registered = CMC_ALREADY_REGISTERED_NO;
+  
+  if (!empty($context['step_info'][1]['stored_values'])) {
+    // > step 1
+    $step1_stored_values = $context['step_info'][1]['stored_values'];
+    $already_registered = $step1_stored_values['already_registered'];
+
+  } else if(isset($_GET['token'])) { // When user come from demo reg to live reg, Already registered is not set
+    $already_registered = CMC_ALREADY_REGISTERED_YES;
+  }
+  else if (!empty($_POST['already_registered'])) {
+    // not the best way to see if user has posted the form on step 1
+    // To cope with if user has js disabled
+    $already_registered = $_POST['already_registered'];
+  }
+  else if (isset($form['already_registered']['#default_value'])) {
+    // use the default value from the forms
+    $already_registered = $form['already_registered']['#default_value'];
+  }
+  else {
+    // If you jump straight to step 2 - possible if open an account from demo
+    // you won't have the already registered set
+    $already_registered = CMC_ALREADY_REGISTERED_YES;
+  }
+  
+  // Hack we are having to store this value is session as already_registered is subject
+  // to change at the end of the applicaiton process based on the fact that even if a user
+  // starts without account, they do get an account along the way on step 4
+  $_SESSION['cmc_tracking']['already_registered'] = $already_registered;
+  
+  // get the options for the tracking
+  $options['region'] = variable_get('cmc_tracking_cmc_registration_region', 'default');
+  $options['function'] = 'cmc_tracking_registration_step' . $context['step'];
+  $options['step'] = $context['step'];
+  $options['product'] = $context['product'];
+  $options['form_type'] = $context['build_info']['args'][0];
+  $options['already_registered'] = $already_registered;
+  $options['live_reg_type'] = (strtolower($already_registered) == 'yes') ? 'demo_to_live' : 'live';
+
+  $form_type = strtolower($options['form_type']);
+  $product = $options['product'];
+
+  module_load_include('inc', 'cmc_tracking', 'config/registration/default');
+  $registration_step_tracking = call_user_func($options['function']);
+  $tracking = $registration_step_tracking[$form_type][$product];
+
+  $tracking = $registration_step_tracking[$form_type][$product];
+
+  // see if we have any country overrides!
+  cmc_tracking_cmc_registration_add_region_overrides($tracking, $options);
+
+
+  if ($context['step'] == 1) {
+    // set some js so we track pageviews when user clicks on Yes/No for
+    // already_registered on step 1
+    $js_page_views = array(
+      // keys must match already_registered values EXACTLY
+      'No' => $tracking['google_analytics_pageview']['live'],
+      'Yes' => $tracking['google_analytics_pageview']['demo_to_live'],
+    );
+
+    // need to add inapp=1 to the pageview
+    if (isset($_GET['inapp'])) {
+      foreach ($js_page_views as $k => $v) {
+        _cmc_tracking_cmc_registration_pageview_add_inapp($js_page_views[$k]);
+      }
+    }
+
+    $data = array(
+      'cmc_tracking_cmc_registration' => array(
+        'already_registered' => $js_page_views,
+      ),
+    );
+
+    $js_options = array(
+    	'type' => 'setting'
+    );
+    drupal_add_js($data, $js_options);
+    $path = drupal_get_path('module', 'cmc_tracking');
+    drupal_add_js($path . '/js/cmc_tracking_cmc_registration.js');
+  }
+ 
+ 
+  cmc_tracking_cmc_registration_process_tracking($tracking, $options);
+
+  if (!empty($tracking['google_analytics_pageview'])) {
+    cmc_tracking_add_google_virtual_pageview();
+  }
+
+  // Need to put the tracking onto the page somehow
+  // Use static variable so we can get the variables in hook_preprocess_page
+  // drupal_static doesn't quite do what we want to do..
+  //drupal_static_reset('cmc_tracking');
+  //drupal_static('cmc_tracking', $tracking);
+  cmc_tracking_tracking($tracking);
+
+  //echo '!!';
+  //print_r(form_get_errors());
+  //echo '!!';
+}
+
+
+function cmc_tracking_add_google_virtual_pageview($pageview=1) {
+  drupal_add_js(array('cmc_tracking' => array('virtual_pageview' => $pageview)), 'setting');
+}
+
+function cmc_tracking_has_google_virtual_pageview(&$javascript) {
+
+  // cmc_tracking['virtual_pageview'] should have been added as a js setting
+  foreach ($javascript['settings']['data'] as $setting) {
+    if (!empty($setting['cmc_tracking']['virtual_pageview'])) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+/**
+ * Runs on the registration thank you page
+ * We get values from the session to determin which form the user has just
+ * filled in and what tracking variables should be added
+ */
+function cmc_tracking_cmc_registration_thanks() {
+
+  // Get info about the reg form from the session
+  // As we don't have the details about the form
+  if (empty($_SESSION['cmc_registration_identity_data'])) {
+    // no session data so someone hitting thanks page directly
+    return array();
+  }
+ 
+  $options = unserialize($_SESSION['cmc_registration_identity_data']);
+  $options['region'] = variable_get('cmc_tracking_cmc_registration_region', 'default');
+  $options['function'] = 'cmc_tracking_registration_complete';
+  $options['step'] = 'complete';
+  $options['form_type'] = strtolower($options['form_type']);
+  
+  // -- Updated by Ravi Julapalli
+  // This logic is incorrect , when a identity is reserved as part of step 4, sometimes
+  // already_regsitered is set to TRUE.
+  // -- $options['live_reg_type'] = ($options['already_registered'] == 1) ? 'demo_to_live' : 'live'; --
+  // Logic being changed to check the session values set by CMC Tracker as part of step 1
+  //
+  
+  $options['live_reg_type'] = ($_SESSION['cmc_tracking']['already_registered'] == CMC_ALREADY_REGISTERED_YES) ? 'demo_to_live' : 'live';
+  ////
+  $form_type = $options['form_type'];
+  $product = $options['product'];
+
+  // load up the tracking variables
+  module_load_include('inc', 'cmc_tracking', 'config/registration/default');
+  $registration_step_tracking = call_user_func($options['function']);
+  $tracking = $registration_step_tracking[$form_type][$product];
+
+  // see if we have any country overrides!
+  cmc_tracking_cmc_registration_add_region_overrides($tracking, $options);
+
+  cmc_tracking_cmc_registration_process_tracking($tracking, $options);
+
+  cmc_registration_finish(); // kill the session now!
+  return $tracking;
+}
+
+
+/**
+ * pretty much the same as thanks but we're rejecting them!
+ * form_type will always be live as we only reject live registrations
+ */
+function cmc_tracking_cmc_registration_reject() {
+  // not sure if we have these values in session need to grab them somehow
+  // need the form type, product and what they answered at step 1
+  //$options = unserialize($_SESSION['cmc_registration_identity_data']);
+
+  $options['region'] = variable_get('cmc_tracking_cmc_registration_region', 'default');
+  $options['function'] = 'cmc_tracking_registration_reject';
+
+
+  $options['step'] = 'reject'; // should always be this step
+  $options['product'] = strtoupper(arg(2)); // ?
+  $options['form_type']  = 'live'; // will always be live
+
+  if (!empty($_SESSION['cmc_tracking']['already_registered'])) {
+    $options['already_registered'] = $_SESSION['cmc_tracking']['already_registered'];
+  }
+  else {
+    $options['already_registered'] = 'no'; // default to no
+  }
+
+
+  $options['live_reg_type'] = (strtolower($options['already_registered']) == 'yes') ? 'demo_to_live' : 'live';
+
+  ////
+  $form_type = $options['form_type'];
+  $product = $options['product'];
+
+  // load up the tracking variables
+  module_load_include('inc', 'cmc_tracking', 'config/registration/default');
+  $registration_step_tracking = call_user_func($options['function']);
+  $tracking = $registration_step_tracking[$form_type][$product];
+
+  // see if we have any country overrides!
+  cmc_tracking_cmc_registration_add_region_overrides($tracking, $options);
+
+  cmc_tracking_cmc_registration_process_tracking($tracking, $options);
+
+  return $tracking;
+}
+
+
+// inapp tracking, we add a string so GA can distinguish between them
+function _cmc_tracking_cmc_registration_pageview_add_inapp(&$pageview) {
+  if (isset($_GET['inapp'])) {
+    $pageview .= '_inapp';
+  }
+}
+
+/**
+ * Do some manipulation to add values to $tracking array from the $options
+ */
+function cmc_tracking_cmc_registration_process_tracking(&$tracking, $options) {
+
+  $tracking['step'] = $options['step'];
+  $tracking['region'] = $options['region'];
+  $tracking['form_type'] = $options['form_type'];
+  $tracking['product'] = $options['product'];
+
+
+  if (!empty($tracking['google_analytics_pageview'])) {
+    // Check for live or demo_to_live, only really for our live reg
+    $p = $tracking['google_analytics_pageview'];
+    $live_reg_type = $options['live_reg_type'];
+    if (is_array($p) && !empty($p[$live_reg_type])) {
+      $tracking['google_analytics_pageview'] = $p[$live_reg_type];
+    }
+
+    _cmc_tracking_cmc_registration_pageview_add_inapp($tracking['google_analytics_pageview']);
+  }
+
+  if (!empty($tracking['google_conversion'])) {
+    // defaults for google conversion, may want to move this to config
+
+    $google_conversion_defaults = _cmc_tracking_google_conversion_defaults();
+
+    if (empty($tracking['google_conversion'][0])) {
+      $tracking['google_conversion'] = array_merge($google_conversion_defaults, $tracking['google_conversion']);
+    }
+    else {
+      // multiple adwords tracking
+      $t = array();
+      for ($i=0; $i<count($tracking['google_conversion']); $i++) {
+        $t[] = array_merge($google_conversion_defaults, $tracking['google_conversion'][$i]);
+      }
+      $tracking['google_conversion'] = $t;
+    }
+  }
+
+  // add ecommerce tags
+  if (!empty($tracking['google_ecommerce'])) {
+    // need to get this from the thank you page
+    $tracking['google_ecommerce']['order']['id'] = (!empty($options['identity'])) ? $options['identity'] : '';;
+    _cmc_tracking_google_ecommerce_order($tracking['google_ecommerce']);
+  }
+
+
+  if (!empty($tracking['adform'])) {
+    // Add order id to adform
+    $tracking['adform']['order_id'] = (!empty($options['identity'])) ? $options['identity'] : '';
+  }
+
+
+  if (!empty($tracking['storm'])) {
+    // add params to storm - SG
+    $tracking['storm']['order_id'] = (!empty($options['identity'])) ? $options['identity'] : '';;
+    $tracking['storm']['email_address'] = (!empty($options['email'])) ? $options['email'] : '';;
+  }
+
+  if (!empty($tracking['s2d6'])) {
+    // add params to s2d6 - SG
+    $tracking['s2d6']['identity'] = (!empty($options['identity'])) ? $options['identity'] : '';;
+    $tracking['s2d6']['email_address'] = (!empty($options['email'])) ? $options['email'] : '';;
+  }
+
+  if (!empty($tracking['eyeblaster'])) {
+    // add params to eyeblaster - AU
+  }
+}
+
+
+/**
+ * Add the region overrides here if the files and functions exist
+ * @param unknown_type $tracking
+ */
+function cmc_tracking_cmc_registration_add_region_overrides(&$tracking, $options) {
+
+  $region = $options['region'];
+  //$region = 'sg';
+
+  if ($region == 'default') {
+    return;
+  }
+
+  // check for region tracking file
+  $region_file = 'config/registration/' . $region;
+  $file_exists = module_load_include('inc', 'cmc_tracking', $region_file);
+
+  if ($file_exists === FALSE) {
+    return;
+  }
+
+
+  // check for region tracking function
+  $region_tracking_function = $options['function'] . '_' . $region;
+  if (!function_exists($region_tracking_function)) {
+    return;
+  }
+
+  // we have a region override for the tracking functions
+  $region_tracking = call_user_func($region_tracking_function);
+
+  $form_type = $options['form_type'];
+  $product = $options['product'];
+
+  if (empty($region_tracking[$form_type][$product])) {
+    return;
+  }
+
+  $region_overrides = $region_tracking[$form_type][$product];
+
+  // merge the region tracking with default tracking
+  foreach ($region_overrides as $k => $v) {
+    if (!empty($tracking[$k]) && is_array($tracking[$k])) {
+      $tracking[$k] = array_merge($tracking[$k], $region_overrides[$k]);
+    }
+    else {
+      $tracking[$k] = $region_overrides[$k];
+    }
+  }
+}
+
+
+/**
+ * Totals up the items in the google ecommerce tracking and sets the order id
+ * @param unknown_type $ecommerce_tracking
+ */
+function _cmc_tracking_google_ecommerce_order(&$ecommerce_tracking) {
+  $total = 0;
+  $order_id = $ecommerce_tracking['order']['id'];
+
+  // add up the totals for the order
+  foreach ($ecommerce_tracking['items'] as &$item) {
+    $item['id'] = $order_id;
+    $total += $item['quantity'] * $item['unit_price'];
+  }
+
+  $ecommerce_tracking['order']['total'] = sprintf('%01.2f', $total);
+}
+
+
+/**
+ * Default settings for google conversion tracking
+ */
+function _cmc_tracking_google_conversion_defaults() {
+  return array(
+    'language' => 'en_US',
+    'format' => '1',
+    'color' => '666666',
+    'value' => '0',
+  );
+}
+
+
+/**
+ * Store tracking variables in static variable
+ * We overwrite it with whatever we pass into it
+ * drupal_static doesn't quite do what we want it to do
+ * Maybe we should do a merge of arrays
+ */
+function cmc_tracking_tracking($vars=NULL) {
+  static $tracking;
+
+  if (!isset($tracking) || !is_null($vars) ) {
+    $tracking = $vars;
+  }
+
+  return $tracking;
+}
+
+
+/**
+ * hook_js_alter
+ */
+function cmc_tracking_js_alter(&$javascript) {
+
+  // If registration form we don't want trackPageview on it twice
+  // not the nicest but seems to work
+  if (cmc_tracking_has_google_virtual_pageview($javascript)) {
+    //print_r($javascript);
+    foreach ($javascript as $k => $v) {
+
+      if (!empty($javascript[$k]['data'])) {
+        $data = (string)$javascript[$k]['data'];
+        if (strpos($data, '_gaq.push(["_trackPageview"]);') > -1) {
+          $javascript[$k]['data'] = str_replace('_gaq.push(["_trackPageview"]);', '', $data);
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Output the tracking tags
+ * @param $tracking
+ */
+function cmc_tracking_tags($tracking) {
+
+  $output = array();
+
+  if (!empty($tracking['region'])) {
+    $output[]  = '<!-- cmc_tracking region: ' . $tracking['region'].  ' -->';
+  }
+
+  if (!empty($tracking['step'])) {
+    $output[]  = '<!-- cmc_tracking step: ' . $tracking['step'].  ' -->';
+  }
+
+  if (!empty($tracking['google_analytics_pageview'])) {
+    $output[] = theme('cmc_tracking_google_track_page_view',
+                  array('pageview' => $tracking['google_analytics_pageview'])
+                );
+  }
+
+  if (!empty($tracking['google_conversion'])) {
+
+    if (!empty($tracking['google_conversion'][0])) {
+      // multiple adword tags
+      foreach ($tracking['google_conversion'] as $c) {
+        $output[] = theme('cmc_tracking_google_conversion',
+                  array('conversion' => $c)
+                );
+      }
+    }
+    else {
+      $output[] = theme('cmc_tracking_google_conversion',
+                  array('conversion' => $tracking['google_conversion'])
+                );
+    }
+  }
+
+  if (!empty($tracking['google_ecommerce'])) {
+    $output[] = theme('cmc_tracking_google_ecommerce',
+                  array('tracking' => $tracking['google_ecommerce'])
+                );
+  }
+
+  if (!empty($tracking['adform'])) {
+    $output[] = theme('cmc_adform',
+                  array('adform' => $tracking['adform'])
+                );
+  }
+
+  if (!empty($tracking['storm'])) {
+    $output[] = theme('cmc_tracking_storm',
+                  array('tracking' => $tracking['storm'])
+                );
+  }
+
+  if (!empty($tracking['helios'])) {
+    $output[] = theme('cmc_tracking_helios',
+                  array('tracking' => $tracking['helios'])
+                );
+  }
+
+  if (!empty($tracking['s2d6'])) {
+    $output[] = theme('cmc_tracking_s2d6',
+                  array('tracking' => $tracking['s2d6'])
+                );
+  }
+
+  if (!empty($tracking['eyeblaster'])) {
+    $output[] = theme('cmc_tracking_eyeblaster',
+                  array('tracking' => $tracking['eyeblaster'])
+                );
+  }
+
+  if (!empty($tracking['google_track_event'])) {
+    $output[] = theme('cmc_tracking_google_track_event',
+                  array('tracking' => $tracking['google_track_event'])
+                );
+  }
+
+  if (!empty($tracking['adcenter'])) {
+    $output[] = theme('cmc_tracking_adcenter',
+                  array('tracking' => $tracking['adcenter'])
+                );
+  }
+
+
+  return implode("\n", $output);
+}
+
+
+/**
+ * Should add some trackEvent items here for form errors
+ * So we track events such as when a service goes down etc?
+ * @param $tracking
+ * @param $errors
+ */
+function cmc_tracking_cmc_registration_errors(&$tracking, $errors) {
+
+  module_load_include('inc', 'cmc_tracking', 'config/registration/form_errors');
+  $form_error_config = cmc_tracking_registration_form_errors();
+
+  // TODO!
+  // adding some dummy data for testing
+  foreach ($errors as $key => $msg) {
+
+    if (!empty($form_error_config[$key])) {
+      if (empty($form_error_config[$key]['category'])) {
+        // to tell if demo or live form
+        $p = ($tracking['product'] == 'SB') ? 'spreadbet' : 'cfd';
+        $p .= '_' . $tracking['form_type'];
+        $form_error_config[$key]['category'] = $p . '_registration_error';
+      }
+      $tracking['google_track_event'][] = $form_error_config[$key];
+    }
+  }
+}
+
+
+/**
+ *
+ */
+function cmc_tracking_is_cmc_registration() {
+  if ((arg(0) == 'registration' || arg(0) == 'demo')) {
+    return true;
+  }
+  return false;
+}
+
+
+/**
+ *
+ */
+function cmc_tracking_is_cmc_registration_final() {
+  if ((arg(0) == 'registration' || arg(0) == 'demo') && arg(1) == 'final' && arg(2)) {
+    cmc_tracking_add_google_virtual_pageview();
+    return true;
+  }
+  return false;
+}
+
+
+/**
+ *
+ */
+function cmc_tracking_is_cmc_registration_reject() {
+  if ((arg(0) == 'registration' || arg(0) == 'demo') && arg(1) == 'reject') {
+    cmc_tracking_add_google_virtual_pageview();
+    return true;
+  }
+  return false;
+}
+
+/**
+ * hook_preprocess_page
+ * Figure out the tracking we should be adding to a page
+ * @param $vars
+ */
+function cmc_tracking_preprocess_page(&$vars) {
+  // This function could do with being tidied up
+  // - how defaults are set
+  // - static variable where we can keep all tracking variables
+  // cmc_tracking_tracking doesn't quite work as intended
+  $cmc_tracking = cmc_tracking_tracking();
+  $form_errors = form_get_errors();
+
+  // should do 'not appropriate stage' too!
+  if (!$cmc_tracking) {
+    // dump some tracking code
+    if (cmc_tracking_is_cmc_registration_final()) {
+      $cmc_tracking = cmc_tracking_cmc_registration_thanks();
+    }
+    else if (cmc_tracking_is_cmc_registration_reject()) {
+      $cmc_tracking = cmc_tracking_cmc_registration_reject();
+    }
+  }
+  else if (count($form_errors) && cmc_tracking_is_cmc_registration()) {
+    // do some event tracking for form errors
+    cmc_tracking_cmc_registration_errors($cmc_tracking, $form_errors);
+  }
+
+  /// defaults - make sure adform is always in
+  if (empty($cmc_tracking['adform'])) {
+    $cmc_tracking['adform']['page_name'] = '';
+  }
+
+  $vars['cmc_tracking'] = cmc_tracking_tags($cmc_tracking);
+
+  cmc_tracking_add_cross_domain_tracking();
+  cmc_tracking_add_event_tracking();
+}
+
+
+/**
+ * Default tracking
+ */
+function cmc_tracking_default_tracking() {
+  return array('adform'=> array(
+      'page_name' => '', // make it empty to so it addds adform tags to page
+    ),
+  );
+}
+
+
+/**
+ *
+ */
+function cmc_tracking_add_event_tracking() {
+  $path = drupal_get_path('module', 'cmc_tracking');
+  drupal_add_js($path . '/js/cmc_tracking_events.js');
+}
+
+
+/**
+ * This drops in the js to do the google cross domain tracking
+ * Add selectors to Drupal.settings and js attach click handlers
+ */
+function cmc_tracking_add_cross_domain_tracking() {
+  $cross_domain_selectors = variable_get('cmc_tracking_cross_domain_selectors', 'a[href*="mycmc."]' . "\n" . 'a[href*="cfd.cmcmarkets.com"]');
+  $cross_domain_selectors = str_replace("\r\n", ',', $cross_domain_selectors);
+
+  drupal_add_js(array('cmc_tracking' => array('cross_domain_selectors' => $cross_domain_selectors)), 'setting');
+  $path = drupal_get_path('module', 'cmc_tracking');
+  drupal_add_js($path . '/js/cmc_tracking_cross_domain.js');
+}
+
+
+/**
+ *
+ */
+function cmc_tracking_protocol() {
+  static $protocol;
+  if (!isset($protocol)) {
+    $protocol = (!empty($_SERVER['HTTPS']) && strtolower($_SERVER['HTTPS']) == 'on') ? 'https://' : 'http://';
+  }
+  return $protocol;
+}
+
+
+function cmc_tracking_consent_form_step1() {
+  $form = array();
+
+  $form['#theme'] = 'cmc_tracking_consent_form_step1';
+
+  $form['title'] = array(
+    '#markup' => '<h3>' . t('This site uses cookies', array(), array('context' => 'Cookie Consent')) . '</h3>'
+  );
+
+  $form['blurb'] = array(
+    '#markup' => '<p>' . t("We use cookies to improve and enhance the performance and functionality of this site. If you consent to this, please 'Accept'. You may change your cookie settings at any time but this may affect your use of the website.", array(), array('context' => 'Cookie Consent')) . '</p><p>' . l(t('Find out more about cookies', array(), array('context' => 'Cookie Consent')), variable_get('cmc_tracking_consent_step1_link', ''), array('attributes' => array('target' => '_blank'))) . '</p>'
+  );
+
+  $form['accept'] = array(
+    '#markup' => l(t('Accept', array('context' => 'Cookie Consent')), '', array('attributes' => array('class' => 'cookie-accept')))
+  );
+
+  $form['update'] = array(
+    '#markup' => l(t('Update', array('context' => 'Cookie Consent')), '', array('attributes' => array('class' => 'cookie-update')))
+  );
+
+  return $form;
+}
+
+function cmc_tracking_consent_form_step2() {
+  $form = array();
+
+  $form['#theme'] = 'cmc_tracking_consent_form_step2';
+
+  $form['title'] = array(
+    '#markup' => '<h3>' . t("Your Cookie Preferences") . '</h3>',
+  );
+
+  $form['blurb'] = array(
+    '#markup' => '<p>' . t("Cookies are small text files which are stored on your computer or mobile device. They help us improve our site, deliver functions that make your browser experience more user-friendly and also monitor the performance of the site and any errors.  We do this using first-party cookies served by us and we do not share this data with any other companies.") . '</p>'
+  );
+
+  $form['blurb_2'] = array(
+    '#markup' => '<p>' . t("We also use cookies to deliver advertising that is relevant to you and to track our advertising performance.  We may use third-party cookies to do this.  To change your cookie settings or to find out more about cookies, please see below.") . '</p>'
+  );
+
+  $cmc_cookie_list = array(
+    t('Account application process'),
+    t('Remember how far through the application you were'),
+    t('Remember your login details'),
+    t('Make the website look consistent'),
+    t('Allow you to comment on blogs'),
+    t('Monitor web visits, site performance and errors')
+  );
+
+  $other_cookie_list = array(
+    t('Send information to other websites about relevant ads (targeting)'),
+    t('Track or monitor effectiveness and performance')
+  );
+
+  $form['cmc_cookies'] = array(
+    '#markup' => theme('item_list',
+               array(
+                 'items' => $cmc_cookie_list,
+                 'title' => t('CMC Cookies')
+               )
+    )
+  );
+
+
+  $form['other_cookies'] = array(
+    '#markup' => theme('item_list',
+               array(
+                 'items' => $other_cookie_list,
+                 'title' => t('Other cookies'),
+               )
+    )
+  );
+
+  $form['other_cookie_options'] = array(
+    '#type' => 'radios',
+    '#options' => array(1 => t('On'), 0 => t('Off')),
+    '#default_value' => TRUE
+  );
+
+$form['change'] = array(
+    '#markup' => '<p>' . t("Update your cookie preferences at anytime by using the link 'Change Cookie Settings' which can be found at the bottom of every web page.  To view our detailed cookie policy please visit our legal section.") . '</p>'
+  );
+
+  $form['find_out_more'] = array(
+    '#markup' => l(t('Find our more about cookies here >'), variable_get('cmc_tracking_consent_step2_link', ''), array('attributes' => array('target' => '_blank')))
+  );
+
+  $form['save'] = array(
+    '#type' => 'button',
+    '#value' => t('Save'),
+  );
+
+  return $form;
+}

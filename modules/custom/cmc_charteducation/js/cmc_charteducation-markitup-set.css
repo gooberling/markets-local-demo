@@ -1,0 +1,33 @@
+
+
+.cmc_education .markItUp .markItUpHeader ul {
+	overflow:hidden;
+	margin:5px 0;
+	list-style-image:none;
+}
+	
+.cmc_education .markItUp .markItUpHeader li {
+	float:left; 
+	margin:0 0 0 0; 
+	padding:0; 
+	list-style-type:none;	
+}
+
+
+
+li.markItUpButton a {
+	border:2px solid #1CA6CA; 
+	padding:2px 5px; 
+	margin:0 5px 5px 0; 
+	display:block;
+	background-color:#ddd;
+	color:#000;
+	font-weight:bold;
+}
+
+li.markItUpButton a:hover {  
+  background-color:#1CA6CA;
+  color:#000;
+}
+
+.cmc_token-h2-button {}

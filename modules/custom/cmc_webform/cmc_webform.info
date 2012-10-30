@@ -1,0 +1,7 @@
+core = "7.x"
+dependencies[] = "webform"
+description = "CMC Webform"
+name = "CMC Webform"
+package = "Features"
+project = "cmc_webform"
+version = "7.x-1.0"

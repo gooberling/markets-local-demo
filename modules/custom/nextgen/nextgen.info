@@ -1,0 +1,14 @@
+name = Nextgen Service API
+description = Provides access to CMC's backend services
+package = CMC
+version = 0.1
+core = 7.x
+
+files[] = nextgen.module
+files[] = nextgen.admin.inc
+files[] = nextgen.classes.inc
+files[] = nextgen.test
+files[] = tests/integration/crm_submit_application.test
+files[] = tests/integration/address.test
+
+configure = admin/config/cmc/nextgen

@@ -1,0 +1,23 @@
+<?php
+
+  /**
+     @file Nextgen test base classes
+  */
+
+define('NEXTGEN_TEST_LOCAL_URL', 'http://localhost:8181/phpjavabridge/scripts/index.php');
+define('NEXTGEN_TEST_HDEV3_URL', 'http://londhdev3l05.cmc.local:20009/phpjavabridge/scripts/index.php');
+define('NEXTGEN_TEST_UAT_URL', 'http://londngdemo16.cmc.local:20004/phpjavabridge/scripts/index.php');
+
+abstract class NextgenIntegrationTestCase extends DrupalWebTestCase {
+  protected $bridge_url;
+  protected $profile = 'cmc_installer';
+
+  function setUp() {
+    parent::setUp();
+
+    module_load_include('inc', 'nextgen', 'nextgen.classes');
+
+    $client = new NextgenPHPJavaBridgeClient($this->bridge_url);
+    nextgen_client($client);
+  }
+}

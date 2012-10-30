@@ -1,0 +1,8 @@
+core = "7.x"
+dependencies[] = "features"
+description = "CMC Sample article"
+features[field][] = "node-cmc_sample_article-body"
+features[field][] = "node-cmc_sample_article-field_sample_author"
+features[node][] = "cmc_sample_article"
+name = "cmc_sample_article"
+package = "Features"

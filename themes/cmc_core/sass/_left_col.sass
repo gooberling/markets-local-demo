@@ -1,0 +1,190 @@
+// CMC Markets Theme	
+// name = CMC Markets V4
+// description = CMC Markets Base Theme - as of 17/02
+// Left Col SASS
+
+.col-left
+	position: absolute
+	left: 10px
+	top: 0px
+	z-index: 5
+	h2
+		font-size: 1em
+		color: $darkesttext
+	.item-list
+		margin-top: 15px
+		li
+			padding: 0
+			margin: 0 0 5px
+			list-style: none
+			position: relative
+	//-----------------------------------------------------------------------------------------------
+	// Education section views from left col - main declaration in right col file
+	//-----------------------------------------------------------------------------------------------
+	.education
+		padding-bottom: 0
+		h3
+			color: $pink
+			padding-top: 15px
+		.divide
+			border-bottom: 1px solid #C4C4C4
+			border-top: 1px solid #F9F9F9
+			padding-bottom: 5px
+		.end
+			border-bottom: 0
+	.signpost-links .signpost2 a, .signpost-links .signpost2 a:visited
+		background: $blue
+	//-----------------------------------------------------------------------------------------------
+	// sub navigation
+	//-----------------------------------------------------------------------------------------------
+	ul.menu
+		background: url(/#{$themepath}/bg_arrow-more.gif) no-repeat -3000em -3000em
+		// load this so it can be used on hover state
+		padding: 0
+		margin: 0
+		li
+			margin: 0 0 5px
+			padding: 0
+			list-style: none
+			position: relative
+		a,
+		a.visited
+			color: $textcolor
+			display: block
+			line-height: 1.2em
+			overflow: visible
+			padding: 7px 25px 7px 0px
+			position: relative
+			text-align: left
+		a:after
+			+arrow
+			font-size: 140%
+			position: absolute
+			right: 6px
+			top: 8px
+			-webkit-transform: scale(0.5, 1)
+			-moz-transform: scale(0.5, 1)
+		a:hover
+			color: $blue
+		li.collapsed > a:hover:after
+			content: url(/#{$themepath}/bg_arrow-more.gif)
+			-webkit-transform: scale(1, 1)
+			-moz-transform: scale(1, 1)
+			right: 3px
+			top: 4px
+		//-----------------------------------------------------------------------------------------------
+		// active nav
+		//-----------------------------------------------------------------------------------------------
+		li.active-trail
+			background-color: $blue
+		li.active-trail a,
+		li.active-trail a:visited,
+		li a.active,
+		li.expanded > a.active-trail.active,
+		li.expanded > a.active-trail.active:visited
+			background-color: $blue
+			color: #fff
+			padding-top: 10px 
+			padding-right: 20px 
+			padding-bottom: 10px
+			left: -2000px
+			padding-left: 2000px
+			position: relative
+			right: 0
+			width: 160px
+		li.expanded > a.active-trail:hover,
+		li.expanded > a.active-trail:visited:hover
+			color: white
+		li.expanded > a.active-trail:after
+			-webkit-transform: rotate(90deg) scale(0.5, 1)
+			-moz-transform: rotate(90deg) scale(0.5, 1)
+			right: 7px
+			top: 7px
+		//-----------------------------------------------------------------------------------------------
+		// sub sub menu
+		//-----------------------------------------------------------------------------------------------
+		ul.menu
+			margin-left: -10px
+			background: $blue
+			li.active-trail
+				min-height: 10px
+			li.active-trail:before
+				display: none
+			li
+				margin: 0
+				a, a:visited
+					padding: 8px 5px 8px 25px
+					left: 0
+					background: $blue
+					color: white 
+					+transition(all 0.5s ease 0s)
+				a:hover
+					background: #0CA9C6
+					+transition(all 0.5s ease 0s)
+				a:after
+					right: 10px
+					top: 8px
+					content: ''
+			li.active
+				a,
+				a:visited
+					background-color: $menu-hilite
+				a:hover
+					color: white
+				a:after
+					color: #acdce5
+	//-----------------------------------------------------------------------------------------------
+	// latest blog header
+	//-----------------------------------------------------------------------------------------------
+	#block-views-cmc-blog-latest
+		h2
+			font-size: 1.6em
+		a.active:after
+			top: 10px
+
+//-----------------------------------------------------------------------------------------------
+// bg blue line put in by jQuery
+//-----------------------------------------------------------------------------------------------
+.line
+	position: absolute
+	left: 0
+	background-color: $blue
+	z-index: 0
+
+//-----------------------------------------------------------------------------------------------
+// metadata for Education section
+//-----------------------------------------------------------------------------------------------
+.meta-side
+	overflow: hidden
+	position: relative
+	background-color: #F3F3F3
+	border-width: 1px
+	border-style: solid
+	border-color: #Efefef #Efefef	 #C4C4C4 #Efefef
+	//	@include box-shadow(0 1px 0 0 #FFFFFF inset, 1px 0 0 0 #E6E6E6 inset, 0 0 0px 1px #E6E6E6 inset);
+	background-repeat: no-repeat
+	background-position: bottom center
+	margin-top: 2em
+	+ieCssFix
+	h3
+		color: $pink
+		font-size: 1.2em
+		border-top: #B8B8B8 1px solid
+		+box-shadow(0 1px 0 0 white inset)
+		margin: 1em 0 0.5em
+		padding: 1em 18px 0
+		&:after
+			clear: both
+			content: "."
+			display: block
+			height: 0
+			visibility: hidden
+	h3:first-child
+		border-top: 0
+		margin: 0 0 0.5em
+		padding: 1em 18px 0
+	p
+		padding-left: 18px
+		padding-right: 18px
+	p.meta
+		font-size: 0.9em

@@ -1,0 +1,76 @@
+// CMC Markets Theme	
+// name = CMC Markets V4
+// description = CMC Markets Base Theme - as of 17/02
+// News styling for products and news analysis page
+
+.page-news .tabbed > ul
+	border: 1px solid #E3E3E3
+	height: 49px
+
+.page-news .tabbed > ul > li .detail
+	padding: 0px
+	padding-top: 2em
+
+.page-news .tabbed
+	border: 0
+	border-top: 1px solid #E3E3E3
+
+.view-third-party-news,
+.view-product-related-news
+	.view-content
+		margin-bottom: 3em
+	ul
+		margin: 0
+		padding: 0
+		background: url(/#{$themepath}/bg_news-aro.png) no-repeat -3000em -3000em
+		// load it in so it shows straign away on hover
+		.show
+			display: block
+			background: url(/#{$themepath}/bg_news-aro.png) no-repeat center right
+			width: 17px
+			height: 125px
+			border-right: 1px solid #E8E8E8
+			border-bottom: 1px solid #E8E8E8
+			position: absolute
+			left: 0
+			top: 0
+			display: none
+			background-color: transparent
+			+transform(rotate(0deg))
+			+transition(background-color 0.5s ease 0s)
+		li
+			list-style: none
+			padding-left: 30px
+			position: relative
+			margin: 0 0 0.7em
+			border: 1px solid #fff
+			padding-right: 20px
+			overflow: hidden
+			min-height: 125px
+		li.long:hover,
+		li.long-hover
+			border: 1px solid #E8E8E8
+			background: #F7F7F7
+			+background(linear-gradient(top, white, #f7f7f7))
+			.show
+				display: block
+				&:hover
+					background-color: white
+					+transition(background-color 0.5s ease 0s)
+					+transform(rotate(0deg))
+					border-color: #eee
+			h3:hover
+				+cursor
+	li.long-hover
+		.show
+			border: 0
+			+transform(rotate(180deg))
+			+transition(background-color 0.5s ease 0s)
+			background-color: transparent
+	h3
+		color: $blue
+		margin-bottom: 0
+	.meta
+		color: $darkesttext
+		font-size: 0.9em
+		margin-bottom: 1.17em

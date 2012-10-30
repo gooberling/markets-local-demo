@@ -1,0 +1,69 @@
+
+
+.cke_editor {border:1px solid red;}
+
+.media-image {
+  border:2px solid green;
+}
+
+.media_cmc {float:right;}
+/*.wibble {float:right;}*/
+
+#simplemodal-container a.modalCloseImg {
+  background:url(/profiles/cmc_installer/modules/custom/cmc_wysiwyg/img/x.png) no-repeat; /* adjust url as required */
+  width:25px;
+  height:29px;
+  display:inline;
+  z-index:3200;
+  position:absolute;
+  top:-15px;
+  right:-18px;
+  cursor:pointer;
+}
+
+#basic-modal-content {display:none;}
+
+/* Overlay - done as by adding a class in js */
+/*#simplemodal-overlay {background-color:#000; cursor:wait;}*/
+
+/* Container */
+#simplemodal-container {height:360px; width:600px; color:#666; background-color:#fff; border:2px solid #AAAAAA; padding:12px;}
+#simplemodal-wrap {overflow-y:auto; overflow-x:hidden;}
+#simplemodal-container .simplemodal-data {padding:8px;}
+#simplemodal-container code {background:#141414; border-left:3px solid #65B43D; color:#bbb; display:block; font-size:12px; margin-bottom:12px; padding:4px 6px 6px;}
+#simplemodal-container a {color:#ddd;}
+/*#simplemodal-container a.modalCloseImg {background:url(../img/basic/x.png) no-repeat; width:25px; height:29px; display:inline; z-index:3200; position:absolute; top:-15px; right:-16px; cursor:pointer;}*/
+#simplemodal-container h3 {color:#84b8d9;}
+
+
+form#media-edit .form-type-file {display:none;} /* Hide the file upload */
+
+/* Styling for the internal link chooser */
+#simplemodal-data a#internal-url {color:#0DBBDB;}
+#simplemodal-data #internal-link-chooser {
+ overflow:auto; height:400px; padding:10px; width:500px; background-color:#FFF;border:2px solid #AAA; position:absolute; top:0;
+ }
+
+#simplemodal-data #internal-link-chooser a {color:#0DBBDB;}
+#simplemodal-data #internal-link-chooser-close {float:right;}
+
+
+
+form.media-edit-form .field-widget-options-select {margin:0 20px 10px 0; float:left;}
+form.media-edit-form #edit-field-filetype,
+form.media-edit-form #edit-field-content-type {}
+
+form.media-edit-form fieldset {clear:both;}
+
+form.media-edit-form .field-widget-options-buttons {clear:both; overflow:hidden; border:1px solid #ccc; padding:10px; margin:0 0 20px 0;}
+form.media-edit-form .field-widget-options-buttons .form-type-checkbox {float:left; margin:10px 10px 10px 0;}
+
+.markItUp .markitup-item-dotted-line a,
+.markItUp .markitup-item-caption a,
+.markItUp .markitup-item-text a,
+.markItUp .markitup-item-measure a,
+.markItUp .markitup-item-source a,
+.markItUp .markitup-item-frequency a,
+.markItUp .markitup-item-care a {
+  width: 52px;
+ }

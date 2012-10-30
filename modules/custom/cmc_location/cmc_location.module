@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the CMC Location feature.
+ */
+
+include_once('cmc_location.features.inc');

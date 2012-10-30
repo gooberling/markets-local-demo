@@ -1,0 +1,41 @@
+<?php
+/** 
+ * Implements hook_menu
+ */
+function cmc_crmclient_menu() {
+  return array(
+    'admin/config/crmclient' => array(
+      'title' => 'CMC CRM Client',
+      'description' => 'All configurations related to CRM Client',
+      'position' => 'left',
+      'page callback' => 'system_admin_menu_block_page',
+      'access arguments' => array('access administration pages'),
+      'file' => 'system.admin.inc',
+      'file path' => drupal_get_path('module', 'system'),
+      'weight' => -15,
+    ),
+    'admin/config/crmclient/settings' => array(
+      'title' => t('CMC CRM settings'),
+      'description' => t('Configuration settings for CRM Client, Use full path of endpoing without http.'),
+      'access arguments' => array('Administer CRM Configuration'),
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('cmc_crmclient_settings_form'),
+      'file' => 'cmc_crmclient.admin.inc',
+      'type' => MENU_NORMAL_ITEM,
+    ),
+  );
+  
+  /*
+ $items['cmc_analytics/form_js'] = array(
+    'page callback' => 'cmc_analytics_form_js',
+    'access arguments' => array('Administer site configuration'),
+    'type' => MENU_CALLBACK,
+  );
+  */
+  return $items;
+}
+
+
+function cmc_crmclient_permissions() {
+  return array('Administer CRM Configuration');
+}

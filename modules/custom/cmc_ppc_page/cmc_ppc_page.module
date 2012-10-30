@@ -1,0 +1,110 @@
+<?php
+/**
+ * @file
+ * Code for the CMC PPC Page feature.
+ */
+
+include_once('cmc_ppc_page.features.inc');
+
+
+
+function cmc_ppc_page_preprocess_page(&$vars) {
+  //echo __METHOD__;
+  //print_r($vars);
+}
+
+/**
+ * hook_block_info
+ */
+function cmc_ppc_page_block_info() {
+    
+  $blocks['cmc_ppc_page_footer'] = array(
+    'info' => t('CMC PPC Page Footer'),
+  );
+  
+  return $blocks;
+}
+
+
+
+/**
+ * hook_block_view
+ * @param unknown_type $delta
+ */
+function cmc_ppc_page_block_view($delta = '') {
+  //$path = drupal_get_path('module', 'cmc_framework');
+  $block = array();
+  
+  if ($delta == 'cmc_ppc_page_footer') {
+    $block['content'] = cmc_ppc_page_block_footer();
+  }
+  
+  return $block;
+}
+
+
+/**
+ *
+ */
+function cmc_ppc_page_block_footer() {
+  
+  // get the contact details
+  $location = variable_get('cmc_framework_seo_footer_location', '');
+  $telephone = variable_get('cmc_framework_seo_footer_telephone', '+44(0)207 7170 8200');
+  $fax = variable_get('cmc_framework_seo_footer_fax', '+44(0)207 7170 8499');
+  $email = variable_get('cmc_framework_seo_footer_email', 'info@cmcmarkets.co.uk');
+  
+  
+  $data = array();
+  
+  module_load_include('inc', 'cmc_framework', 'includes/cmc_seo_footer');
+  
+  $lid = variable_get('cmc_framework_seo_footer_location', '');
+  $params = array(
+    'name',
+    'street',
+    'city',
+    'postal_code',
+  );
+  $loc = cmc_framework_seo_footer_get_location($lid, $params);
+  
+  $edit = '';
+  if (user_access('administer cmc_seo_footer')) {
+    $edit = l(t('Edit SEO Footer'), 'admin/config/cmc/seo_footer');
+  }
+  
+  
+  $email = variable_get('cmc_framework_seo_footer_email', 'info@cmcmarkets.co.uk');
+  $email = '<a href="mailto:' . $email .'">' . $email . '</a>';
+  
+  // data to be passed to theme
+  $data = array(
+    'location' => $loc,
+    'telephone' => variable_get('cmc_framework_seo_footer_telephone', '+44(0)207 7170 8200'),
+    'fax' => variable_get('cmc_framework_seo_footer_fax', '+44(0)207 7170 8499'),
+  	'email' => $email,
+    'edit' => $edit,
+  );
+  return theme('cmc_ppc_page_footer', $data);
+}
+
+
+/**
+ * hook_theme
+ */
+function cmc_ppc_page_theme($existing, $type, $theme, $path) {
+  return array(
+    'cmc_ppc_page_header' => array(
+      'template'	=> 'theme/cmc_ppc_page_header',
+      'variables' => array(
+        'data' => NULL
+      ),
+    ),
+    'cmc_ppc_page_footer' => array(
+      'template'	=> 'theme/cmc_ppc_page_footer',
+      'variables' => array(
+        'data' => NULL
+      ),
+    ),
+  );
+}

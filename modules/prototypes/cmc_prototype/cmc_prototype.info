@@ -1,0 +1,5 @@
+name = CMC Prototype
+description = Base module to be used in all prototypes, <b>Not for Production</b>
+
+version = 7.x-1.0-beta1
+core = 7.x

@@ -1,0 +1,76 @@
+<?php
+/**
+ * @file
+ * Code for the cmc_blog feature.
+ */
+include_once('cmc_blog.features.inc');
+include_once('cmc_blog.migrate.inc');
+
+/**
+ * hook_menu
+ */
+function cmc_blog_menu() {
+  $items = array();
+
+  $items['cmcemail/blog/%'] = array(
+    'title' => 'Blog for Email',
+    'page callback'     => 'cmc_blog_email_page',
+    'access arguments' => array('access content'),
+  );
+  
+  $items['cmcemail/title/%'] = array(
+    'title' => 'Blog for Email',
+    'page callback'     => 'cmc_blog_email_page',
+    'access arguments' => array('access content'),
+  );
+ 
+  return $items;
+}
+
+
+/**
+ *
+ */
+function cmc_blog_email_page() {
+  $url = $_GET['q'];
+  $url = str_replace('/title/', '/blog/', $url); // if we're title
+  $blog_url = str_replace('cmcemail/blog/', '', $url);
+    
+  $blog_system_path = drupal_lookup_path('source', $blog_url);
+  $blog_system_path = explode("/", $blog_system_path);
+  
+  $nid = $blog_system_path[1];
+  $node = node_load($nid);
+  
+  
+  if (arg(1) == 'title') {
+    echo $node->title;
+    exit;
+  }  
+  
+  $view_name = 'cmc_blog_email';
+  $view = views_get_view($view_name);
+  
+  if (empty($view)) {
+    echo 'No view exists: ' . $view_name;
+  }
+  else if (empty($_GET['title'])) {
+    echo $view->preview('blog_entry_no_title', array($node->nid));    
+  }
+  else {
+    echo $view->preview('blog_entry', array($node->nid));
+  }  
+  exit;
+}
+
+
+/**
+ * migrate api
+ */
+function cmc_blog_migrate_api() {
+  $api = array(
+    'api' => 2,
+  );
+  return $api;
+}
+

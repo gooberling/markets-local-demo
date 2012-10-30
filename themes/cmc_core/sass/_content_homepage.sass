@@ -1,0 +1,83 @@
+// CMC Markets Theme	
+// name = CMC Markets V4
+// description = CMC Markets Base Theme - as of 17/02
+// Home page SASS
+
+//-----------------------------------------------------------------------------------------------
+// homepage region
+//-----------------------------------------------------------------------------------------------
+.is-front #main-wrapper .inner:first-child
+	padding-bottom: 2.7em
+	clear: both
+	overflow: hidden
+
+.is-front .page-title
+	font-size: 2.8em
+
+.is-front #main-content article
+	float: left
+	margin-right: 4%
+	width: 45%
+
+//-----------------------------------------------------------------------------------------------
+// full width banners
+//-----------------------------------------------------------------------------------------------
+.banner
+	padding: 3em 0
+	overflow: hidden
+	color: white
+	clear: both
+	height: 360px
+	+box-sizing(border-box)
+	h1, h2, h3
+		color: white
+	h2
+		font-size: 2.85em
+		line-height: 1.05em
+		margin: 0 0 0.25em
+	h3
+		font-size: 1.8em
+	.inner
+		overflow: visible !important
+	.grid-5.last-col
+		position: absolute
+		top: -3em
+		left: 500px
+
+.banner.blue
+	background: #0091ac
+	// Old browsers
+	background: url(/#{$themepath}/v4_bg_head.png) repeat-y top center
+	//@include gradient(#0091ac,#52daf4,0%,100%);
+	+background(linear-gradient(#0091ac 0, #52daf4 100%))
+	a, a:visited
+		color: white
+	a:hover
+		color: yellow
+	h3
+		color: #9DD7E1
+
+.banner.white
+	background: #fff
+	// Old browsers
+	color: $textcolor
+	h1, h2 , h1 a, h2 a, h1 a:visited, h2 a:visited
+		color: #333
+	h3
+		color: $textcolor
+
+.banner.black
+	background: black
+	h3
+		color: #ccc
+	a, a:visited
+		color: white
+	a:hover
+		color: yellow
+
+.is-front .region-content-home .block-cmc-hero
+	height: auto
+
+.is-front .col-left, .is-front .col-right,	.is-front #main-content
+	margin-bottom: 0em
+	min-height: 5px

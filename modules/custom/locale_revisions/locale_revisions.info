@@ -1,0 +1,6 @@
+name = Locale revisions
+description = Provides ability to maintain revisions for translated strings.
+package =  core
+core = 7.x
+
+dependencies[] = locale

@@ -1,0 +1,197 @@
+<?php
+/**
+ * @file
+ * Code for the CMC Calendar Education feature.
+ */
+
+include_once('cmc_calendar_education.features.inc');
+
+
+
+/**
+ * Implementation of hook_permission().
+ */
+function cmc_calendar_education_permission() {
+  return array(
+    'cmc_calendar_education admin' => array(
+      'title' => t('cmc_calendar_education admin'),
+     ),
+    'cmc_calendar_education configure' => array(
+      'title' => t('cmc_calendar_education configure'),
+     ),
+  );
+}
+
+
+/**
+ * hook_menu
+ */
+function cmc_calendar_education_menu() {
+  $items = array();
+
+  $items['admin/config/cmc/calendar_education'] = array(
+      'title' => 'CMC Calendar Education Settings',
+      'page callback'     => 'drupal_get_form',
+      'page arguments' => array('cmc_calendar_settings'),
+      'access callback' => 'user_access',
+      'access arguments' => array('cmc_calendar_education configure'),
+  );
+
+  $items['ecocalendareducation'] = array(
+      'title' => 'CMC Calendar Education Settings',
+      'page callback'     => 'cmc_calendar_education_xml',
+      'page arguments' => array(1,2),
+      'access callback' => 'user_access',
+      'access arguments' => array('access content'),
+  );
+
+  $items['ecocalendareducation_list'] = array(
+      'title' => 'CMC Calendar Education Settings',
+      'page callback'     => 'cmc_calendar_education_list_xml',
+      'page arguments' => array(1),
+      'access callback' => 'user_access',
+      'access arguments' => array('access content'),
+  );
+
+  return $items;
+}
+
+
+/**
+ * Settings form
+ */
+function cmc_calendar_education_settings() {
+  $form = array();
+
+  $filter_formats = filter_formats();
+
+  $options = array('' => 'All');
+  foreach ($filter_formats as $k => $v) {
+    $options[$k] = $v->name;
+  }
+
+  $form['cmc_calendar_education_filter_format'] = array(
+      '#type' => 'select',
+      '#options' => $options,
+      '#default_value' => variable_get('cmc_calendar_education_filter_format', 'cmc_calendar_education'),
+      '#required' => TRUE,
+      '#description' => 'Choose the allowed filter format. Leave blank if you want user to choose from all.',
+      '#title' => t('Calendar Education Filter format')
+  );
+
+  return system_settings_form($form);
+}
+
+/**
+ * hook_form_alter
+ * Add in the filter format
+ * @param unknown_type $form
+ * @param unknown_type $form_state
+ * @param unknown_type $form_id
+ */
+function cmc_calendar_education_form_alter(&$form, &$form_state, $form_id) {
+
+  if (isset($form['#node']) && $form['#node']->type == 'cmc_calendar_education') {
+    $form['body']['und'][0]['#format'] = variable_get('cmc_calendar_education_filter_format', 'cmc_calendar_education');
+
+    // need to add buttons for editor
+    // add custom validation function, use charteducation function
+    $form['#validate'][] = 'cmc_charteducation_node_edit_validate';
+
+  }
+}
+
+
+/**
+ * return a xml list of chart education nodes
+ * @param unknown_type $lang
+ */
+function cmc_calendar_education_list_xml($lang) {
+
+  // load a view and output the raw content
+  // views module encodes output so some content is returned as html entities
+  // flex won't convert these and can't handle them
+  // which is why we output raw values this way
+  $args = array($lang);
+  $view = views_get_view('cmc_calendar_education');
+  $view->preview('list', $args);
+
+  if (!empty($view->result[0]->nid)) {
+    $data = array();
+//print_r($view->result);
+    foreach ($view->result as $i => $res) {
+      
+      $row = array(
+        'language' => cmc_charteducation_cdata_wrap($res->node_language),
+        'calendar_id' => cmc_charteducation_cdata_wrap($res->field_field_calendar_education_id[0]['raw']['value']),
+        'title' => cmc_charteducation_cdata_wrap($res->node_title),
+      );
+
+      $data[] = $row;
+    }
+
+    drupal_add_http_header('Content-Type', 'text/xml; utf-8');
+    echo theme('cmc_calendar_education_node_list_xml', array('data' => $data));
+    exit;
+  }
+
+  drupal_not_found();
+  exit;
+}
+
+
+/**
+ * return xml content for a chart education xml
+ * @param unknown_type $lang
+ * @param unknown_type $chart_id
+ * @return string
+ */
+function cmc_calendar_education_xml($lang, $chart_id) {
+
+  // load a view and output the raw content
+  // views module encodes output so some content is returned as html entities
+  // which we don't want as flex won't convert these
+  $args = array($lang, $chart_id);
+  $view = views_get_view('cmc_calendar_education');
+  $content = $view->preview('node_language_id', $args);
+
+  if (!empty($view->result[0]->nid)) {
+    $node = node_load($view->result[0]->nid);
+
+    $data = array(
+      'language' => cmc_charteducation_cdata_wrap($node->language),
+      'calendar_id' => cmc_charteducation_cdata_wrap($node->field_calendar_education_id['und'][0]['value']),
+      'title' => cmc_charteducation_cdata_wrap($node->title),
+      'body' => cmc_charteducation_parse_body($node),
+    );
+
+    drupal_add_http_header('Content-Type', 'text/xml; utf-8');
+    echo theme('cmc_calendar_education_node_xml', array('data' => $data));
+    exit;
+  }
+
+  drupal_not_found();
+  exit;
+}
+
+
+
+/**
+ * hook_theme
+ */
+function cmc_calendar_education_theme($existing, $type, $theme, $path) {
+  return array(
+      'cmc_calendar_education_node_xml' => array(
+        'template'	=> 'theme/cmc_calendar_education_node_xml',
+        'variables' => array(
+            'data' => NULL
+        ),
+      ),
+      'cmc_calendar_education_node_list_xml' => array(
+        'template'	=> 'theme/cmc_calendar_education_node_list_xml',
+        'variables' => array(
+            'data' => NULL
+        ),
+      ),
+  );
+}

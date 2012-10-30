@@ -1,0 +1,461 @@
+<?php
+
+abstract class NextgenCrmSubmitApplicationTestCase extends NextgenIntegrationTestCase {
+
+  protected function randomEmail() {
+    return $this->randomName(10) . '@example.com';
+  }
+
+  protected function randomNumber($len) {
+    $chars = implode('', range(0, 9));
+
+    $string = '';
+
+    for ($i = 0; $i < $len; $i++) {
+      $string .= $chars[mt_rand(0, strlen($chars)-1)];
+    }
+
+    return $string;
+  }
+
+  protected function randomUKPostcode() {
+    $area = $this->randomName(2);
+    $sector = $this->randomName(2);
+
+    return $area . rand(1,99) . ' ' . rand(1,9) . $sector;
+  }
+
+  protected function getApplicationFormUKNotAppropriate() {
+
+    /**
+       This test data is taken from the CRM Bridge tests held in TFS.
+       Some of the input data has been changed to reflect changes in CRM Bridge.
+    **/
+
+    $random = $this->randomName();
+
+
+    $applicationForm = new ApplicationForm();
+    $address = new Address();
+    $address->setAddressLine1("3524 {$random} Road");
+    $address->setAddressLine2("{$random}");
+    $address->setCountry("GBR");
+    $address->setPostalCode($this->randomUKPostcode());
+    $address->setType("type");
+
+    $emailAddress = new EmailAddress();
+    $emailAddress->setEmailAddress($this->randomEmail());
+    $emailAddress->setType("Home");
+
+    $employmentDetails = new EmploymentDetails();
+    // employmentDetails.setCompanyName("CMC Markets");
+    $employmentDetails->setEmploymentStatus("Employed");
+    $employmentDetails->setFsaRegulated(TRUE);
+    $employmentDetails->setJobTitle("Senior Developer");
+    $employmentDetails->setNatureOfBusiness("Daylight Robbery");
+    //        $employmentDetails->setSourceOfFunds("Other");
+    //        $employmentDetails->setSourceOfFundsDetails("sedfsdgfdg");
+
+    $complianceEmailAddresses = array();
+    $complianceEmailAddresses[] = array(
+      'EmailAddress' => 'compliance1@company.com'
+    );
+    $complianceEmailAddresses[] = array(
+      'EmailAddress' => 'compliance2@company.com'
+    );
+
+    /**
+        IMPORTANT: Note the use of ComplianceEmailAddresses2!
+        (the 2 is important)
+     **/
+    $employmentDetails->setComplianceEmailAddresses2($complianceEmailAddresses);
+
+    $financialDetails = new FinancialDetails();
+    $financialDetails->setAnnualIncomeCurrency("GBP");
+    $financialDetails->setAnnualIncome(20000);
+    $financialDetails->setNetWorthCurrency("GBP");
+    $financialDetails->setNetWorth(20000);
+    $financialDetails->setSourceOfFunds("Savings/Investments");
+    $financialDetails->setSourceOfFundsDetails("Property");
+    //financialDetails.setOriginOfWealth("Property Income");
+    //financialDetails.setOriginOfWealthDetails("Property");
+
+    $identityDetails = new IdentityDetails();
+    $identityDetails->setType("Driging Licence");
+    $identityDetails->setIdentification("Identification_ABCD");
+    $identityDetails->setAdditionalDetails("Additional Details_XYZ");
+    $identityDetails->setExpiryDate(time() * 1000);
+
+    $telephoneNumbers = array();
+    $telephoneNumber = new TelephoneNumber();
+    $telephoneNumber->setTelephoneNumber($this->randomNumber(10));
+    $telephoneNumber->setType("Mobile");
+    $telephoneNumbers[] = $telephoneNumber;
+
+    $bankDetail = new BankDetails();
+    $bankDetail->setAccountNumber($this->randomNumber(8));
+    $bankDetail->setSortCode("56-25-23");
+    $bankDetail->setIsValid(TRUE);
+    $bankDetail->setAccountCountry("United Kingdom");
+
+    $tradingExperience = new TradingExperience();
+    $tradingExperience->setAverageDealSize("100");
+    $tradingExperience->setAverageDealSizeCurrency("GBP");
+    $tradingExperience->setId(1);
+    $tradingExperience->setNumberOfTrades("10");
+    $tradingExperience->setTradingFrequencyCode(1);
+    $tradingExperience->setTradingFrequency("Never");
+    $tradingExperience->setTradingType("Shares");
+
+    $tradingExperience2 = new TradingExperience();
+    $tradingExperience2->setAverageDealSize("200");
+    $tradingExperience2->setAverageDealSizeCurrency("USD");
+    $tradingExperience2->setId(2);
+    $tradingExperience2->setNumberOfTrades("20");
+    $tradingExperience2->setTradingFrequency("Never");
+    $tradingExperience2->setTradingFrequencyCode(1);
+    $tradingExperience2->setTradingType("OTC Derivatives");
+
+    $educationalDetails = new EducationalDetails();
+    $educationalDetails->setEducationalQualificationResult("Fail");
+    $educationalDetails->setEducationalQualificationsCode("ACC");
+
+    $relevantInvestmentExperience = new RelevantInvestmentExperience();
+    $relevantInvestmentExperience->setInvestmentExperienceCode("NON");
+    $relevantInvestmentExperience->setInvestmentExperienceResult("Fail");
+    $relevantInvestmentExperience->setNoOfTransactionsCode("OTF");
+
+    $tradingExperiences = array();
+    $tradingExperiences[] = $tradingExperience;
+    $tradingExperiences[] = $tradingExperience2;
+
+    $tradingExperienceDetails = new TradingExperienceDetails();
+    $tradingExperienceDetails->setProfessionalExperience(FALSE);
+    $tradingExperienceDetails->setProfessionalExperienceDetails("Neither");
+    $tradingExperienceDetails->setProfessionalExperienceCode(4);
+    $tradingExperienceDetails->setSeminarAttended(FALSE);
+    $tradingExperienceDetails->setId(1);
+    $tradingExperienceDetails->setTradingExperiences($tradingExperiences);
+    $tradingExperienceDetails->setNoOfYearsExperienceCode("TOM");
+    $tradingExperienceDetails->setWorkExperienceCode("NON");
+    $tradingExperienceDetails->setWorkExperienceResult("Fail");
+    $tradingExperienceDetails->setEducationalDetails($educationalDetails);
+    $tradingExperienceDetails->setRelevantInvestmentExperience($relevantInvestmentExperience);
+
+    $applicationForm->setAddress($address);
+    $applicationForm->setBankDetails($bankDetail);
+    $applicationForm->setDateOfBirth(time() * 1000);
+    $applicationForm->setEmailAddress($emailAddress);
+    $applicationForm->setEmploymentDetails($employmentDetails);
+    $applicationForm->setFinancialDetails($financialDetails);
+    $applicationForm->setIdentityDetails($identityDetails);
+    $applicationForm->setFirstName($random);
+    $applicationForm->setLastName($random);
+    $applicationForm->setGender('MALE');
+    $applicationForm->setNationality("English");
+    $applicationForm->setTelephoneNumbers($telephoneNumbers);
+    $applicationForm->setTitle("Mr");
+    $applicationForm->setTradingExperienceDetails($tradingExperienceDetails);
+    $applicationForm->setReceiveMarketingData(TRUE);
+    $applicationForm->setTermsAndConditions("Terms And Conditions");
+    $applicationForm->setTermsOfBusinessName("Terms Of Business: Name");
+    $applicationForm->setTermsOfBusinessVersion("234");
+    $applicationForm->setTermsOfBusinessAcceptanceTime(time() * 1000);
+
+    $applicationForm->setProduct("CFD");
+    $applicationForm->setProductWrapperCode("X-A");
+    $applicationForm->setTenantTemplateCode("CMC-CFDUK-R");
+
+    $applicationForm->setIpAddress("10.222.218.171");
+    $applicationForm->setDeviceID("WowLookAtMe:IAmAnIphoneDeviceID");
+
+    $applicationForm->setTenantID("tenantID");
+    $applicationForm->setOffice("office");
+    $applicationForm->setProfitCentre("profitCentre");
+    $applicationForm->setCurrency("GBP");
+    $applicationForm->setGender('MALE');
+    $applicationForm->setAcceptanceOfCKAAssessment(TRUE);
+
+    return $applicationForm;
+  }
+
+  protected function getApplicationFormAUPass() {
+
+    /**
+       This test data is taken from the CRM Bridge tests held in TFS.
+       The only real changes have been changes required for PHP
+    **/
+
+    $random = $this->randomName();
+
+    $applicationForm = new ApplicationForm();
+    $address = new Address();
+    $address->setAddressLine1("3524 {$random} Road");
+    $address->setAddressLine2("{$random}");
+
+    $address->setCountry("AUS");
+    $address->setPostalCode($this->randomNumber(6));
+    $address->setType("Home");
+
+    $emailAddress = new EmailAddress();
+    $emailAddress->setEmailAddress($this->randomEmail());
+    $emailAddress->setType("Home");
+
+    $employmentDetails = new EmploymentDetails();
+    $employmentDetails->setCompanyName("CMC Markets");
+    $employmentDetails->setEmploymentStatus("Employed");
+    $employmentDetails->setFsaRegulated(TRUE);
+    $employmentDetails->setJobTitle("Developer");
+    $employmentDetails->setNatureOfBusiness("Finance");
+    //        $employmentDetails->setSourceOfFunds("Other");
+    //        $employmentDetails->setSourceOfFundsDetails("sedfsdgfdg");
+
+    /*    $complianceEmailAddresses = array();
+    $complianceEmailAddresses[] = array(
+      'EmailAddress' => 'compliance1@company.com'
+    );
+    $complianceEmailAddresses[] = array(
+      'EmailAddress' => 'compliance2@company.com'
+      );*/
+
+    /**
+        IMPORTANT: Note the use of ComplianceEmailAddresses2!
+        (the 2 is important)
+     **/
+    //    $employmentDetails->setComplianceEmailAddresses2($complianceEmailAddresses);
+
+    $employmentDetails->setComplianceEmailAddresses(array(
+        'compliance1@company.com',
+        'compliance2@company.com'
+      )
+    );
+
+    $financialDetails = new FinancialDetails();
+    $financialDetails->setAnnualIncomeCurrency("AUD");
+    $financialDetails->setAnnualIncome(100000);
+    $financialDetails->setNetWorthCurrency("AUD");
+    $financialDetails->setNetWorth(1000000);
+    $financialDetails->setSourceOfFunds("Savings/Investments");
+    $financialDetails->setSourceOfFundsDetails("Property");
+    //financialDetails.setOriginOfWealth("Property Income");
+    //financialDetails.setOriginOfWealthDetails("Property");
+
+    $identityDetails = new IdentityDetails();
+    $identityDetails->setType("Driging Licence");
+    $identityDetails->setIdentification("Identification_ABCD");
+    $identityDetails->setAdditionalDetails("Additional Details_XYZ");
+    $identityDetails->setExpiryDate(time() * 1000);
+
+    $telephoneNumbers = array();
+    $telephoneNumber = new TelephoneNumber();
+    $telephoneNumber->setTelephoneNumber($this->randomNumber(10));
+    $telephoneNumber->setType("Mobile");
+    $telephoneNumbers[] = $telephoneNumber;
+
+    $bankDetail = new BankDetails();
+    $bankDetail->setAccountNumber($this->randomNumber(10));
+    $bankDetail->setSortCode("10-10-10");
+    $bankDetail->setIsValid(TRUE);
+    $bankDetail->setAccountCountry("Australia");
+
+    $tradingExperience = new TradingExperience();
+    $tradingExperience->setAverageDealSize("100");
+    $tradingExperience->setAverageDealSizeCurrency("GBP");
+    $tradingExperience->setId(1);
+    $tradingExperience->setNumberOfTrades("1000");
+    $tradingExperience->setTradingFrequencyCode(4);
+    $tradingExperience->setTradingFrequency("Regularly");
+    $tradingExperience->setTradingType("Shares");
+
+    $tradingExperience2 = new TradingExperience();
+    $tradingExperience2->setAverageDealSize("200");
+    $tradingExperience2->setAverageDealSizeCurrency("USD");
+    $tradingExperience2->setId(2);
+    $tradingExperience2->setNumberOfTrades("2000");
+    $tradingExperience2->setTradingFrequency("Regularly");
+    $tradingExperience2->setTradingFrequencyCode(4);
+    $tradingExperience2->setTradingType("Spread Betting/CFDs");
+
+
+    $tradingExperience3 = new TradingExperience();
+    $tradingExperience3->setAverageDealSize("400");
+    $tradingExperience3->setAverageDealSizeCurrency("GBP");
+    $tradingExperience3->setId(1);
+    $tradingExperience3->setNumberOfTrades("1500");
+    //        $tradingExperience3->setTradingFrequency("Regularly");
+    //        $tradingExperience3->setTradingFrequencyCode(4);
+    //        $tradingExperience3->setTradingFrequency("Occasionally");
+    //        $tradingExperience3->setTradingFrequencyCode(3);
+    $tradingExperience3->setTradingFrequency("Rarely");
+    $tradingExperience3->setTradingFrequencyCode(2);
+    //        $tradingExperience3->setTradingFrequency("Never");
+    //        $tradingExperience3->setTradingFrequencyCode(1);
+    $tradingExperience3->setTradingType("OTHER DERIVATIVES"); // EDT
+
+
+    $tradingExperienceDetails = new TradingExperienceDetails();
+    $tradingExperienceDetails->setProfessionalExperience(FALSE);
+    $tradingExperienceDetails->setProfessionalExperienceDetails("Neither");
+    $tradingExperienceDetails->setProfessionalExperienceCode(4);
+    $tradingExperienceDetails->setSeminarAttended(TRUE);
+    $tradingExperienceDetails->setId(1);
+    $tradingExperienceDetails->setNoOfYearsExperienceCode("TOM");
+    $tradingExperienceDetails->setWorkExperienceCode("MTT");
+    $tradingExperienceDetails->setWorkExperienceResult("Pass");
+
+    $tradingExperiences = array(
+      $tradingExperience,
+      $tradingExperience2,
+      $tradingExperience3
+    );
+
+    $tradingExperienceDetails->setTradingExperiences($tradingExperiences);
+
+    $educationalDetails = new EducationalDetails();
+    $educationalDetails->setEducationalQualificationsCode("DAQ");
+
+    $tradingExperienceDetails->setEducationalDetails($educationalDetails);
+
+    $understandingOfRisk = new UnderstandingOfRisk();
+    // ConceptOfMarginAndLeverage
+    $understandingOfRisk->setConceptOfMarginAndLeverage(TRUE);
+    //        $understandingOfRisk->setConceptOfMarginAndLeverage(FALSE);
+
+    // ConceptOfVolatility
+    $understandingOfRisk->setConceptOfVolatility(TRUE);
+    //        $understandingOfRisk->setConceptOfVolatility(FALSE);
+
+    // FamiliarWithOnlinePlatform
+    $understandingOfRisk->setFamiliarWithOnlinePlatform(TRUE);
+    //        $understandingOfRisk->setFamiliarWithOnlinePlatform(FALSE);
+
+    //OwnershipAndRights
+    $understandingOfRisk->setOwnershipAndRights(TRUE);
+    //        $understandingOfRisk->setOwnershipAndRights(FALSE);
+
+    //ResponsibilityToMonitorAndManage
+    //        $understandingOfRisk->setResponsibilityToMonitorAndManage(TRUE);
+    $understandingOfRisk->setResponsibilityToMonitorAndManage(FALSE);
+
+    $applicationForm->setUnderstandingOfRisk($understandingOfRisk);
+
+    $applicationForm->setAddress($address);
+    $applicationForm->setBankDetails($bankDetail);
+    $applicationForm->setDateOfBirth(time() * 1000);
+    $applicationForm->setEmailAddress($emailAddress);
+    $applicationForm->setEmploymentDetails($employmentDetails);
+    $applicationForm->setFinancialDetails($financialDetails);
+    $applicationForm->setIdentityDetails($identityDetails);
+    $applicationForm->setFirstName($random);
+    $applicationForm->setLastName($random);
+    $applicationForm->setGender('MALE');
+    $applicationForm->setNationality("English");
+    $applicationForm->setTelephoneNumbers($telephoneNumbers);
+    $applicationForm->setTitle("Mr");
+    $applicationForm->setTradingExperienceDetails($tradingExperienceDetails);
+    $applicationForm->setReceiveMarketingData(TRUE);
+    $applicationForm->setTermsAndConditions("Terms And Conditions");
+    $applicationForm->setTermsOfBusinessName("Terms Of Business: Name");
+    $applicationForm->setTermsOfBusinessVersion("234");
+    $applicationForm->setTermsOfBusinessAcceptanceTime(time() * 1000);
+
+    $applicationForm->setProduct("CFD");
+    $applicationForm->setProductWrapperCode("X-A");
+    $applicationForm->setTenantTemplateCode("CMC-CFDAU-R");
+
+    $applicationForm->setIpAddress("10.222.218.171");
+    $applicationForm->setDeviceID("WowLookAtMe:IAmAnIphoneDeviceID");
+
+    $applicationForm->setTenantID("tenantID");
+    $applicationForm->setOffice("office");
+    $applicationForm->setProfitCentre("profitCentre");
+    $applicationForm->setCurrency("GBP");
+    $applicationForm->setGender('MALE');
+    $applicationForm->setAcceptanceOfCKAAssessment(FALSE);
+
+    return $applicationForm;
+  }
+
+  function testCrmBridgeUK() {
+
+    $app_form = $this->getApplicationFormUKNotAppropriate();
+    $request = new SubmitApplicationRequest($app_form, new Identity(1953096273), TRUE);
+    $request->setChannel('FlexCustomer');
+
+    try {
+      $result = nextgen_crm_submit_application($request);
+    } catch (NextgenException $e) {
+      $this->exceptionHandler($e);
+      $this->verbose(var_export($e, TRUE));
+      return;
+    }
+
+    $this->assertEqual(200, $result['code'], 'Got HTTP 200 response for submit application');
+    $this->assertEqual(TRUE, property_exists($result['data'], 'InvalidAppropriateness'), 'Got invalid appropriateness object');
+    $appr = $result['data']->InvalidAppropriateness;
+    $this->verbose(var_export($result['data'], TRUE));
+    $this->assertEqual(TRUE, isset($appr) && ($appr->AppropriatenessStatus == 'NOT_APPROPRIATE'), 'Got NOT_APPROPRIATE status');
+  }
+
+  function testCrmBridgeAU() {
+
+    $app_form = $this->getApplicationFormAUPass();
+    $request = new SubmitApplicationRequest($app_form, new Identity(1953096273), TRUE);
+    $request->setChannel('FlexCustomer');
+
+    $this->verbose(json_encode($request));
+
+    try {
+      $result = nextgen_crm_submit_application($request);
+    } catch (NextgenException $e) {
+      $this->exceptionHandler($e);
+      $this->verbose(var_export($e, TRUE));
+      return;
+    }
+
+    $this->assertEqual(200, $result['code'], 'Got HTTP 200 response for submit application');
+    $this->assertEqual(TRUE, property_exists($result['data'], 'InvalidAppropriateness'), 'Got invalid appropriateness object');
+    $appr = $result['data']->InvalidAppropriateness;
+    $this->assertEqual('PASS', $appr->AppropriatenessStatus, 'Got PASS status');
+
+  }
+}
+
+
+class NextgenCrmSubmitApplicationLocalTestCase extends NextgenCrmSubmitApplicationTestCase {
+  protected $bridge_url = NEXTGEN_TEST_LOCAL_URL;
+
+  public static function getInfo() {
+    return array(
+      'name' => 'CRM Bridge tests',
+      'description' => 'Tests submission of applications to CRM Bridge',
+      'group' => 'CMC Integration (local)'
+    );
+  }
+}
+
+
+class NextgenCrmSubmitApplicationHdev3TestCase extends NextgenCrmSubmitApplicationTestCase {
+  protected $bridge_url = NEXTGEN_TEST_HDEV3_URL;
+
+  public static function getInfo() {
+    return array(
+      'name' => 'CRM Bridge tests',
+      'description' => 'Tests submission of applications to CRM Bridge',
+      'group' => 'CMC Integration (HDEV3)'
+    );
+  }
+}
+
+
+class NextgenCrmSubmitApplicationUatTestCase extends NextgenCrmSubmitApplicationTestCase {
+  protected $bridge_url = NEXTGEN_TEST_UAT_URL;
+
+  public static function getInfo() {
+    return array(
+      'name' => 'CRM Bridge tests',
+      'description' => 'Tests submission of applications to CRM Bridge',
+      'group' => 'CMC Integration (UAT)'
+    );
+  }
+}

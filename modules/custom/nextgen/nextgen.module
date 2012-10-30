@@ -1,0 +1,388 @@
+<?php
+/**
+ * @file CMC trading account registration module
+
+ The purpose of this module is to provide a wrapper around the back-end 'Nextgen' services
+ within CMC.  It provides some configuration options which enable us to store information such
+ as back-end server URLs in Drupal settings.
+
+ For each service, a function could be added to this module which invokes the service via the
+ nextgen_invoke() function.  The advantage of using nextgen_invoke() is that it provides a single
+ path for requests to Nextgen, and thus ensures that we can do any logging or error handling
+ necessary in one place.
+
+ * @author Rob Knight <r.knight@cmcmarkets.com>
+ */
+
+abstract class NextgenClient {
+  abstract public function invoke($version, $service, $method, $data = array(), $params = array());
+
+  protected function build_result($code, $raw_data) {
+    return array('code' => $code, 'raw_data' => $raw_data, 'data' => json_decode($raw_data));
+  }
+}
+
+class NextgenPHPJavaBridgeClient extends NextgenClient {
+  protected $base;
+  protected $timeout = 16; // seconds
+
+  public function __construct($base) {
+    $this->base = $base;
+  }
+
+  public function invoke($version, $service, $method, $data = array(), $params = array()) {
+    $nextgen_uri = implode('/', array($version, $service));
+    $nextgen_uri .= http_build_query($params);
+    $url = $this->base . '?uri=' . $nextgen_uri;
+
+    $headers = array(
+      'Content-type: application/json',
+      'Accept: application/json'
+    );
+
+    $options = array(
+      'headers' => $headers,
+      'method' => $method,
+      'timeout' => $this->timeout
+    );
+
+    if ($method != 'GET') {
+      $options['data'] = json_encode($data);
+    }
+
+    $result = drupal_http_request($url, $options);
+
+    if (variable_get('nextgen_log_all', FALSE)) {
+      watchdog('nextgen', '%service->%method response: %result',
+        array(
+          '%service' => $service,
+          '%method' => $method,
+          '%uri' => $url,
+          '%result' => var_export($result, TRUE)
+        ),
+        WATCHDOG_DEBUG);
+    }
+
+    if ($result->code < 0) {
+      watchdog('nextgen', 'Encountered error %code from service %service->%method',
+        array(
+          '%service' => $service,
+          '%method' => $method,
+          '%code' => $result->code
+        )
+      );
+      throw new NextgenException(NULL, '', $result->code);
+    }
+
+    if ($result->code >= 400) {
+      if ($result->code == 500) {
+        watchdog('nextgen', 'Encountered error %code from service %service->%method. Data: %data',
+          array(
+            '%service' => $service,
+            '%method' => $method,
+            '%code' => $result->code,
+            '%data' => var_export($result->data, TRUE)
+          )
+        );
+      }
+
+      throw new NextgenException($result, $result->data, $result->code);
+    }
+
+    return $this->build_result($result->code, $result->data);
+  }
+}
+
+class NextgenTestClient extends NextgenClient {
+  protected $cache = array();
+
+  public function invoke($version, $service, $method, $data = array(), $params = array()) {
+    $uri = implode('/', array($version, $service));
+
+    return array_key_exists($uri, $this->cache) ?
+      $this->build_result(200, $this->cache[$uri]) :
+      $this->build_result(404, '{"error":"Not found"}');
+  }
+
+  public function add($version, $service, $method, $result) {
+    $uri = implode('/', array($version, $service, $method));
+
+    $this->cache[$uri] = $result;
+  }
+}
+
+class NextgenException extends Exception {
+  private $raw_data;
+
+  public function __construct($response, $raw_data, $code, $message = '') {
+    $this->raw_data = $raw_data;
+
+    $dump = var_export($response, TRUE);
+    $message = "Message: {$message}\r\nCode: {$code}\r\nData: {$raw_data}\r\nDump: {$dump}";
+
+    parent::__construct($message, $code);
+  }
+
+  public function getRawData() {
+    return $this->raw_data;
+  }
+
+  public function getData() {
+    return json_decode($this->raw_data);
+  }
+}
+
+/*
+  Implementation of hook_permission()
+*/
+function nextgen_permission() {
+  return array(
+    'administer nextgen' => array(
+      'title' => t('Administer Nextgen service configuration'),
+      'description' => t('Set configuration variables related to back-end services')
+    )
+  );
+}
+
+/*
+  Implementation of hook_menu()
+*/
+function nextgen_menu() {
+  $items = array();
+
+  $items['admin/config/system/nextgen'] = array(
+    'title' => 'Nextgen Service Configuration',
+    'description' => 'Configure back-end services.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('nextgen_admin_settings_form'),
+    'access arguments' => array('administer nextgen'),
+    'file' => 'nextgen.admin.inc',
+  );
+
+  return $items;
+}
+
+/**
+   Manages the Nextgen client object.
+
+   If the caller passes in a new client object, make this the current Nextgen
+   client - this will probably only happen during unit testing.  Otherwise,
+   check if the cached client object is null and if so create a standard
+   NextgenPHPJavaBridgeClient.  If this already exists, just return it.
+*/
+function nextgen_client($client = NULL) {
+  static $_client = NULL;
+
+  if (!is_null($client)) {
+    $_client = $client;
+  }
+
+  if (is_null($_client)) {
+    $base = variable_get('nextgen_bridge_url');
+    $_client = new NextgenPHPJavaBridgeClient($base);
+  }
+
+  return $_client;
+}
+
+/*
+ Invokes a back-end service.
+
+ @param $uri The partial URI of the service (not including hostname etc.)
+ @param $method The HTTP method (GET/POST/etc.) to use
+ @param $params Params to add to the HTTP query string
+ @param $data Data to be posted to the service (will be JSON encoded automatically)
+ @return Returns a PHP array with three elements - $code, the HTTP response code; $data, the JSON data in PHP object format and $raw_data, the returned data as text
+*/
+function nextgen_invoke($uri, $method, $params = array(), $data = array()) {
+  list($version, $service) = explode('/', $uri, 2);
+
+  $client = nextgen_client();
+  return $client->invoke($version, $service, $method, $data, $params);
+}
+
+function nextgen_call($request) {
+  //  var_dump($request); die();
+  $version = '2.0';
+  $service = $request->_getService();
+  $method = $request->_getMethod();
+
+  $uri = implode('/', array($version, $service, $method));
+
+  $result = nextgen_invoke($uri, 'POST', array(), $request);
+
+  $response_class = $request->_getResponseClass();
+  //  var_dump($response_class); die();
+  $response = new $response_class;
+  $response->fromData($result['data']);
+
+  return $response;
+}
+
+/*
+  Registers a demo account for a new customer
+*/
+function nextgen_register_demo_customer($email, $password, $ip, $tenant_template_code, $currency,
+  $country, $lang, $opt_out, $phone, $title, $forename, $surname, $opt_out) {
+
+    $id_response = nextgen_identity_create($email, $password);
+  // @todo error handling
+
+ $identity = $id_response['data']->identity;
+
+  $data = compact('email', 'password', 'identity' ,'ip', 'tenant_template_code', 'currency',
+  'country', 'lang', 'opt_out', 'phone', 'title', 'forename', 'surname', 'opt_out');
+
+  return nextgen_invoke('1.0/registration/demo', 'POST', array(), $data);
+}
+
+/*
+  Registers a demo account for an existing customer
+*/
+function nextgen_demo_account_for_customer($username, $password, $tenant_template_code, $country, $lang,
+  $currency, $opt_out) {
+
+  $data = compact('tenant_template_code', 'username', 'password', 'country', 'lang', 'currency', 'opt_out');
+
+  return nextgen_invoke('1.0/registration/demo/existing', 'POST', array(), $data);
+}
+
+/*
+  Creates an identity
+*/
+function nextgen_identity_create($username, $password) {
+  $data = compact('username', 'password');
+  $response = nextgen_invoke('1.0/identity/create', 'POST', array(), $data);
+
+  return $response;
+}
+
+/*
+  Creates an identity
+*/
+function nextgen_identity_search($username) {
+  $data = compact('username');
+  $response = nextgen_invoke('1.0/identity/search', 'POST', array(), $data);
+
+  return $response;
+}
+
+/*
+  Authenticate a user
+*/
+function nextgen_authenticate($username, $password) {
+  $data = compact('username', 'password');
+  $response = nextgen_invoke('1.0/identity/authenticate', 'POST', array(), $data);
+
+  return $response;
+}
+
+/*
+  Create a session
+*/
+function nextgen_create_session($auth_token, $trading_account_id) {
+  $data = compact('auth_token', 'trading_account_id');
+  $response = nextgen_invoke('1.0/session/create', 'POST', array(), $data);
+
+  return $response;
+}
+
+/*
+  Get session transfer token
+*/
+function nextgen_get_session_transfer_token($session_key) {
+  $response = nextgen_invoke('1.0/session/transfer/' . $session_key, 'GET');
+
+  return $response;
+}
+
+/*
+  Verify session transfer token
+*/
+function nextgen_verify_session_transfer_token($token) {
+  $response = nextgen_invoke('1.0/session/verify/' . $token, 'GET');
+
+  return $response;
+}
+
+/*
+  Search for address by postcode
+  @param $search A postcode
+  @param $search Country code (e.g. GBR)
+*/
+function nextgen_address_search($search, $country) {
+  $data = compact('search', 'country');
+  $response = nextgen_invoke('1.0/client_verification/address_search', 'POST', array(), $data);
+
+  return $response;
+}
+
+/*
+  Get full address
+*/
+function nextgen_get_full_address($code, $country) {
+  $data = compact('search', 'country');
+  $response = nextgen_invoke('1.0/client_verification/full_address/' . $data, 'GET');
+
+  return $response;
+}
+
+/*
+  Submit live account application
+*/
+function nextgen_submit_application($identity, $application) {
+  $data = compact('identity', 'application');
+  $response = nextgen_invoke('1.0/crm/submit_application', 'POST', array(), $data);
+
+  return $response;
+}
+
+/*
+  Get account details
+*/
+function nextgen_identity_get_details($identity) {
+  $response = nextgen_invoke('1.0/identity/details/' . $identity, 'GET');
+
+  return $response;
+}
+
+/*
+  Validate a one time token
+*/
+function nextgen_password_reset($password, $token) {
+  $data = array('pass' => $password, 'token' =>$token);
+  $response = nextgen_invoke('1.0/identity/password_reset', 'POST', array(), $data);
+  return $response;
+}
+
+function nextgen_verify_token($token) {
+  $data = array('token' => $token);
+  $response = nextgen_invoke('1.0/identity/verify_token', 'POST', array(), $data);
+
+  return $response;
+}
+
+/*
+ * Send user a one time forgot password token
+ */
+function nextgen_forgot_password($email) {
+  $data = array('email' => $email);
+  $response = nextgen_invoke('1.0/identity/forgot_password', 'POST', array(), $data);
+  return $response;
+}
+
+function nextgen_complete_registration($token) {
+  $data = array('token' => $token);
+  $response = nextgen_invoke('1.0/registration/complete_registration', 'POST', array(), $data);
+  return $response;
+}
+
+/*
+ * Version 2.0 Application Submission
+ */
+function nextgen_crm_submit_application(SubmitApplicationRequest $request) {
+  $request->setAppropriatenessSupported(TRUE);
+  $response = nextgen_invoke('2.0/crm/submitApplication', 'POST', array(), $request);
+  return $response;
+}
+

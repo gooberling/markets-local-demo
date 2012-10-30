@@ -1,0 +1,263 @@
+// CMC Markets Theme	
+// name = CMC Markets V4
+// description = CMC Markets Base Theme - as of 17/02
+// IE overrides
+
+//-----------------------------------------------------------------------------------------------
+// All IE
+//-----------------------------------------------------------------------------------------------
+body.ie
+	
+	//-----------------------------------------------------------------------------------------------
+	// main nav styling
+	//-----------------------------------------------------------------------------------------------
+	#header
+		.ieNav
+			overflow: hidden
+			width: 980px
+			position: absolute
+			left: 0px
+			top: 0px
+			padding: 0 10px
+			height: 120px
+		.menu-block-wrapper
+			width: 90%
+			//position: relative
+			//top: 0
+			//left: 0
+		.inner
+			//overflow: hidden;
+			padding-bottom: 0
+			margin-bottom: 30px
+		ul.menu
+			list-style: none outside none
+			margin: 0 0 0
+			overflow: hidden
+			padding: 0
+			li
+				float: left
+				padding: 0
+				text-align: center
+				margin: 0
+				list-style: none
+			a:hover
+				background-position: 0 -42px
+			a.active,
+			li.active-trail a,
+			a.active:visited, 
+			li.active-trail a:visited
+				color: #fff
+				background: none
+	.tabbed
+		background: url(/#{$themepath}/bg_tabs_ie.gif) white repeat-x
+	.col-left
+		ul.menu
+			a:after
+				right: 7px
+				top: 8px
+				content: url(/#{$themepath}/bg_arrow-link.gif)
+			li.collapsed > a:hover:after
+				content: url(/#{$themepath}/bg_arrow-more.gif)
+				-webkit-transform: scale(1, 1)
+				-moz-transform: scale(1, 1)
+				right: 7px
+				top: 4px
+			li > a.active-trail:after
+				content: url(/#{$themepath}/bg_arrow-across.gif)
+				right: 8px
+				top: 7px
+			li.expanded > a.active-trail:after
+				content: url(/#{$themepath}/bg_arrow-sub.gif)
+				right: 8px
+				top: 7px
+			ul.menu li a:after
+				content: ''
+	.signpost1 a:hover
+		background: #000
+		color: #fff
+	.jcarousel-skin-default
+		.jcarousel-item
+			div.nav-links
+				a.ipad
+					width: 40px
+				a.iphone
+					width: 24px
+	tr.even
+		background-color: #f9f9f9 !important
+		border-bottom: 0 !important
+	.product-data tr.even
+		background-color: #fff !important
+	.pricing-group
+		tr.th-shadow
+			background: url(/#{$themepath}/bg_home_price_th.png) repeat-x white
+	.pricing-group tr, .pricing-group tr.even
+		background: url(/#{$themepath}/bg_home_price.png) repeat-x #f7f7f7
+	.pricing-group tr.even, .pricing-group tr
+		background-color: #f9f9f9 !important
+	.pricing-group tr th
+		background: url(/#{$themepath}/bg_home_price_tr_bg.gif) repeat-x #f0f0f0
+	.pricing-group th.th-sell
+		background: url(/#{$themepath}/bg_home_price_tr_dn.gif) 0 0 no-repeat #f0f0f0
+	.pricing-group th.th-buy
+		background: url(/#{$themepath}/bg_home_price_tr_up.gif) 0 0 no-repeat #f0f0f0
+	.block-facetapi
+		background: url(/#{$themepath}/bg_faceted_search.png) repeat-x #f0f0f0
+
+body.ie.is-front #header .inner
+	margin-bottom: 0px
+
+body.ie .markets-section table.product-data
+	tr.even
+		background-color: #fff !important
+		
+body.ie.is-front .hero-content h2
+	color: white
+
+//-----------------------------------------------------------------------------------------------
+// common IE styles
+//-----------------------------------------------------------------------------------------------
+
+body.ie7,
+body.ie8
+	#play
+		display: none
+	// , .block-views-cmc-landing-page-hero, .hero-bg, .region-landing-page, .hero
+	.img, .hero-image
+		background: transparent !important
+		-ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#00FFFFFF,endColorstr=#00FFFFFF)" !important
+		// IE8
+		filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#00FFFFFF,endColorstr=#00FFFFFF) !important
+		// IE6 & 7
+		zoom: 1
+body.ie8.is-front,
+body.ie7.is-front
+	.hero
+		width: 1200px !important
+		.hero-image
+			left: 380px
+			top: 0
+			background: none !important
+			width: 1200px !important
+			img
+				height: 480px
+				width: 1200px
+
+//-----------------------------------------------------------------------------------------------
+// IE 7 styles
+//-----------------------------------------------------------------------------------------------
+
+
+body.ie7.is-front 
+	#crumbtrail
+		display: block
+	#main-wrapper
+		padding-top: 2.7em
+
+body.ie7.stretch #header .top-fill-right
+	margin-left: -501px
+	.insert
+		margin-left: 501px
+
+body.ie7.triptych-hero .block-views-cmc-landing-page-hero
+	z-index: 1
+
+body.ie7
+	.ticker-mask
+		display: none!important
+	.page-market-analysis .view-cmc-blog .views-row-2
+		width: 379px
+	.page-market-analysis .view-cmc-blog .views-row
+		width: 179px
+	.banner
+		height: 284px
+	.hero-content h2
+		color: #9DD7E1
+	.col-left
+		position: relative
+		left: -600px
+	#header .buttons .login.active
+		height: 28px
+		width: 31px
+		filter: progid:DXImageTransform.Microsoft.Gradient(StartColorStr='#80000000', EndColorStr='#80000000')
+	#header .buttons .login-layer
+		// need to replace this with transparent PNG
+		background-color: #000000
+	.region-content-related #block-views-further-reading-block
+		width: 39%
+	.region-text-search input.form-text
+		line-height: 52px
+	#block-cmc-framework-cmc-share-this #share-this-toggle,
+	#block-cmc-framework-cmc-follow #share-this-toggle
+		width: 50%
+	hr
+		height: 1px
+		background: none
+	#cmc-tracking-consent-form-step2 hr
+		height: 1px
+	#main-wrapper .inner
+		z-index: 1
+	.block-views-cmc-landing-page-hero.triptych .triptych-content
+		width: 27.9%
+	.page-education
+		.block-facetapi
+			width: 19%
+	.signup.grid-5
+		width: 440px
+	.jcarousel-skin-default
+		.jcarousel-item
+			div.nav-links
+				display: none
+			&:hover
+				div.nav-links
+					display: block
+	.landing-list li
+		width: 178px
+	#header .top-fill-right
+		width: 49.9%
+	.col-left ul.menu li.active-trail a, 
+	.col-left ul.menu li.active-trail a:visited, 
+	.col-left ul.menu li a.active, 
+	.col-left ul.menu li.expanded > a.active-trail.active, 
+	.col-left ul.menu li.expanded > a.active-trail.active:visited
+		padding-right: 10px
+	
+	.col-left ul.menu li.active-trail
+		//margin-left: -10px
+		a,
+		a:visited
+			padding-left: 10px
+			padding-right: 10px
+			left: 0
+		ul.menu
+			margin-left: 0px
+			li, 
+			li.active-trail
+				a,
+				a:visited
+					padding-left: 20px
+
+//-----------------------------------------------------------------------------------------------
+// IE 8 styles
+//-----------------------------------------------------------------------------------------------
+
+body.ie8 
+	.region-text-search input.form-text
+		padding: 14px 100px 17px 20px
+		height: 22px
+	.hero-content h2
+		color: #9DD7E1
+
+
+//-----------------------------------------------------------------------------------------------
+//IE 9 styles 
+//-----------------------------------------------------------------------------------------------
+
+body.ie9 
+	.col-left ul.menu ul.menu
+		margin-top: -2px
+	#header .menu-block-wrapper 
+		width: 89.1%
+body.ie9.node-type-cmc-platform-page .gradient,
+body.ie9 .vid-mask
+	background: #18A8D0
+

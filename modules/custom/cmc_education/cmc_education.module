@@ -1,0 +1,45 @@
+<?php
+
+
+function aasort (&$array, $key) {
+    $sorter=array();
+    $ret=array();
+    reset($array);
+    foreach ($array as $ii => $va) {
+        $sorter[$ii]=strip_tags($va[$key]);
+    }
+    asort($sorter);
+    foreach ($sorter as $ii => $va) {
+        $ret[$ii]=$array[$ii];
+    }
+    $array=$ret;
+}
+
+function cmc_education_block_view_alter(&$data, $block) {
+
+  if ($block->module == 'views' && $block->region == 'filter_block') {
+  
+	if (isset($data['content']['facets']['#items'])) {
+  
+		foreach ($data['content']['facets']['#items'] as $facet_item) {
+			aasort($data['content']['facets']['#items'],'data');
+		}
+	
+	}
+	
+	if (isset($data['subject']) && ($data['subject'] == 'Content Type')) {
+		
+		foreach ($data['content']['facets']['#items'] as $index => &$facet_item) {
+		
+			if(!((strstr($facet_item['data'], 'CMC Document Guide')) || (strstr($facet_item['data'], 'CMC Event')) || (strstr($facet_item['data'], 'CMC Video')))) {
+			
+			unset($data['content']['facets']['#items'][$index]);
+			
+			}
+		
+		}
+			
+	}
+	
+	}
+}

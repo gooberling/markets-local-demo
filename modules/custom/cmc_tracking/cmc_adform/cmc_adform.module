@@ -1,0 +1,81 @@
+<?php
+
+// cmc_adform.module,v 1.0.0 2012-02-23
+
+function cmc_adform_menu() {
+
+  $items = array();
+
+  $items['admin/config/cmc/cmc_adform'] = array(
+    'title' => 'CMC Markets AdForm',
+    'description' => t('Allows the user to configure AdForm tracking.'),
+    'page callback' => 'drupal_get_form',
+  	'page arguments' =>	array('cmc_adform_settings'),
+    'access callback' => 'user_access',
+    'access arguments' => array('administer cmcmarkets_settings'),
+  );
+
+  return $items;
+}
+
+function cmc_adform_settings(){
+
+	$form['cmc_adform_javascript_src'] = array(
+		'#type'	=> 'textfield',
+		'#title'	=> t('URL of AdForm javascript file'),
+		'#description'	=> t('The full URL of the AdForm javascript file'),
+		'#required'	=> TRUE,
+		'#default_value'	=> variable_get('cmc_adform_javascript_src', '')
+	);
+
+	$form['cmc_adform_account_no'] = array(
+		'#type'	=> 'textfield',
+		'#title'	=> t('AdForm Account number'),
+		'#description'	=> t('The AdForm tracking account number'),
+		'#required'	=> TRUE,
+		'#default_value'	=> variable_get('cmc_adform_account_no', '')
+	);
+
+	return system_settings_form($form);
+}
+
+function cmc_adform_preprocess_page(&$vars) {
+  $admin = (substr($_SERVER['HTTP_HOST'], 0, 5) == 'admin');
+  $vars['cmc_adform'] = $admin ? '' : theme('cmc_adform');
+}
+
+function cmc_adform_get_page_name() {
+  $url = request_uri();
+  return $_SERVER['HTTP_HOST'] . $url;
+}
+
+function cmc_adform_theme($existing, $type, $theme, $path){
+  $base_path = drupal_get_path('module', 'cmc_adform');
+  $path = $base_path ."/theme";
+
+	$array = array(
+		'cmc_adform' => array(
+			'template'	=> 'cmc-adform',
+	    'path' => $path,
+	    'variables' => array('adform'=> NULL),
+		)
+	);
+
+	return $array;
+}
+
+// function cmc_adform_embed_js(){
+  // $path = explode('/', $_GET['q']);
+
+  // if ($path[0] == 'search') {
+    // $path = array('search');
+  // } else if ($path[0] == 'markets' && $path[1] == 'search') {
+    // $path = array('markets', 'search');
+  // } else if ($path[0] == 'thanks') {
+    // $path = array($path[0], $path[1]);
+  // }
+
+  // $url = url(implode('/', $path));
+
+  // return $_SERVER['HTTP_HOST'] . $url;
+// }

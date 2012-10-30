@@ -1,0 +1,16 @@
+<?php
+/**
+ * @file
+ * Code for the CMC Landing Page feature.
+ */
+
+include_once('cmc_landing_page.features.inc');
+
+
+function cmc_landing_page_node_view($node, $view_mode, $langcode) {
+  if ($view_mode == 'full') {
+    $path = drupal_get_path('module', 'cmc_landing_page');
+    //drupal_add_js($path . '/js/cmc_landing_page.js');
+    drupal_add_css($path . '/css/cmc_landing_page.css');
+  }
+}

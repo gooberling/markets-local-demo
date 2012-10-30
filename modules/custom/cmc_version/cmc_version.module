@@ -1,0 +1,74 @@
+<?php
+
+function cmc_version_block_info() {
+  $blocks = array();
+  $blocks['version'] = array(
+    'info' => t('Version'),
+    'cache' => DRUPAL_CACHE_GLOBAL
+  );
+
+  return $blocks;
+}
+
+function cmc_version_block_view($delta = '') {
+  $block = array();
+
+  if ($delta == 'version') {
+    $block['subject'] = t('Version');
+    $block['content'] = cmc_version_block_content();
+  }
+
+  return $block;
+}
+
+function cmc_version_get_version() {
+  return @file_get_contents(DRUPAL_ROOT . '/.version');
+}
+
+function cmc_version_get_environment() {
+  $hostname = `hostname`;
+  $base = reset(explode('.', $hostname));
+
+  return $base;
+}
+
+function cmc_version_block_content() {
+
+  $css = <<<CSS
+  h2.version-info {
+    background: none repeat scroll 0 0 #0EBCDC;
+    border-bottom: 2px solid yellow;
+    color: white;
+    font-size: 1.25em;
+    margin: 0;
+    padding: 4px 8px;
+    position: absolute;
+    top: 10px;
+  }
+  h2.version-info em {
+    font-weight:bold;
+  }
+CSS;
+
+
+  return array(
+    'version' => array(
+      '#theme' => 'html_tag',
+      '#tag' => 'h2',
+      '#value' => t('Version: <em>@version</em> Host: <em>@host</em>',
+                array('@version' => cmc_version_get_version(),
+                  '@host' => cmc_version_get_environment())),
+      '#attributes' => array(
+        'class' => array('version-info')
+      ),
+      '#attached' => array(
+        'css' => array(
+          array(
+            'data' => $css,
+            'type' => 'inline'
+          )
+        )
+      )
+    ),
+  );
+}

@@ -1,0 +1,65 @@
+name        = CMC Core
+description = CMC Markets Core v3.5 theme based on the modified Html5_boilerplate main theme requires the SASSY module to render the CSS
+version 	= 0.1
+core        = 7.x
+engine      = phptemplate
+screenshot  = screenshot.png
+base theme 	= html5_boilerplate
+
+stylesheets[all][] = css/application.css
+
+;KILL THESE DEFAULT STYLESHEETS:
+;stylesheets[all][] = ctools.css
+;stylesheets[all][] = field.css
+;stylesheets[all][] = node.css
+;stylesheets[all][] = search.css
+;stylesheets[all][] = system.base.css
+;stylesheets[all][] = system.theme.css
+;stylesheets[all][] = system.menus.css
+;stylesheets[all][] = system.messages.css
+;stylesheets[all][] = user.css
+;stylesheets[all][] = views.css
+
+;Theme scripts	
+scripts[] = js/s_core_overrides.js
+scripts[] = js/s_platform.js
+scripts[] = js/s_1024.js
+scripts[] = js/s_stretch_class.js
+scripts[] = js/s_ie-nav.js
+scripts[] = js/s_tabs.js
+scripts[] = js/s_faceted_search.js
+scripts[] = js/s_signup_link.js
+scripts[] = js/s_login_layer.js
+scripts[] = js/s_opening_hours.js
+scripts[] = js/s_triptych.js
+scripts[] = js/s_campaign.js
+scripts[] = js/s_news_reveal.js
+scripts[] = js/s_education_show_hide.js
+scripts[] = js/s_youtube_embed.js
+scripts[] = js/s_generic.js
+scripts[] = js/s_markets.js
+
+;JQuery plugins
+scripts[] = js/easing.js
+scripts[] = js/jquery.touchwipe.min.js
+
+regions[header] = Header
+regions[ppc_header] = PPC Header
+regions[landing_page] = Landing Pages
+regions[text_search] = Section Search
+;regions[secondary_nav] = Secondary Navigation
+regions[sidebar_first] = Left sidebar
+regions[filter_block] = Filter area
+regions[content] = Content
+regions[content_home] = Home Content
+regions[content_related] = Related Content
+regions[sidebar_second] = Right sidebar
+regions[risk] = Risk Warning
+regions[footer] = Footer
+regions[campaign_footer] = Campaign Page Footer
+regions[ppc_footer] = PPC Footer
+regions[main_nav] = Main Navigation (responsive design)
+regions[cookies_uk] = Cookie consent for UK only
+
+
+

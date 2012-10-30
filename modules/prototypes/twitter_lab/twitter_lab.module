@@ -1,0 +1,106 @@
+<?php
+/**
+ * @file
+ * Twitter Lab module.
+ * @author Ravi Julapalli r.julapalli@cmcmarkets.com
+ */
+
+/**
+ * 
+ */
+define ('TWITTER_LAB_FOLLOWER_CACHES', 'cmcmarkets_twitter_followers');
+
+/**
+ * Implements hook_flush_caches().
+ */
+function twitter_lab_flush_caches() {
+  return array(TWITTER_LAB_FOLLOWER_CACHES);
+}
+
+/**
+ * Implementation of hook_help().
+ */
+function twitter_lab_help($path, $arg) {
+  switch ($path) {
+    case 'admin/help#twitter_lab':
+      $output = file_get_contents(drupal_get_path('module', 'twitter_lab') .'/README.txt');
+      return module_exists('markdown') ? filter_xss_admin(module_invoke('markdown', 'filter', 'process', 0, -1, $output)) : '<pre>'. check_plain($output) .'</pre>';
+  }
+}
+
+/**
+ * Implements hook_menu
+ */
+function twitter_lab_menu() {
+  $items = array();
+  $items['admin/config/cmc-prototype/twitterlab'] = array(
+    'title' => 'Settings for CMC Twitter lab',
+    'description' => 'Required settings for twitter lab',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('twitter_lab_admin_settings'),
+    'access arguments' => array('administer site configuration'),
+    'file' => 'twitter_lab.admin.inc',
+  );
+  
+  $items['twitter_test'] = array(
+    'title' => 'Twitter test page',
+    'description' => 'Twitter test page',
+    'page callback' => 'twitter_lab_test',
+    'access arguments' => array('access content'),
+
+  );
+  return $items;
+}
+
+function twitter_lab_test() {
+  module_load_include('inc','twitter_lab');
+
+  $connection = _twitter_lab_get_connection();
+  $mentions = $connection->get("statuses/home_timeline", array('include_entities' => TRUE));
+  
+  foreach($mentions as $item) {
+
+    $user = $item->user;
+    $text = $item->text;
+    $id_str = $item->id_str;
+    
+    $tmp = new stdclass();
+    $tmp->text = 'price';
+    $item->entities->hashtags[] = $tmp;
+    $question = new twitter_question($item);
+
+    $user_screenname = $item->user->screen_name;
+
+    // We only service users that are followers and ask specific information
+    if(_twitter_lab_get_follower($user->id) && ($question->hashtags)) {
+      $question->response();
+
+    }
+    else {
+      //Tell user to follow
+      
+    }       
+  }
+  return true;
+}
+
+/**
+ * Implements hook_cron
+ */
+function twitter_lab_cron() {
+// Using Oauth Generate authentication tokens
+  
+}
+
+function twitter_lab_twitter_lab_service() {
+  $item = array(
+      'FX' => array(
+         'callback' => 'test_callback', 
+      ),
+      
+  );
+  return $item;
+}
+
+
+

@@ -1,0 +1,189 @@
+<?php
+/**
+ * @file
+ * Code for the CMC home feature.
+ */
+
+include_once('cmc_home.features.inc');
+
+
+/**
+ * hook_block_info
+ */
+function cmc_home_block_info() {
+  $blocks['cmc_home_banners'] = array(
+    'info' => t('CMC Home Page Banners'),
+    //'visibility' => BLOCK_VISIBILITY_NOTLISTED,
+  );
+  
+  $blocks['cmc_home_heroes'] = array(
+    'info' => t('CMC Home Page Heroes'),
+    //'visibility' => BLOCK_VISIBILITY_NOTLISTED,
+  );
+  
+  $blocks['cmc_home_signup'] = array(
+    'info' => t('CMC Signup Page Heroes'),
+    //'visibility' => BLOCK_VISIBILITY_NOTLISTED,
+  );
+    
+  return $blocks;
+}
+
+
+/**
+ * hook_block_view
+ * @param unknown_type $delta
+ */
+function cmc_home_block_view($delta = '') {
+  
+  if ($delta == 'cmc_home_banners') {
+    $block['content'] = cmc_home_block_banners();
+  }
+  else if ($delta == 'cmc_home_heroes') {
+    $block['content'] = cmc_home_block_heroes();
+  }
+  else if ($delta == 'cmc_home_signup') {
+    $block['content'] = cmc_home_block_signup();
+  }
+
+  return $block;
+}
+
+
+/**
+ *
+ * @param unknown_type $view
+ * @param unknown_type $fields
+ * @param unknown_type $num_rows
+ */
+function _cmc_home_get_views_rows_content($view, $fields, $num_rows) {
+// now loop thru the results
+  $rows = array();
+  
+  for ($i=1; $i<=$num_rows; $i++) {
+    
+    $row = array();
+    $image_field_name = $fields['image_field'] . $i;
+    $content_field_name = $fields['content_field'] . $i;
+
+    // get the image
+    if (!empty($view->result[0]->{$image_field_name}[0]['rendered'])) {
+      
+      $rendered = $view->result[0]->{$image_field_name}[0]['rendered'];
+      $vars = array(
+        'item' => $rendered['#item'],
+        'path' => $rendered['#path'],
+        'image_style' => $rendered['#image_style'],
+      );
+      
+      $row['image'] = theme('image_formatter', $vars);
+    }
+    
+    // get the content
+    if (!empty($view->result[0]->{$content_field_name}[0]['rendered']['#markup'])) {
+      $content = $view->result[0]->{$content_field_name}[0]['rendered']['#markup'];
+      $row['content'] = $content;
+    }
+    
+    if (!empty($row)) {
+      $rows[] = $row;
+    }
+  }
+  
+  return $rows;
+}
+
+
+/**
+ * Heroes block
+ */
+function cmc_home_block_heroes() {
+  
+  $path = drupal_get_path('module', 'cmc_home');
+  drupal_add_css($path . '/css/cmc_home.css');
+  drupal_add_js($path . '/js/jquery.cycle.all.js');
+  drupal_add_js($path . '/js/cmc_home.js');
+  
+  $view = views_get_view('cmc_home');
+  $view->preview('heroes');
+  
+
+  $fields = array(
+    'image_field' => 'field_field_home_hero_image',
+  	'content_field' => 'field_field_home_hero_content'
+  );
+  $num_rows = 4;
+  $rows = _cmc_home_get_views_rows_content($view, $fields, $num_rows);
+  
+  return theme('cmc_home_heroes', array('rows' => $rows));
+}
+
+/**
+ * Banner block
+ */
+function cmc_home_block_banners() {
+  $path = drupal_get_path('module', 'cmc_home');
+  drupal_add_css($path . '/css/cmc_home.css');
+  $view = views_get_view('cmc_home');
+  $view->preview('banners');
+  
+  $fields = array(
+    'image_field' => 'field_field_home_banner_image',
+  	'content_field' => 'field_field_home_banner_content'
+  );
+  $num_rows = 4;
+  $rows = _cmc_home_get_views_rows_content($view, $fields, $num_rows);
+  
+  
+  return theme('cmc_home_banners', array('rows' => $rows));
+}
+
+
+/**
+ * Heroes block
+ */
+function cmc_home_block_signup() {
+  
+  $path = drupal_get_path('module', 'cmc_home');
+  drupal_add_css($path . '/css/cmc_home.css');
+  
+  $view = views_get_view('cmc_home');
+  $view->preview('heroes');
+
+  $fields = array(
+    'image_field' => 'field_field_home_hero_image',
+  	'content_field' => 'field_field_home_hero_content'
+  );
+  $num_rows = 4;
+  $rows = _cmc_home_get_views_rows_content($view, $fields, $num_rows);
+  
+  return theme('cmc_home_signup', array('rows' => $rows));
+}
+
+
+/**
+ * hook_theme
+ */
+function cmc_home_theme($existing, $type, $theme, $path) {
+  return array(
+    'cmc_home_banners' => array(
+      'template'	=> 'theme/cmc_home_banners',
+      'variables' => array(
+          'rows' => NULL
+      ),
+    ),
+    'cmc_home_heroes' => array(
+      'template'	=> 'theme/cmc_home_heroes',
+      'variables' => array(
+          'rows' => NULL
+      ),
+    ),
+    'cmc_home_signup' => array(
+      'template'	=> 'theme/cmc_home_signup',
+      'variables' => array(
+          'rows' => NULL
+      ),
+    ),
+  );
+}
+

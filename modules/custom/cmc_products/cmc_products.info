@@ -1,0 +1,14 @@
+name = "CMC Product Library"
+description = "Migrates data from content services to Drupal"
+package = "CMC"
+core = 7.x
+
+dependencies[] = migrate
+dependencies[] = field
+dependencies[] = taxonomy
+dependencies[] = text
+dependencies[] = number
+
+files[] = cmc_products.inc
+files[] = cmc_products.module
+files[] = cmc_products.solr.inc

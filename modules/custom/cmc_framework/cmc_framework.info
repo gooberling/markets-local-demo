@@ -1,0 +1,9 @@
+name = CMC Framework
+description = Provides core functionality to be re-used across other CMC modules
+package = CMC
+version = 0.1
+core = 7.x
+
+files[] = cmc_framework.module
+
+configure = admin/config/cmc/framework

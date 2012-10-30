@@ -1,0 +1,97 @@
+<?php
+// cmc_pricing.install
+
+/**
+ *
+ */
+function cmc_pricing_install() {
+
+  switch ($GLOBALS['db_type']) {
+    case 'mysql':
+    case 'mysqli':
+      cmc_pricing_install_create_table();
+      //cmc_pricing_install_table_block();
+      //cmc_pricing_install_table_group();
+      break;
+  }
+}
+
+
+/**
+ *
+ */
+function cmc_pricing_install_create_table() {
+  db_query("CREATE TABLE `cmc_pricing` (
+  `pid` int(11) NOT NULL AUTO_INCREMENT,
+  `instrument_code` varchar(255) CHARACTER SET utf8 DEFAULT NULL,
+  `symbol` varchar(255) CHARACTER SET utf8 NOT NULL,
+  `name` varchar(255) CHARACTER SET utf8 NOT NULL,
+  `type` varchar(255) CHARACTER SET utf8 DEFAULT NULL,
+  `subtype` varchar(255) CHARACTER SET utf8 DEFAULT NULL,
+  `country` varchar(255) CHARACTER SET utf8 DEFAULT NULL,
+  `region` varchar(255) CHARACTER SET utf8 DEFAULT NULL,
+  `created` int(11) NOT NULL,
+  `updated` int(11) NOT NULL,
+  PRIMARY KEY (`pid`)
+)");
+
+  drupal_set_message('Created Table cmc_pricing');
+}
+
+/**
+ *
+ */
+function cmc_pricing_install_table_block() {
+  db_query("CREATE TABLE `cmc_pricing_block` (
+  `pbid` int(11) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `created` int(11) NOT NULL,
+  `updated` int(11) NOT NULL
+);");
+
+  drupal_set_message('Created Table cmc_pricing');
+}
+
+/**
+ *
+ */
+function cmc_pricing_install_table_group() {
+  db_query("CREATE TABLE  `cmc_pricing_group` (
+`gid` INT( 11 ) NOT NULL ,
+`pbid` INT( 11 ) NOT NULL ,
+`title` VARCHAR( 255 ) NOT NULL ,
+`qid` INT( 11 ) NOT NULL
+);");
+
+  drupal_set_message('Created Table cmc_pricing');
+}
+
+
+
+/**
+ *
+ */
+function cmc_pricing_update_7002() {
+
+  if (!db_table_exists('cmc_pricing')) {
+    cmc_pricing_install_create_table();
+  }
+  else {
+    drupal_set_message('Table cmc_pricing Exists');
+  }
+
+  if (!db_table_exists('cmc_pricing_block')) {
+    cmc_pricing_install_table_block();
+  }
+  else {
+    drupal_set_message('Table cmc_pricing_block Exists');
+  }
+
+  if (!db_table_exists('cmc_pricing_group')) {
+    cmc_pricing_install_table_group();
+  }
+  else {
+    drupal_set_message('Table cmc_pricing_group Exists');
+  }
+}
+

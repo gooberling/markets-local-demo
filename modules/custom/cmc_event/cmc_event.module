@@ -1,0 +1,205 @@
+<?php
+/**
+ * @file
+ * Code for the CMC Event feature.
+ */
+
+include_once('cmc_event.features.inc');
+include_once('cmc_event.webform.inc');
+
+function cmc_event_menu() {
+  $items = array();
+  
+  $items['node/%node/cmc_event_webform'] = array(
+    'title' => 'Export Registrations',
+    'page callback' => 'cmc_event_webform_export',
+    'page arguments' => array(1),
+    'access callback' => 'cmc_event_access',
+    'access arguments' => array(1, 'Access all webform results'),
+    'file' => 'cmc_event.webform.inc',
+    'weight' => 9,
+    'type' => MENU_LOCAL_TASK,
+  );
+  
+  $items['node/%node/cmc_event_webform/download/%'] = array(
+    'title' => 'Download Registrations',
+    'page callback' => 'cmc_event_webform_download',
+    'page arguments' => array(1, 4),
+    'access callback' => 'cmc_event_access',
+    'access arguments' => array(1, 'Access all webform results'),
+    'file' => 'cmc_event.webform.inc',
+    
+  );
+  
+  return $items;
+}
+
+function cmc_event_access($node, $perm) {
+  if ($node->type == 'cmc_event') {
+    if (user_access($perm)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+
+/**
+ * hook_node_view
+ *
+ * @param unknown_type $node
+ * @param unknown_type $view_mode
+ * @param unknown_type $langcode
+ */
+function cmc_event_node_view(&$node, $view_mode, $langcode) {
+
+  if ($node->type != 'cmc_event') {
+    return;
+  }
+  
+  // Add the map at the end of body for the time being
+  if (!empty($node->field_location)) {
+    $node->content['body'][0]['#markup'] .= cmc_event_iframe_gmap($node);
+  }
+
+  // check we have valid dates in the future
+  // no valid dates in future then don't show the form
+  $view = views_get_view('cmc_events');
+  $event_dates = $view->preview('event_dates', array($node->nid));
+  if (!count($view->result)) {
+    unset($node->content['field_date']);
+    return;
+  }
+  else {
+    // only show the valid dates in the future from the view
+    for ($i=0; $i<=count($view->result); $i++) {
+      unset($node->content['field_date'][$i]);
+    }
+    $node->content['field_date'][0]['#markup'] = $event_dates;
+  }
+    
+  // check if we should show the webform
+  $view = views_get_view('cmc_events');
+  $view->preview('webform_nid', array($node->nid));
+
+  if (!empty($view->result[0])) {
+    //print_r($view->result[0]);
+    $webform_nid = $view->result[0]->field_field_webform[0]['raw']['nid'];
+    $block = module_invoke('webform', 'block_view', 'client-block-' . $webform_nid);
+    $node->content['body'][0]['#markup'] .= render($block['content']);
+  }
+  
+}
+
+
+
+/**
+ * hook_form_alter
+ */
+function cmc_event_form_alter(&$form, &$form_state, $form_id) {
+  
+  if (module_exists('cmc_webform') && cmc_webform_is_embedded_webform($form)) {
+    // if we're on an event node and have embedded an webform
+    
+    if (!is_numeric(arg(1))) {
+      return;
+    }
+    $event_node = node_load(arg(1));
+    
+    if ($event_node->type == 'cmc_event') {
+
+      $webform_replace_values = array(
+        'cmc_event_nid' => 'nid',
+        'cmc_event_title' => 'title',
+      );
+      
+      foreach ($webform_replace_values as $webform_key => $node_prop) {
+        if (isset($form['submitted'][$webform_key]['#default_value'])) {
+          $form['submitted'][$webform_key]['#default_value'] = $event_node->{$node_prop};
+        }
+      }
+    }
+    
+  }
+}
+
+
+
+
+
+
+
+/**
+ * return an iframed gmap
+ * Enter description here ...
+ * @param unknown_type $result
+ */
+function cmc_event_iframe_gmap($node) {
+    
+  $view = views_get_view('cmc_events');
+  $location_output = $view->preview('map', array($node->nid));
+  
+  if (empty($view->result[0])) {
+    return;
+  }
+  
+  $result = $view->result[0];
+  
+  // get address details
+  module_load_include('inc', 'location', 'location');
+  $address[] = $result->node_field_data_field_location__location_street;
+  $address[] = $result->node_field_data_field_location__location_additional;
+  $address[] = $result->node_field_data_field_location__location_city;
+  $address[] = $result->node_field_data_field_location__location_province;
+  $address[] = location_country_name($result->node_field_data_field_location__location_country);
+  $address[] = $result->node_field_data_field_location__location_postal_code;
+  
+  // filter out empty elements
+  $address = array_filter($address);
+  
+  // get location for gmap iframe
+  if ($result->node_field_data_field_location__location_latitude &&
+    $result->node_field_data_field_location__location_longitude) {
+    // we have longitude and latitude
+    $query[] = 'll=' . $result->node_field_data_field_location__location_latitude . ',' . $result->node_field_data_field_location__location_longitude;
+  }
+  else {
+    $query[] = 'q=' . implode(',', $address);
+  }
+
+  $args = array(
+    'query' => implode('&amp;', $query),
+    'location' => $location_output,
+    'address' => $address,
+  );
+  
+  return theme('cmc_event_map', $args);
+  
+}
+
+
+/**
+ * hook_theme
+ * @param unknown_type $existing
+ * @param unknown_type $type
+ * @param unknown_type $theme
+ * @param unknown_type $path
+ */
+function cmc_event_theme($existing, $type, $theme, $path) {
+  $base_path = drupal_get_path('module', 'cmc_event');
+  $path = $base_path ."/theme";
+
+  $array = array(
+    'cmc_event_map' => array(
+      'template'	=> 'cmc_event_map',
+      'path' => $path,
+      'variables' => array(
+      	'location' => NULL,
+        'query'=> NULL,
+        'address'=> NULL,
+      ),
+    ),
+  );
+
+  return $array;
+}

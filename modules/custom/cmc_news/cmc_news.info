@@ -1,0 +1,13 @@
+name = "CMC News"
+description = "Migrates data from third party news sources to Drupal"
+package = "CMC"
+core = 7.x
+
+dependencies[] = migrate
+dependencies[] = field
+dependencies[] = taxonomy
+dependencies[] = text
+dependencies[] = number
+
+files[] = cmc_news.inc
+files[] = cmc_news.module

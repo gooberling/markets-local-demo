@@ -1,0 +1,250 @@
+// CMC Markets Theme	
+// Pricing panels SASS
+// CMC Markets Theme	
+// name = CMC Markets V4
+// description = CMC Markets Base Theme - as of 17/02
+
+#block-cmc-pricing-cmc-pricing-home
+	float: right
+	width: 49%
+	margin-top: -40px
+
+.is-front #block-system-main
+	float: left
+	width: 45%
+	margin-right: 4%
+
+.is-front #main-content .region-content
+	//overflow:hidden;
+
+.pricing-group.default
+	.pricing-panel
+		overflow: hidden
+		clear: right
+		margin: 0 0 20px 0
+	.pricing-panel > h3
+		padding-left: 20px
+	.pricing
+		width: 178px
+		float: left
+		margin-left: 20px
+
+.pricing-panel-tabbed
+	td.bid, td.ask, td.spread
+		width: 80px
+
+.pricing-edit
+	position: absolute
+	margin-top: -10px
+	background-color: #EC009C
+	padding: 3px 10px
+
+.price-col-right
+	float: left
+	width: 600px
+
+.price-col-left
+	float: left
+	width: 375px
+
+.pricing-group
+	position: relative
+	table
+		margin: 15px 0 0
+		border: 1px solid #dcdcdc
+		border-width: 1px 1px 0 1px
+	h2
+		font-size: 1.55em
+	th
+		font-weight: normal
+		font-size: 0.9em
+		border-bottom: 1px solid #dcdcdc
+		padding: 8px 10px
+	
+	td
+		text-align: center
+		border-bottom: 1px solid #dcdcdc
+		padding: 8px 10px
+		a, a:visited
+			font-weight: normal
+			color: $textcolor
+	td.title
+		text-align: left
+	th.th-instrument
+		width: 175px
+		text-align: left
+	th.th-spread
+		text-align: center
+	th.th-buy
+		background-image: url(/#{$themepath}/v4_bg_price_up.png)
+		background-position: 28% -15px
+		background-repeat: no-repeat
+		padding-left: 21px
+		text-align: center
+	th.th-sell
+		background-image: url(/#{$themepath}/v4_bg_price_up.png)
+		background-position: 28% 8px
+		background-repeat: no-repeat
+		padding-left: 21px
+		text-align: center
+	tr, 
+	tr.even
+		background: url(/#{$themepath}/bg_home_price.png) repeat-x #f7f7f7
+		+background(linear-gradient(top, white, #f7f7f7))
+		th
+			background: white
+			+box-shadow(0 5px 2px -2px #eeeeee inset)
+	td.spread
+		font-style: italic
+
+.pricing-group.tab-panel
+	margin-top: 2em
+	.movement
+		display: none
+	ul.panel-nav
+		margin: 0
+		padding: 0
+		right: 0
+		top: 4px
+		position: absolute
+	ul.panel-nav li
+		display: inline
+		margin: 0
+		padding: 2px 5px
+		list-style-type: none
+		a, a:visited
+			color: #CCCCCC
+		a.active, a.active:visited
+			font-weight: bold
+			color: $textcolor
+
+.pricing-group.tab-panel:first-child
+	margin-top: 0
+
+.up
+	color: #18C51B
+
+.down
+	color: red
+div.pricing
+	overflow: hidden
+	position: relative
+	+greybox
+	h3
+		font-size: 1.22em
+		line-height: 1.2em
+		margin: 0 0 0.8em
+		padding: 15px 18px 0
+		a, a:visited
+			color: $textcolor
+	.prices
+		height: 65px
+		background: url("/#{$themepath}/bg_pricing.png") 0 0 repeat-x #3e3e3e
+		+background(linear-gradient(top, #7d7d7d 0, #535353 33%, #323232 66%, #3e3e3e 100%))
+		ul
+			padding: 8px 45px 5px 0px
+			margin: 0
+		li
+			list-style-type: none
+			margin: 0 0 1px 7px
+			padding: 0
+			font-size: 1.4em
+			text-align: right
+			color: white
+		.value
+			text-align: right
+			font-style: italic
+			font-weight: normal
+		.movement
+			width: 18px
+			height: 21px
+			display: block
+			float: right
+		.ask .movement
+			background: url(/#{$themepath}/v4_bg_price_up.png) right -18px no-repeat
+		.bid .movement
+			background: url(/#{$themepath}/v4_bg_price_up.png) right 4px no-repeat
+	ul.details
+		padding: 10px 18px 5px
+		li.spread-details
+			font-size: 1em
+			color: $textcolor
+			list-style-type: none
+			span
+				float: right
+
+// for the product listing page
+
+.node-product
+	.pricing
+		border: none
+		position: absolute
+		top: 1px
+		right: 12px
+		background: none
+		+box-shadow(none)
+		width: 105px
+		.prices
+			background: none
+			ul
+				padding-right: 0
+
+// ticker
+.pricing-group.ticker-container
+	background-color: #eee
+	height: 2em
+
+.pricing-scroller
+	overflow: hidden
+	margin: 0
+	padding: 0
+	height: 25px
+	li.pricing
+		float: left
+		margin: 0
+		padding: 0
+		border: none
+		padding: 3px 25px 0 0
+		list-style-type: none
+		background-color: transparent
+		+box-shadow(none)
+		font-size: 0.9em
+	li div
+		float: left
+		padding: 2px
+	//Need to fix the width else sizes keep changing and screws up the scrolling
+	li div.ask,	 
+	li div.bid
+		width: 45px
+		padding-right: 18px
+		text-align: right
+		background-repeat: no-repeat
+	li div.ask
+		background-image: url(/#{$themepath}/v4_bg_price_up.png)
+		background-position: 52px -21px
+	li div.bid
+		background-image: url(/#{$themepath}/v4_bg_price_up.png)
+		background-position: 52px 3px
+	li div.title a
+		font-weight: bold
+		color: #0EBCDC
+
+.ticker-container
+	background-color: #eee
+	padding: 2px 0px
+	margin: 0
+
+.ticker-mask
+	margin: 0 auto
+	// center the tickers - div inserted by plugin
+
+.ticker
+	margin: 0
+	padding: 0
+
+.pricing-edit-scroller
+	position: absolute
+	//margin-top:-10px;
+	right: 0
+	background-color: #EC009C
+	padding: 3px 10px

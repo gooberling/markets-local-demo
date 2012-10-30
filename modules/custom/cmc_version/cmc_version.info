@@ -1,0 +1,7 @@
+name = CMC Version
+package = CMC
+description = Provides a block which shows the version of the currently deployed code
+version = 0.1
+core = 7.x
+
+files[] = cmc_version.module

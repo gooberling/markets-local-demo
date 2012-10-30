@@ -1,0 +1,247 @@
+<?php
+/**
+ * @file CMC trading account registration module
+ * @author Rob Knight <r.knight@cmcmarkets.com>
+ */
+
+//Constants for regional stuff
+
+define('CMC_REGISTRATION_LIVE', 'live');
+define('CMC_REGISTRATION_DEMO', 'demo');
+define('CMC_ALREADY_REGISTERED_NO' , 'no');
+define('CMC_ALREADY_REGISTERED_YES' , 'yes');
+define('CMC_REGISTRATION_MULTICURRENCY', 'multicurrency');
+define('CMC_REGISTRATION_MULTILANGUAGE', 'multilanguage');
+
+define('CMC_REGISTRATION_TRADING_EXPERIENCE_NEITHER', 1);
+define('CMC_REGISTRATION_TRADING_EXPERIENCE_WORK', 3);
+define('CMC_REGISTRATION_TRADING_EXPERIENCE_BOTH', 4);
+define('CMC_REGISTRATION_TRADING_EXPERIENCE_QUALIFICATION', 2);
+
+define('CMC_REGISTRATION_TRADING_FREQUENCY_NEVER', 1);
+define('CMC_REGISTRATION_TRADING_FREQUENCY_RARELY', 2);
+define('CMC_REGISTRATION_TRADING_FREQUENCY_OCCASIONALLY', 3);
+define('CMC_REGISTRATION_TRADING_FREQUENCY_REGULARLY', 4);
+
+
+
+function cmc_registration_permission() {
+  return array(
+    'administer cmc registration' => array(
+      'title' => t('Administer CMC Account Registration'),
+      'description' => t('Administer the account registration forms')
+    ),
+    'register for demo account' => array(
+      'title' => t('Register for demo account'),
+      'description' => t('Allows users to register for CMC demo account')
+    ),
+    'register for live account' => array(
+      'title' => t('Register for live account'),
+      'description' => t('Allows users to register for CMC live account')
+    )
+  );
+}
+
+/**
+ * Implementation of hook_menu()
+ * For dev purposes, we're using a menu hook to display the form. In production
+ * we may want to embed the form in a block.git
+ */
+function cmc_registration_nextgen_menu() {
+  $items = array();
+
+  $items['registration/%'] = array(
+    'title' => 'Live @accounttype Account', // @todo proper title
+    'title callback' => '_cmc_registration_title',
+    'title arguments' => array('account_type' => 0, 'product' => 1),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('cmc_registration_get_form', CMC_REGISTRATION_LIVE, 1),
+    'access arguments' => array('register for live account'),
+    'type' => MENU_CALLBACK,
+    'file' => 'includes/cmc_registration_nextgen.git inc'
+  );
+
+  $items['demo/%'] = array(
+    'title' => 'Demo @accounttype Account', // @todo proper title
+    'title callback' => '_cmc_registration_title',
+    'title arguments' => array('account_type' => 0, 'product' => 1),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('cmc_registration_get_form', CMC_REGISTRATION_DEMO, 1),
+    'access arguments' => array('register for demo account'),
+    'type' => MENU_CALLBACK,
+    'file' => 'includes/cmc_registration_nextgen.inc'
+  );
+
+  $items['registration/%/pdf/%'] = array(
+    'title' => 'Registration PDF',
+    'page callback' => 'cmc_registration_live_pdf',
+    'page arguments' => array(3,1),
+    'access arguments' => array('register for live account'),
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['registration/final/%'] = array(
+    'title callback' => '_cmc_registration_title',
+    'title arguments' => array('account_type' => 0, 'product' => 2),
+    'page callback' => '_cmc_registration_final',
+    'page arguments' => array(2),
+    'access arguments' => array('register for live account'),
+    'type' => MENU_CALLBACK,
+    'file' => 'includes/cmc_registration.inc'
+  );
+
+  $items['registration/reject/%'] = array(
+    'title callback' => '_cmc_registration_title',
+    'title arguments' => array('account_type' => 0, 'product' => 2),
+    'page callback' => '_cmc_registration_reject',
+    'page arguments' => array(2),
+    'access arguments' => array('register for live account'),
+    'type' => MENU_CALLBACK,
+    'file' => 'includes/cmc_registration.inc'
+  );
+
+
+  $items['demo/final/%'] = array(
+    'title callback' => '_cmc_registration_title',
+    'title arguments' => array('account_type' => 0, 'product' => 2),
+    'page callback' => '_cmc_registration_demo_final',
+    'page arguments' => array(2),
+    'access arguments' => array('register for demo account'),
+    'type' => MENU_CALLBACK,
+    'file' => 'includes/cmc_registration.inc'
+  );
+
+  $items['registration/confirmation'] = array(
+    'title' => t('Live Account Activated'), // @todo proper title
+    'page callback' => '_cmc_registration_confirmation',
+    'access arguments' => array('register for live account'),
+    'type' => MENU_CALLBACK,
+    'file' => 'includes/cmc_registration.inc'
+  );
+
+  $items['registration/error'] = array(
+    'title' => t('An error has occurred'),
+    'page callback' => '_cmc_registration_error',
+    'access arguments' => array('register for live account'),
+    'type' => MENU_CALLBACK,
+    'file' => 'includes/cmc_registration.inc'
+  );
+
+  $items['registration/error/pdf'] = array(
+    'title' => t('An error has occurred'),
+    'page callback' => '_cmc_registration_error',
+    'page arguments' => array(2),
+    'access arguments' => array('register for live account'),
+    'type' => MENU_CALLBACK,
+    'file' => 'includes/cmc_registration.inc'
+  );
+
+  $items['address/search'] = array(
+    'title' => t('Search for an address by postcode'),
+    'page callback' => 'cmc_registration_address_search',
+    'page arguments' => array(2),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'includes/cmc_registration.address.inc'
+  );
+
+  $items['address/full/%'] = array(
+    'title' => t('Get full address details'),
+    'page callback' => 'cmc_registration_address_full',
+    'page arguments' => array(2),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'includes/cmc_registration.address.inc'
+  );
+
+
+ $items['admin/config/system/registration'] = array(
+    'title' => t('CMC Account Registration'),
+    'description' => 'Configure live and demo registration forms.',
+    'access arguments' => array('administer cmc registration'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('cmc_registration_settings_form'),
+    'file' => 'admin/cmc_registration_nextgen.admin.inc',
+    'type' => MENU_NORMAL_ITEM,
+
+  );
+
+ $items['admin/config/system/registration/settings'] = array(
+    'title' => t('Settings'),
+    'description' => 'Configure general settings',
+    'access arguments' => array('administer cmc registration'),
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+ );
+
+ $items['admin/config/system/registration/live'] = array(
+    'title' => t('Account Registration LIVE'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('cmc_registration_live_settings_form'),
+    'file' => 'admin/cmc_registration_nextgen.admin.live.inc',
+    'description' => 'Configure live registration forms.',
+    'access arguments' => array('administer cmc registration'),
+    'type' => MENU_LOCAL_TASK,
+  );
+
+  $items['admin/config/system/registration/demo'] = array(
+    'title' => t('Account Registration DEMO'),
+    'description' => 'Configure demo registration forms.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('cmc_registration_demo_settings_form'),
+    'access arguments' => array('administer cmc registration'),
+    'file' => 'admin/cmc_registration_nextgen.admin.demo.inc',
+    'type' => MENU_LOCAL_TASK,
+  );
+
+
+  return $items;
+}
+
+
+/**
+ * Implements hook_preprocess_html
+ * @param string $variables 
+ */
+function cmc_registration_preprocess_html(&$variables) {
+  if (array_key_exists('inapp', $_GET) && ($_GET['inapp'] == '1')) {
+    $variables['classes_array'][] = 'inapp';
+  }
+}
+
+
+/**
+ *Implements hook_l10n_strings_alter
+ * There is a bug with Drupal core translations that stops it fro
+ * @param type $strings
+ * @param type $language 
+ */
+function cmc_registration_l10n_strings_alter(&$strings, $language) {
+  $result = db_query("SELECT s.source, t.translation, s.textgroup, s.context FROM {locales_source} s LEFT JOIN {locales_target} t ON s.lid = t.lid WHERE (s.location LIKE :location) OR (s.location LIKE :location1)", array(':location' => '%cmc_registration%',':location1' => '%cmc_js_validation%'));
+  // select s.source, t.translation, s.textgroup, s.context from locales_source s left join locales_target t on s.lid = t.lid
+  foreach ($result as $data) {
+      if (!array_key_exists($data->source, $strings[$data->textgroup])) {
+        $strings[$data->textgroup][$data->context][$data->source] = (empty($data->translation) ? TRUE : $data->translation);
+      }
+    }
+}
+
+/**
+ * Return type of products supported by Registraiton forms
+ * @return type Re
+ */
+function cmc_registration_product_type() {
+  return array(
+      'cfd' => t('CFD'),
+      'sb'  => t('Spread Betting'),
+  );
+}
+
+/**
+ * Implements hook_cmc_registration_form_config_alter
+ * @param type $config 
+ * 
+ * Change any config before the form is being built
+ */
+function cmc_registration_cmc_registration_form_config_alter(&$config) {
+
+}

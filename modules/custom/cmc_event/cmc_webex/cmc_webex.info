@@ -1,0 +1,10 @@
+name = CMC Webex
+description = Provides integration with webex
+package = CMC
+version = 0.1
+core = 7.x
+
+dependencies[] = "cmc_event"
+files[] = cmc_webex.module
+
+configure = admin/config/cmc/webex

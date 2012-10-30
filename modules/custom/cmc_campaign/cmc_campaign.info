@@ -1,0 +1,6 @@
+name = "CMC Campaign"
+description = "Loads the Campaign nodes into the campaign page"
+package = "CMC"
+core = 7.x
+
+files[] = cmc_campaign.module

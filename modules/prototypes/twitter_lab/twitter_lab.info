@@ -1,0 +1,13 @@
+name = Twitter Lab
+description = Provides functions for CMC  twitter lab project
+package = CMC Prototypes
+core = 7.x
+
+;dependencies[] = cmc_prototype
+
+configure = admin/config/cmc-prototype/twitterlab
+files[] = twitter_lab.module
+files[] = twitter_lab.install
+files[] = twiteroauth/OAuth.php
+files[] = twiteroauth/twitteroauth.php
+

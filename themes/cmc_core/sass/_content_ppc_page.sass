@@ -1,0 +1,90 @@
+// CMC Markets Theme	
+// name = CMC Markets V4
+// description = CMC Markets Base Theme - as of 17/02
+// PPC Page styling
+
+.node-type-cmc-ppc-page.logged-in #main-wrapper
+	.inner
+		min-height: 10px
+		#main-content
+			min-height: 10px
+
+.node-type-cmc-ppc-page
+	#header
+		background-repeat: no-repeat
+		background-position: 50% 0
+		.top-fill-right,
+		.top-fill-left
+			display: none
+		.inner
+			float: none
+			min-height: 30px
+		#logo
+			a
+				top: 0 !important
+				background-color: #000
+				background: url(/#{$themepath}/logo_ppc.png) no-repeat
+				width: 95px
+				height: 63px
+	.button
+		display: block
+		padding: 25px 15px
+		color: white
+		float: left
+		+box-shadow(0 0 3px rgba(0, 0, 0, 0.5) inset)
+		font-size: 1.5em
+		margin-bottom: 0.8em
+		&:hover
+			color: #333
+	.blue
+		background-color: $blue
+	.yellow
+		background-color: $yellow
+		color: #333
+		font-size: 2em
+		margin-right: 10px
+		&:hover
+			color: #fff
+	#block-views-cmc-ppc-block-1
+		-moz-box-sizing: border-box
+		height: 290px
+		margin: 15px auto 0
+		overflow: visible
+		padding: 0
+		position: relative
+		text-align: left
+		width: 980px
+	#crumbtrail
+		display: none
+	.hero-content
+		width: 50%
+	#main-wrapper
+		.inner
+			min-height: 10px
+			#main-content
+				min-height: 10px
+	#footer
+		background-color: #01363E
+		color: #CCCCCC
+		.region-risk
+			background-color: #01363E
+			box-shadow: none
+		.region-ppc-footer
+			.inner
+				padding: 20px 0
+				border-top: 1px solid #CCCCCC
+			address
+				float: left
+				line-height: 1.4em
+				span
+					margin: 0 18px 0 0
+					font-style: normal
+			ul.details
+				float: left
+				margin: 0
+				padding: 0
+				li
+					display: inline
+					margin: 0 18px 0 0
+				li.email
+					margin: 0

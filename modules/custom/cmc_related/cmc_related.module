@@ -1,0 +1,150 @@
+<?php
+
+function cmc_related_block_info() {
+  $blocks = array();
+
+  $blocks['related_events'] = array(
+    'info' => t('Related events'),
+    'cache' => DRUPAL_CACHE_PER_PAGE
+  );
+
+  $blocks['related_blogs'] = array(
+    'info' => t('Related blogs'),
+    'cache' => DRUPAL_CACHE_PER_PAGE
+  );
+
+  return $blocks;
+}
+
+function cmc_related_block_view($delta = '') {
+  $block = array();
+
+  if ($delta == 'related_events') {
+    $block['subject'] = t('Related events');
+    $block['content'] = cmc_related_content(menu_get_object(), 'cmc_event');
+  } else if ($delta == 'related_blogs') {
+    $block['subject'] = t('Related blogs');
+    $block['content'] = cmc_related_content(menu_get_object(), 'cmc_blog');
+  }
+
+  return $block;
+}
+
+function cmc_related_content($node, $type) {
+  $themes = array();
+  $trade_types = array();
+
+  if (isset($node->field_theme['und'])) {
+    foreach ($node->field_theme['und'] as $theme) {
+      $themes[] = $theme['tid'];
+    }
+  }
+
+  if (isset($node->field_trade_type['und'])) {
+    foreach ($node->field_trade_type['und'] as $trade_type) {
+      $trade_types[] = $trade_type['tid'];
+    }
+  }
+
+  $args = array();
+  $args[] = $type;
+  $args[] = implode(',', $themes);
+
+  // View doesn't work with this as an argmunent, it returns get a 400: Bad request response.
+  // Seems to happen if we use the trade type field
+  // not sure why so commenting out for time being
+  //$args[] = implode(',', $trade_types);
+
+  $view = views_get_view('related_content');
+  $view_output = $view->execute_display('default', $args);
+
+  if (!count($view->result)) {
+    return '';
+  }
+
+  $content = '<div class="block-' . $type . '">' . $view_output . '</div>';
+
+  return $content;
+}
+
+function cmc_related_events() {
+  $node = menu_get_object();
+
+  $countries = array();
+  foreach ($node->field_country['und'] as $country_field) {
+    $countries[] = $country_field['tid'];
+  }
+
+  $args = array();
+  $args[] = implode(',', $countries);
+
+  $view = views_get_view('related_events');
+  $view_output = $view->execute_display('default', $args);
+
+  $content = array();
+  $content = $view_output;
+
+  return $content;
+}
+
+function cmc_related_blogs() {
+  $node = menu_get_object();
+
+  $themes = array();
+  $trade_types = array();
+
+  foreach ($node->field_theme['und'] as $theme) {
+    $themes[] = $theme['tid'];
+  }
+
+  foreach ($node->field_trade_type['und'] as $trade_type) {
+    $trade_types[] = $trade_type['tid'];
+  }
+
+  $args = array();
+  $args[] = implode(',', $themes);
+  $args[] = implode(',', $trade_types);
+
+  $view = views_get_view('related_blogs');
+  $view_output = $view->execute_display('default', $args);
+
+  $content = $view_output;
+
+  return $content;
+}
+
+/**
+   Search API is a bit weird when it comes to multiple taxonomy terms in
+   filters. Views allows multiple taxonomy terms to be passed as arguments to
+   views by comma-separating them, but Search API seems to ignore this
+   information and just passes the comma-separated string through to Solr.  This
+   code fixes this.
+*/
+
+function cmc_related_search_api_solr_query_alter(array &$call_args, SearchApiQueryInterface $query) {
+  // loop through all filter queries
+  foreach ($call_args['params']['fq'] as $index => $fq) {
+    // if we have the 'im_field_trade_type' field - might need to expand this
+    // mechanism to support other fields
+    if (strpos($fq, 'im_field_trade_type') === 0) {
+
+      $filter = explode(':', $fq, 2);
+      // break comma-separated params up
+      $params = explode(',', $filter[1]);
+      // if we have multiple params...
+      if (count($params) > 1) {
+        // unset the original param
+        unset($call_args['params']['fq'][$index]);
+        $params[0] = substr($params[0], 1);
+        $last = count($params) - 1;
+        $params[$last] = substr($params[$last], 0, -1);
+      }
+
+      // append the actual params separately
+      foreach ($params as $p) {
+        $call_args['params']['fq'][] = "{$filter[0]}:\"{$p}\"";
+      }
+    }
+  }
+  //  drupal_set_message(var_export($call_args, TRUE));
+}

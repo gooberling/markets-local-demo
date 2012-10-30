@@ -1,0 +1,25 @@
+<?php
+/**
+ * @File 
+ * 
+ * @author Ravi Julapalli (r.julapalli@cmcmarkets.com) 
+ */
+
+/**
+ * Implements hook_menu
+ */
+function qas_menu() {
+  $items = array();
+  
+  $items['admin/config/system/qas/settings'] = array(
+    'title' => t('Settings for QAS'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('qas_settings'),
+    'access arguments' => array('Administer site configuration'),
+    'file' => 'qas.admin.inc',
+  );  
+
+  return $items;
+}
+
+

@@ -1,0 +1,70 @@
+This is a module for analytics tracking for CMC websites
+
+Developed at first just for the registration forms but hopefully can be re-used
+for the rest of the D7 build
+
+CONFIGURATION
+Turn on google_analytics and cmc_adform modules
+Configure GA code for domain
+Configure adform code and js for cmc_adform for domain
+
+Turn on cmc_tracking module
+Choose the CMC Registration region for domain. Leave as default if region has no
+extra tracking requirements.
+
+TRACKING OVERVIEW
+Requirements:
+All pages should have Google Analytics Tracking
+All pages should have Adform Tracking
+Some pages may have custom tracking tags added to them - first implementation 
+are the registration forms
+
+We use cmc_tracking_preprocess_page to add tracking at the last moment of the
+page rendering process
+
+In theory after module hooks are run, we should have the tracking as an array.
+Then we run this array through a function to turn the different options/keys 
+into the relevant tracking tags.
+
+If there are no tracking variables, default tracking should be applied here. 
+
+We add some js to do a few other things such as event and cross domain tracking.
+
+
+REGISTRATION FORMS OVERVIEW
+All Steps of a registration form have an adform tag and GA Tracking with 
+different custom pageview tags. On the final step, google ecommerce tracking and 
+extra adform variables should be fired off. Demo and Live reg will have 
+different ecommerce values, demo=50, live=1000.
+
+For live registration, we have a 'already registered' variable. The pageview 
+custom variable will change depending on what the user chooses. If they choose 
+yes, the variable will be demo_to_live_[some_pageview], otherwise it'll be 
+live_[some_pageview].
+
+Configuration:
+This is common for all regions and these settings are stored in 
+cmc_tracking/config/registration/default.inc
+
+Settings are stored in an associative array/hash with a function for each step.
+
+Extra tracking requirements are put into their own .inc files. Some regions will
+have extra tags such as eyeblaster, google adwords conversion or 3rd party 
+tracking. Look at sg and au as examples.
+
+Each set of tracking tags should have their own theme function. 
+
+Most of the action happens in the cmc_tracking_cmc_registration_form_alter hook
+to see what type of form, step etc to figure out what tracking tags to output
+
+For the thank you and rejection page, we use hook_preprocess_page to see if 
+we're on the final/reject page as cmc_tracking_cmc_registration_form_alter won't 
+be run
+
+REGISTRATION FORM ERRORS
+There probably needs to be some tracking to be added for form errors such as if
+captcha is wrong or the some part of the various registration services is down 
+and can't be processed. This has ben started but left as I'm not sure about
+how 'system down' errors are presented. I don't think we do anything at the 
+moment? It just fails.    
+

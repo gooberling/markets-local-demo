@@ -1,0 +1,256 @@
+<?php
+/**
+ * @file locale_revisions, providies revision capability to translations
+ * @author Ravi Julapalli
+ */
+
+/**
+ * Number of revisions to be displayed per page.
+ */
+define('LOCALE_REVISIONS_PAGE_LIMIT', 50);
+
+/**
+ * Non current 
+ */
+define('LOCAL_REVISIONS_CURRENT_FALSE', 0);
+
+/**
+ * Non current 
+ */
+define('LOCAL_REVISIONS_CURRENT_TRUE', 1);
+
+/**
+ * Current version
+ */
+define('LOCALE_REVISIONS_PUBLISHED', 1);
+
+/**
+ * Draft version of the text
+ */
+define('LOCALE_REVISIONS_DRAFT', 0);
+
+/**
+ * Implements hook_menu
+ */
+function locale_revisions_menu() {
+  $items['admin/config/regional/locale_revisions/revert/%'] = array(
+    'title' => 'Revert translated text',
+    'description' => 'Revert translated text',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('locale_revisions_revert',5),
+    'access arguments' => array('Publish translations'),
+    'file' => 'locale_revisions.admin.inc',
+    'type' => MENU_CALLBACK,
+  );
+  $items['admin/config/regional/locale_revisions/edit/%'] = array(
+    'title' => 'Edit revision',
+    'description' => 'Publish translated text',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('locale_revisions_edit_form',5),
+    'access arguments' => array('Publish translations'),
+    'file' => 'locale_revisions.admin.inc',
+    'type' => MENU_CALLBACK,
+  );
+   $items['admin/config/regional/locale_revisions/publish/%'] = array(
+    'title' => 'Publish translated text',
+    'description' => 'Publish translated text',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('locale_revisions_revert',5),
+    'access arguments' => array('Publish translations'),
+    'file' => 'locale_revisions.admin.inc',
+    'type' => MENU_CALLBACK,
+  ); 
+ 
+//  $items['admin/config/regional/translate/dasbboard'] = array(
+//    'title' => 'Translations Dashboard',
+//    'description' => 'Provides Dashboard of all translations within system',
+//    'page callback' => 'drupal_get_form',
+//    'page arguments' => array('_locale_revisions_dashboard'),
+//    'access arguments' => array('Translate content'),
+//    'file' => 'locale_revisions.admin.inc',
+//    'type' => MENU_LOCAL_TASK,
+//  );
+  return $items;
+}
+
+//locale_revisions_edit_form
+
+/**
+ * Implements hook_permission
+ * @return type 
+ */
+function locale_revisions_permission() {
+  return array(
+    'Publish translations' => array(
+      'title' => t('Publish translated strings'),
+      'description' => t('By default all strings translated will be set to draft mode, only users with permission to publish translations can publish the stings')
+    ),
+  );
+}
+
+/**
+* Implements hook_form_alter().
+*/
+function locale_revisions_form_alter(&$form, &$form_state, $form_id) {
+  if ($form_id != 'locale_translate_edit_form') return;
+  
+//    $result = db_select('locales_revisions', 'l')
+//         ->fields('l', array('rid'))
+//         ->condition('lid', $form['lid']['#value'], '=')
+//         ->execute()
+//         ->fetchAssoc();
+//  
+//  // We serialize array of all values so as to compare if any of the values actually changed 
+//  // during current edit.
+//
+//  foreach ($form['translations'] as $key => $item) {
+//    if ($key != '#tree') {
+//      
+//    }
+//  }
+  
+  /** 
+   * This is a important step in the process, what we do here is to identify the submit handler used
+   * by core, we unset the submit handler and replace it with locales_revisions submit handler. 
+   * We do this as locales_revisions_submit calles locales_translate_edit_form_submit explictly
+   */
+  $locale_submit = array_search('locale_translate_edit_form_submit', $form['#submit']);
+  $form['#submit'][$locale_submit] = 'locale_revisions_submit';
+  
+  // Based on current user permissions provide ability to save translation in different workflow states
+  if (user_access('Publish translations')) {
+    $form['published'] = array(
+      '#type' => 'radios',
+      '#title' => t('Workflow state'),
+      '#default_value' => LOCALE_REVISIONS_DRAFT,
+      '#options' => array(
+        LOCALE_REVISIONS_DRAFT => t('Draft') ,
+        LOCALE_REVISIONS_PUBLISHED => t('Published')
+      ),
+    );
+  } 
+  else {
+    $form['published'] = array(
+      '#type'  => 'value',
+      '#value' => LOCALE_REVISIONS_DRAFT,
+    );
+  }
+
+  //Check if there is a existing revision for current string, if yes load the revision id of the string
+  module_load_include('inc', 'locale_revisions', 'locale_revisions');
+  $form['markup'] = array('#weight' => 1000, '#markup' => _locale_revisions_by_lid($form['lid']['#value']));
+}
+
+
+/**
+ * Additional Submit handler for the form
+ * 1. Log the changes made to translated strings in revisiosn table
+ * 2. Mark the latest version as current. 
+ */
+function locale_revisions_submit($form, &$form_state) {
+  global $user;
+  
+  $lid = $form_state['values']['lid'];
+  
+  // if revision id already exists -- This happens when a revision is being edited
+  if (!empty($form_state['values']['rid'])) {
+    $rid = $form_state['values']['rid'];
+    db_update('locales_revisions_index') // Table name no longer needs {}
+     ->fields(array(
+      'updated' => REQUEST_TIME,
+      'uid' => $user->uid,
+      'status' => $form_state['values']['published'],
+     ))
+    ->condition('rid', $rid)
+    ->execute();
+  } 
+  else {
+    $rid = db_insert('locales_revisions_index') // Table name no longer needs {}
+    ->fields(array(
+      'lid' => $lid,
+      'updated' => REQUEST_TIME,
+      'status' => $form_state['values']['published'],
+      'current' => LOCAL_REVISIONS_CURRENT_FALSE,
+      'uid' => $user->uid,
+    ))
+    ->execute();
+  }
+  // We now store the new version of strings in revisions database against the rid.
+  foreach ($form_state['values']['translations'] as $key => $value) {
+    if (!empty($value)) {
+      // Only update or insert if we have a value to use.
+      $translation = db_query("SELECT translation FROM {locales_revisions} WHERE rid = :rid AND language = :language", array(':rid' => $rid, ':language' => $key))->fetchField();
+      // Only update or insert if we have a value to use.
+      if (!empty($translation)) {
+        db_update('locales_revisions')
+          ->fields(array(
+            'translation' => $value,
+          ))
+          ->condition('lid', $lid)
+          ->condition('language', $key)
+          ->execute();
+      }
+      else {
+        db_insert('locales_revisions')
+        ->fields(array(
+          'rid' => $rid,
+          'lid' => $lid,
+          'translation' => $value,
+          'language' => $key,
+        ))
+        ->execute();
+      }
+    }
+  }
+
+  // Check if the revision is set to publish 
+  if ($form_state['values']['published'] == LOCALE_REVISIONS_PUBLISHED) {
+   // Since the current translation is being published directly
+   // Move the current pointer to the current revision
+    
+    db_update('locales_revisions_index')
+     ->fields(array(
+         'current' => LOCAL_REVISIONS_CURRENT_FALSE,
+     ))
+     ->condition('lid', $form_state['values']['lid'], '=')
+     ->execute();
+
+    db_update('locales_revisions_index')
+     ->fields(array(
+         'current' => LOCAL_REVISIONS_CURRENT_TRUE,
+     ))
+     ->condition('rid', $rid, '=')
+     ->execute();
+    module_load_include('inc', 'locale', 'locale.admin');
+    locale_translate_edit_form_submit($form, $form_state);
+  }
+  module_load_include('inc', 'locale_revisions', 'locale_revisions');
+  locale_revisions_goto_lid($form_state['values']['lid']);
+}
+
+
+
+
+
+/**
+ * Helper function that prepares operational links 
+ * @param type $item
+ * @return type 
+ */
+function _locale_revisions_operations($item) {
+  $output = "";
+  if ($item['current']) {
+    return t('Current');
+  }
+  else {
+    if(user_access('translate content') && ($item['status'] == LOCALE_REVISIONS_DRAFT)){
+      $output .= l(t('Edit'), 'admin/config/regional/locale_revisions/edit/' .$item['rid']) ." | ";
+    }
+    
+    if(user_access('Publish translations')){
+      $title = ($item['status'] == LOCALE_REVISIONS_PUBLISHED)? t('Revert') : t('Publish');
+      $output .= l($title, 'admin/config/regional/locale_revisions/revert/' .$item['rid']);
+    }
+    return $output;
+  }
+}

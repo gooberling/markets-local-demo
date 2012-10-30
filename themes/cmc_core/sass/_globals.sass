@@ -1,0 +1,78 @@
+// CMC Markets Theme	
+// name = CMC Markets V4
+// description = CMC Markets Base Theme - as of 17/02
+// Global variables and mixins SASS
+
+//-----------------------------------------------------------------------------------------------
+// Global varaibles
+//-----------------------------------------------------------------------------------------------
+$themepath: profiles / cmc_installer / themes / cmc_core / images
+
+//path to images - add '#{$themepath}' to declaration
+$piepath: profiles / cmc_installer / themes / cmc_core / css / pie
+
+//path to PIE css for IE 7-8
+$titlefont: Ubuntu, "Trebuchet MS", Trebuchet, Arial, Helvetica, sans-serif
+$standardfont: Arial, Helvetica, sans-serif
+$textcolor: #5f6569
+$darkesttext: #1b242a
+$lightblue: #9ce5f7
+$blue: #0ebcdc
+$yellow: yellow
+$pink: #0a8197
+
+// original was pink -#EC009C, changed o request to dark blue;
+$menu-hilite: #0a96b1
+$border-color: #e3e3e3
+
+//--
+$tint-markets: #74205b
+$tint-economy: #f35a17
+$tint-currency: #68ac19
+
+//-----------------------------------------------------------------------------------------------
+// Compass Mixins imports
+//-----------------------------------------------------------------------------------------------
+
+@import compass/css3
+
+//-----------------------------------------------------------------------------------------------
+// General mixins 
+//-----------------------------------------------------------------------------------------------
+=headeroverride
+	font-family: $standardfont
+	margin-bottom: 1em
+	letter-spacing: 0
+
+=ieCssFix
+	behavior: url(/#{$piepath}/PIE.php)
+
+=cursor
+	cursor: pointer
+	cursor: hand
+
+=arrow
+	content: '>'
+
+//-----------------------------------------------------------------------------------------------
+// Specific mixins
+//-----------------------------------------------------------------------------------------------
+
+=greybox
+	+box-shadow(0 1px 0 0 white inset, 1px 0 0 0 #e6e6e6 inset, 0 0 0px 1px #e6e6e6 inset)
+	background-color: #F3F3F3
+	border-width: 1px
+	border-style: solid
+	border-color: #Efefef #Efefef #C4C4C4 #Efefef
+	+ieCssFix
+
+=headerGradientFills
+	background: url(/#{$themepath}/bg_head_ie.png) repeat-x
+	+background(linear-gradient(top, rgba(23, 26, 32, 0.8) 0, rgba(10, 11, 14, 0.8) 100%))
+
+//-----------------------------------------------------------------------------------------------
+// Compass Sprite generation
+//-----------------------------------------------------------------------------------------------
+@import education/*.png
+
++all-education-sprites

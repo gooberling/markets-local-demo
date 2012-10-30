@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the Feature CMC Master feature.
+ */
+
+include_once('feature_cmc_master.features.inc');

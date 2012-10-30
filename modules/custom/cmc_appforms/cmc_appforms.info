@@ -1,0 +1,17 @@
+name = Onboarding forms for CMC
+description = Provides functionality for users to register for trading accounts
+package = CMC
+version = 0.2
+core = 7.x
+
+dependencies[]= browserclass
+
+configure = admin/config/appforms
+
+files[] = includes/appform.class.inc
+files[] = includes/live.class.inc
+files[] = includes/demo.class.inc
+
+files[] = admin/cmc_appforms.admin.inc
+files[] = admin/cmc_appforms.templates.admin.inc
+files[] = admin/cmc_appforms.admin.live.inc

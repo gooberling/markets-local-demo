@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions targetNamespace="urn:PegaRULES:SOAP:CMCOnBoarding:Services" 
+xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" 
+xmlns="http://schemas.xmlsoap.org/wsdl/" 
+xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" 
+xmlns:tns="urn:PegaRULES:SOAP:CMCOnBoarding:Services" 
+xmlns:nslt2="pyDefault" 
+xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" 
+xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/">
+  <types>
+    <!-- <schema elementFormDefault="unqualified" targetNamespace="urn:PegaRULES:SOAP:CMCOnBoarding:Services" xmlns="http://www.w3.org/2001/XMLSchema"/> -->
+    <xsd:schema 
+      targetNamespace="urn:PegaRULES:SOAP:CMCOnBoarding:Services"
+      xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+      xmlns:nslt2="pyDefault">
+    </xsd:schema>
+  </types>
+  <message name="ProcessApplication">
+    <part name="ApplicationForm" element="nslt2:ApplicationForm">
+    </part>
+  </message>
+  <message name="ProcessApplicationResponse">
+    <part name="ApplicationFormResponse" element="nslt2:ApplicationFormResponse">
+    </part>
+  </message>
+  <portType name="ServicesType">
+    <operation name="ProcessApplication">
+      <input message="tns:ProcessApplication">
+    </input>
+      <output message="tns:ProcessApplicationResponse">
+    </output>
+    </operation>
+  </portType>
+  <binding name="ServicesBindingSOAP" type="tns:ServicesType">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http"/>
+    <operation name="ProcessApplication">
+      <soap:operation soapAction="urn:PegaRULES:SOAP:CMCOnBoarding:Services#ProcessApplication" style="document"/>
+      <input>
+        <soap:body use="literal"/>
+      </input>
+      <output>
+        <soap:body use="literal"/>
+      </output>
+    </operation>
+  </binding>
+  <binding name="ServicesBindingSOAP12" type="tns:ServicesType">
+    <soap12:binding transport="http://schemas.xmlsoap.org/soap/http"/>
+    <operation name="ProcessApplication">
+      <soap12:operation soapAction="urn:PegaRULES:SOAP:CMCOnBoarding:Services#ProcessApplication" style="document"/>
+      <input>
+        <soap12:body use="literal"/>
+      </input>
+      <output>
+        <soap12:body use="literal"/>
+      </output>
+    </operation>
+  </binding>
+  <service name="ServicesService">
+    <port name="ServicesPortSOAP" binding="tns:ServicesBindingSOAP">
+      <soap:address location="http://londdevpega13:20004/prweb/PRSOAPServlet/SOAP/CMCOnBoarding/Services"/>
+    </port>
+    <port name="ServicesPortSOAP12" binding="tns:ServicesBindingSOAP12">
+      <soap12:address location="http://londdevpega13:20004/prweb/PRSOAPServlet/SOAP/CMCOnBoarding/Services"/>
+    </port>
+  </service>
+</definitions>

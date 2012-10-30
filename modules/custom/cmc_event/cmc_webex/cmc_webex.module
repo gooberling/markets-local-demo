@@ -1,0 +1,492 @@
+<?php
+function cmc_webex_menu() {
+  $items = array();
+  
+  $items['node/%node/cmc_webex'] = array(
+    'title' => 'Webex',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('cmc_webex_export', 1),
+    'access callback' => 'cmc_event_access',
+    'access arguments' => array(1, 'cmc_webex export'),
+    'type' => MENU_LOCAL_TASK,
+  );
+  
+  $items['admin/config/cmc/webex'] = array(
+    'title' => 'CMC Webex Settings',
+  	'page callback' => 'drupal_get_form',
+    'page arguments' => array('cmc_webex_settings'),
+    'access arguments' => array('administer cmc_webex'),
+  );
+  /*
+  $items['webex/test'] = array(
+    'title' => 'CMC Webex Settings',
+  	'page callback' => 'cmc_webex_test',
+    'access arguments' => array('administer cmc_webex'),
+  );*/
+    
+  return $items;
+}
+
+
+/**
+ * Implementation of hook_perm().
+ */
+function cmc_webex_permission() {
+  return array(
+    'cmc_webex export' => array(
+      'title' => t('cmc_webex export'),
+    ),
+    'administer cmc_webex' => array(
+      'title' => t('administer cmc_webex'),
+    ),
+  );
+}
+
+
+function cmc_webex_settings() {
+  
+  echo cmc_webex_test() . 'xxx';
+  
+  $connection_settings = cmc_webex_connection_settings('all');
+  $connections = array();
+  foreach ($connection_settings as $k => $v) {
+    $connections[$k] = $k;
+  }
+  
+  
+  $form['cmc_webex_connection'] = array(
+    '#type' => 'select',
+    '#options' => $connections,
+    '#title' => t('Connection'),
+    '#required' => TRUE,
+  	'#default_value' => variable_get('cmc_webex_connection', 'default webex'),
+  );
+  
+  
+  $form['cmc_webex_api_url'] = array(
+    '#type' => 'textfield',
+    '#title' => t('CMC WebEx XML API Service'),
+    '#required' => TRUE,
+    '#description' => 'Full url with https://',
+    '#default_value' => variable_get('cmc_webex', 'http://cmc-markets.webex.com/WBXService/XMLService'),
+  );
+  
+  $form['cmc_webex_site_id'] = array(
+    '#type' => 'textfield',
+    '#title' => t('CMC WebEx ID'),
+    '#required' => TRUE,
+  	'#description' => 'Site ID can be obtained from WebEx Contact',
+    '#default_value' => variable_get('cmc_webex_site_id', '298174'),
+  );
+  
+  $form['cmc_webex_site_name'] = array(
+    '#type' => 'textfield',
+    '#title' => t('CMC WebEx XML API Service'),
+    '#required' => TRUE,
+    '#description' => 'Site name can be obtained from WebEx Contact',
+    '#default_value' => variable_get('cmc_webex_site_name', 'cmc-markets.webex.com'),
+  );
+  
+  $form['cmc_webex_num_events'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Number of events to show in WebEx dropdown'),
+    '#required' => TRUE,
+    '#default_value' => variable_get('cmc_webex_num_events', '20'),
+  );
+  
+  
+  // Telephone country code
+  $form['cmc_webex_phone_code'] = array(
+    '#prefix' => '<br /><br /><h2>WebEx data</h2><div>This settings are or all imported data.</div>',
+    '#type' => 'textfield',
+    '#default_value' => variable_get('cmc_webex_phone_code', ''),
+    '#required' => TRUE,
+    '#title' => t('WebEx Telephone Country Code'),
+    '#description' => t('Telephone Country Code for WebEx'),
+  );
+
+  // option values copied from the WebEx system
+  $form['cmc_webex_import_language'] = array(
+    '#type' => 'select',
+    '#options' => array(
+      '' => 'Choose Language',
+    	'ENGLISH' => 'English',
+      'SIMPLIFIED CHINESE' => 'Simplified Chinese',
+      'TRADITIONAL CHINESE' => 'Traditional Chinese',
+      'JAPANESE' => 'Japanese',
+      'KOREAN' => 'Korean',
+      'FRENCH' => 'French',
+      'GERMAN' => 'German',
+      'ITALIAN' => 'Italian',
+      'SPANISH' => 'Spanish',
+      'SWEDISH' => 'Swedish',
+      'DUTCH' => 'Dutch',
+    ),
+    '#default_value' => variable_get('cmc_webex_import_language', ''),
+    '#description' => t('Language used when importing users into webex.'),
+    '#required' => TRUE,
+    '#title' => t('WebEx Language')
+  );
+
+
+  // option values copied from the WebEx system
+  $form['cmc_webex_import_locale'] = array(
+    '#type' => 'select',
+    '#options' => array(
+      '' => 'Choose Country',
+    	'U.S' => 'U.S.',
+      'Australia' => 'Australia',
+      'Canada' => 'Canada',
+      'France' => 'France',
+      'Germany' => 'Germany',
+      'New Zealand' => 'New Zealand',
+      'Sweden' => 'Sweden',
+      'Switzerland' => 'Switzerland',
+      'U.K.' => 'U.K.',
+    ),
+    '#default_value' => variable_get('cmc_webex_import_locale', ''),
+    '#description' => t('Locale used when importing users into webex.<br />
+      	Only relevant if we choose English as langauge (so we can get
+      	English:Australia and English:U.K.)<br />
+      	Example: If Korean chosen as lanaguage, WebEx will set locale to Korea
+      	even if we have U.K. chosen as the locale
+      	'),
+    '#required' => TRUE,
+    '#title' => t('WebEx Locale')
+  );
+      
+  return system_settings_form($form);
+}
+
+
+/**
+ * post xml doc to webex
+ * @param unknown_type $xml
+ */
+function cmc_webex_post_xml($xml) {
+
+  $request_url = variable_get('cmc_webex_xml_api_service', 'http://cmc-markets.webex.com/WBXService/XMLService');
+  $request_headers = array('Content-Type' => 'application/x-www-form-urlencoded');
+  $request_method = 'POST';
+  $request_retry = 3;
+  $data = 'XML=' . $xml;
+
+  $options = array(
+    'headers' => $request_headers,
+    'method' => $request_method,
+    'data' => $data,
+  );
+
+  $response = drupal_http_request($request_url, $options);
+  return $response;
+}
+
+/**
+ * nasty hack to remove namespaced elements so simplexml can parse the xmldata
+ * not sure how to do this properly with simplexml
+ * @param unknown_type $str
+ */
+function _cmc_webex_clean_xml_response($str) {
+  $str = str_replace('serv:', '', $str);
+  $str = str_replace('event:', '', $str);
+  return $str;
+}
+
+
+/**
+ *
+ * Enter description here ...
+ */
+function cmc_webex_export($form, &$form_state, $node) {
+  
+  // get the dates
+  // get the numbers from the logs
+  $summary = _cmc_event_webform_log_get_summary($node);
+  
+  $date_options = array();
+  $summary_output[] = '<div>';
+  foreach ($summary as $s) {
+    $date = date('Y-m-d H:i', $s->event_date);
+    $date_options[$s->event_date] = $date;
+    $summary_output[] = 'Num of Entries: ' . $s->num . ' (' . $date . ')';
+  }
+  $summary_output[] = '</div>';
+  
+  $form['#prefix'] = implode("\n", $summary_output);
+  
+  
+  $form['event_node_time'] = array(
+    '#type' => 'select',
+    '#options' => $date_options,
+    '#title' => t('Date:'),
+    '#required' => TRUE,
+  );
+  
+  
+  
+  // US Date format!
+  $from_date = strtotime('-1 day', date('U'));
+  $from_date = date('m/d/Y 00:00:00', $from_date);
+
+  // Get the list of events from webex using xml api
+  $data['from_date'] = $from_date;
+  $xml = theme('cmc_webex_list_events_xml', $data);
+  $response = cmc_webex_post_xml($xml);
+  
+  if ($response->code != 200) {
+    drupal_set_message($response->error, 'error');
+  }
+  else {
+
+    $response_data = _cmc_webex_clean_xml_response($response->data);
+    $response_data = simplexml_load_string($response_data);
+
+    $webex_events = array('' => 'Choose Webex event');
+    foreach ($response_data->body->bodyContent->event as $e) {
+      // get event session key as this is identifier in WebEx
+      $session_key = (string) $e->sessionKey;
+      $date = (string)$e->startDate;
+      $title = (string)$e->sessionName . ' - (' . date('j M Y H:i', strtotime($date)) . ')';
+  
+      $webex_events[$session_key] = $title;
+    }
+   
+    // get the webex dates
+    $form['webex_event_session'] = array(
+      '#type' => 'select',
+      '#title' => t('CMC WebEx Event'),
+      '#required' => TRUE,
+      '#options' => $webex_events
+    );
+    
+    
+    $form['nid'] = array(
+      '#type' => 'hidden',
+      '#value' => $node->nid,
+    );
+    
+    
+    $form['submit'] = array(
+      '#type' => 'submit',
+      '#value' => t('Post Users to WebEx'),
+    );
+  
+  }
+  
+  return $form;
+}
+
+
+/**
+ * On submission of webex form
+ * @param unknown_type $form
+ * @param unknown_type $form_state
+ */
+function cmc_webex_export_submit(&$form, &$form_state) {
+  $form_values = $form_state['values'];
+  
+  $node = node_load($form_values['nid']);
+  
+  // Load up the submissions
+  $sids = _cmc_event_webform_log_get_sids($node, $form_values['event_node_time']);
+
+  // get the event
+  $webex_event_session = $form_values['webex_event_session'];
+  
+  $data = array(
+    'webex_event_session' => $webex_event_session,
+  );
+  $xml = theme('cmc_webex_get_event_xml', $data);
+  $response = cmc_webex_post_xml($xml);
+
+  $response_data = _cmc_webex_clean_xml_response($response->data);
+  $response_data = simplexml_load_string($response_data);
+
+  $webex_event_title = (string) $response_data->body->bodyContent->metaData->sessionName;
+  $webex_event_date = strtotime((string) $response_data->body->bodyContent->schedule->startDate);
+  $webex_event_date = date('j M Y H:i', $webex_event_date);
+  $webex_event = $webex_event_title . ' - ' . $webex_event_date;
+  
+  drupal_set_message('Posting users of [' . $node->title . '] to [' . $webex_event . ']');
+
+
+  // set a message for user feedback
+  $webform_nid = $node->field_webform['und'][0]['nid'];
+  $webform = node_load($webform_nid);
+
+  // get teh component keys
+  $component_keys = array();
+  foreach ($webform->webform['components'] as $c) {
+    $component_keys[$c['cid']] = $c['form_key'];
+  }
+
+  $results = array();
+  module_load_include('inc', 'webform', 'includes/webform.submissions');
+  foreach ($sids as $i => $sid) {
+    $submission = webform_get_submission($webform_nid, $sid);
+    $values = array();
+    foreach ($component_keys as $cid => $key) {
+      $values[$key] = $submission->data[$cid]['value'][0];
+    }
+
+    // depdupe by email and assume the latest values are the most up to date
+    $results[$values['email']] = $values;
+  }
+
+  // post each one individually
+  // If posted as a list, the process fails if an email in the list
+  // is already in webex for that event
+  $language = variable_get('cmc_webex_import_language', 'English');
+  $locale = variable_get('cmc_webex_import_locale', 'U.K.');
+  //print_r($results);
+  foreach ($results as $email => $res) {
+    $data = array(
+      'results' => $res,
+      'webex_event_session' => $webex_event_session,
+      'language' => $language,
+      'locale' => $locale,
+    );
+    $xml = theme('cmc_webex_create_meeting_attendee_xml', $data);
+    
+    // post to api and handle errors
+    $response = cmc_webex_post_xml($xml);
+    cmc_webex_process_response_data($response->data, $res);
+  }
+}
+
+
+/**
+ * Helper function to process the response XML data from WebEx
+ * After we've posted attendees to an event
+ * @param unknown_type $response_data
+ * @param unknown_type $data
+ */
+function cmc_webex_process_response_data($response_data, $data) {
+  $response_data = _cmc_webex_clean_xml_response($response_data);
+  $response_data = simplexml_load_string($response_data);
+
+  //print_r($response_data);
+  //print_r($data);
+
+  $result = (string)$response_data->header->response->result;
+  $exception_id = (string)$response_data->header->response->exceptionID;
+  $reason = (string)$response_data->header->response->reason;
+
+  // Display messages back to user about progress
+  if ($result == 'SUCCESS') {
+    $message = 'WebEx ' . $result . ' ' . $data['email_address'] . ' Added';
+    drupal_set_message($message);
+  }
+  else {
+    // Result == FAILURE OR SOMETHING ELSE
+    $message = 'WebEx ' . $result . ' ' . $data['email_address'] . ' ' . $reason;
+    drupal_set_message($message, 'error');
+  }
+}
+
+
+
+
+
+
+
+/**
+ * <stupid> Flip flop between the 2 passwords as passords expire periodically
+ * for webex. Or alternatively, login to Webex, change user password by going to
+ * Site administration and changing the password 3 times! Each time use a
+ * different one and then revert back to the original password</stupid>
+ *
+ * Webex claim that there is an option to not expire passwords but we can't
+ * find it
+ * CMC WebEx settings form
+ */
+function cmc_webex_connection_settings($key='') {
+
+  $connections = array(
+    'default webex' => array(
+      'user' => 'M.Wong',
+    	'password' => 'Andywarren123',
+    ),
+    'default webex 2' => array(
+      'user' => 'M.Wong',
+    	'password' => 'Cmc=12345',
+    ),
+    'france webex f.couste' => array(
+      'user' => 'f.couste',
+    	'password' => 'Invest8*',
+    ),
+  );
+
+  if ($key == 'all') {
+    return $connections;
+  }
+
+  return $connections[$key];
+}
+
+
+
+/**
+ *
+ * Enter description here ...
+ * @param unknown_type $data
+ */
+function theme_cmc_webex_xml_cell($data) {
+  if (!empty($data['value'])) {
+    $cellname = $data['cell'];
+    return '<' . $cellname. '>' . $data['value'] . '</' . $cellname . '>' . "\n";
+  }
+  return;
+}
+
+
+function cmc_webex_theme($existing, $type, $theme, $path) {
+  return array(
+    'cmc_webex_create_meeting_attendee_xml' => array(
+      'template'	=> 'theme/cmc_webex_create_meeting_attendee_xml',
+      'variables' => array(
+        'data' => NULL
+      ),
+    ),
+    'cmc_webex_meeting_attendee_xml' => array(
+      'template'	=> 'theme/cmc_webex_meeting_attendee_xml',
+      'variables' => array(
+        'data' => NULL
+      ),
+    ),
+    'cmc_webex_list_events_xml' => array(
+      'template'	=> 'theme/cmc_webex_list_events_xml',
+      'variables' => array(
+        'data' => NULL
+      ),
+    ),
+    
+    'cmc_webex_xml_cell' => array(
+      'variables' => array(
+        'data' => NULL
+      ),
+    ),
+    
+    'cmc_webex_security_context_xml' => array(
+      'template'	=> 'theme/cmc_webex_security_context_xml',
+      'variables' => array(
+        'data' => NULL
+      ),
+    ),
+    
+    'cmc_webex_get_event_xml' => array(
+      'template'	=> 'theme/cmc_webex_get_event_xml',
+      'variables' => array(
+        'data' => NULL
+      ),
+    ),
+    
+    'cmc_webex_test_xml' => array(
+      'template'	=> 'theme/cmc_webex_test_xml',
+      'variables' => array(
+        'data' => NULL
+      ),
+    ),
+  );
+  
+}

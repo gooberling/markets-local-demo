@@ -1,0 +1,8 @@
+Notes about Adform
+
+Each domain should have their own adform account number
+
+APAC regions, AU,NZ,SG,JP
+The adform tracking js should be served from a1.adform.net
+
+All other regions should be served from track.adform.net

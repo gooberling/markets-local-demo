@@ -1,0 +1,61 @@
+// CMC Markets Theme	
+// name = CMC Markets V4
+// description = CMC Markets Base Theme - as of 17/02
+// Base SASS
+// this scss is included in the info file and imports all the partial files
+
+// set grid width and import mixins and global variable colors etc
+@import globals
+@import grid
+
+// General sitewide content styles
+@import general
+
+// header and footer cols
+@import header
+@import footer
+
+// header variations
+@import header_landing
+@import header_triptych
+@import header_platforms
+@import header_section_search
+
+// left and right cols
+@import right_col
+@import left_col
+
+// content styles broken down
+@import content_news_analysis
+@import content_education
+@import content_markets
+@import content_homepage
+@import content_faceted_search
+@import content_forms
+@import content_related
+@import content_search_res
+@import content_signup
+@import content_news
+@import content_pricing
+@import content_ppc_page
+@import content_faqs
+
+// campaign page
+@import content_campaign
+
+// IE stylesheet fixes
+@import ie
+
+// Less than 1024 stylesheet for IE and other browsers
+@import header_1024
+
+// admin theme CSS
+@import admin
+
+// for tablets import narrower css and set variables
+@media screen and	 (min-width : 700px) and (max-width : 1010px)
+	@import tablet
+
+// for smartphone import narrower css and set variables
+@media screen and (min-width : 250px) and (max-width : 699px)
+	@import smartphone
